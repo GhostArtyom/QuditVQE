@@ -1,6 +1,25 @@
 import numpy as np
 from numpy.linalg import norm
+from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
+
+
+def fidelity(rho, sigma):
+    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
+        rho = rho.flatten()
+    if sigma.ndim == 2 and (sigma.shape[0] == 1 or sigma.shape[1] == 1):
+        sigma = sigma.flatten()
+    if rho.ndim == 1 and sigma.ndim == 1:
+        f = np.abs(rho.conj() @ sigma)
+    elif rho.ndim == 1 and sigma.ndim == 2:
+        f = np.real(np.sqrt(rho.conj().T @ sigma @ rho))
+    elif rho.ndim == 2 and sigma.ndim == 1:
+        f = np.real(np.sqrt(sigma.conj().T @ rho @ sigma))
+    elif rho.ndim == 2 and sigma.ndim == 2:
+        f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
+    else:
+        raise ValueError('Wrong Input!')
+    return f
 
 
 def partial_trace(rho, index):

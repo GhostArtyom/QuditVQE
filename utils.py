@@ -109,7 +109,6 @@ def su2_encoding(qudit: np.array) -> np.array:
             nq_bin = pickle.load(f_read)
             f_read.close()
         else:
-            nq_bin = [[0]] * d
             raise ValueError('d is over 25!')
         for i in range(d):
             qubits_i = nq_bin[i]
@@ -149,7 +148,6 @@ def su2_encoding(qudit: np.array) -> np.array:
             nq_bin = pickle.load(f_read)
             f_read.close()
         else:
-            nq_bin = [[0]] * d
             raise ValueError('d is over 25!')
         for i in range(d):
             qubits_i = nq_bin[i]

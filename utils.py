@@ -21,12 +21,11 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     mat = gate.matrix()
     d = mat.shape[0]
     circ = Circuit()
-    if not np.allclose(np.eye(2), mat @ mat.conj().T):
+    if not np.allclose(np.eye(d), mat @ mat.conj().T):
         raise ValueError('The gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = mat * np.exp(1j * phase)
     cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
-    sin = np.sqrt(-np.real(matU[1, 0] * matU[0, 1]))
     theta = 2 * np.arccos(cos)
     phi = np.angle(matU[1, 1]) + np.angle(matU[1, 0])
     lam = np.angle(matU[1, 1]) - np.angle(matU[1, 0])

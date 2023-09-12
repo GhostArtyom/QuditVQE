@@ -35,21 +35,30 @@ np.set_printoptions(linewidth=200)
 # print(qudit.shape)
 # print(qubits.shape)
 
-d = 2
+# d = 2
+# gate = unitary_group.rvs(d, random_state=42)
+# print(gate)
+# gate_u = UnivMathGate('gate', gate).on(0)
+# gate_d, pr = one_qubit_decompose(gate_u, 'zyz')
+# print(gate_d)
+# print(gate_d.matrix(pr))
+# print(gate_d.apply_value(pr))
+# print(norm(gate - gate_d.matrix(pr)))
+
+# gate_d = euler_decompose(gate_u, 'zyz')
+# print(gate_d)
+# print(gate_d.matrix())
+# print(norm(gate - gate_d.matrix()))
+
+# print(pr)
+# print(params_zyz(gate))
+# print(params_u3(gate))
+
+d = 4
 gate = unitary_group.rvs(d, random_state=42)
 print(gate)
-gate_u = UnivMathGate('gate', gate).on(0)
-gate_d, pr = one_qubit_decompose(gate_u, 'zyz')
-print(gate_d)
-print(gate_d.matrix(pr))
-print(gate_d.apply_value(pr))
-print(norm(gate - gate_d.matrix(pr)))
-
-gate_d = euler_decompose(gate_u, 'zyz')
-print(gate_d)
+gate_u = UnivMathGate('gate', gate).on([0, 1])
+gate_d = kak_decompose(gate_u)
+# print(gate_d)
 print(gate_d.matrix())
-print(norm(gate - gate_d.matrix()))
-
-print(pr)
-print(params_zyz(gate))
-print(params_u3(gate))
+print(gate / gate_d.matrix())

@@ -3,62 +3,161 @@ import sys
 import pickle
 import numpy as np
 from typing import List
-from numpy.linalg import det, norm
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from mindquantum.core.circuit import Circuit
-from mindquantum.core.gates import RX, RY, RZ, U3, GlobalPhase, UnivMathGate
+from numpy.linalg import det, eigh, norm, svd
+from mindquantum.core.gates import RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
 optional_basis = ['zyz', 'u3']
+A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
+M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
 
-def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
-    str_phase = gate.name + '_phase'
-    str_theta = gate.name + '_theta'
-    str_phi = gate.name + '_phi'
-    str_lam = gate.name + '_lam'
-    obj = gate.obj_qubits
-    mat = gate.matrix()
+def decompose_zyz(mat: np.array):
     d = mat.shape[0]
-    circ = Circuit()
     if not np.allclose(np.eye(d), mat @ mat.conj().T):
         raise ValueError('The gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = mat * np.exp(1j * phase)
-    cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
+    cos = np.sqrt(np.real(matU[0][0] * matU[1][1]))
     theta = 2 * np.arccos(cos)
-    phi = np.angle(matU[1, 1]) + np.angle(matU[1, 0])
-    lam = np.angle(matU[1, 1]) - np.angle(matU[1, 0])
+    phi = np.angle(matU[1][1]) + np.angle(matU[1][0])
+    lam = np.angle(matU[1][1]) - np.angle(matU[1][0])
+    return phase, theta, phi, lam
+
+
+def decompose_u3(mat: np.array):
+    phase, theta, phi, lam = decompose_zyz(mat)
+    phase += (phi + lam) / 2
+    return phase, theta, phi, lam
+
+
+def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
+    d = mat1.shape[0]
+    u_a, d_a, v_a_h = svd(mat1)
+    u_a_h = u_a.conj().T
+    v_a = v_a_h.conj().T
+    if np.count_nonzero(d_a) != d:
+        raise ValueError('Not implemented yet for the situation that mat1 is not full-rank')
+    # g commutes with d
+    g = u_a_h @ mat2 @ v_a
+    # because g is hermitian, eigen-decomposition is its spectral decomposition
+    _, p = eigh(g)  # p is unitary or orthogonal
+    u = u_a @ p
+    v = v_a @ p
+    # ensure det(u_a) == det(v_a) == +1
+    if det(u) < 0:
+        u[:, 0] *= -1
+    if det(v) < 0:
+        v[:, 0] *= -1
+    d1 = u.conj().T @ mat1 @ v
+    d2 = u.conj().T @ mat2 @ v
+    d = d1 + 1j * d2
+    return u, v, d
+
+
+def kron_factor_4x4_to_2x2s(mat: np.ndarray):
+    # Use the entry with the largest magnitude as a reference point.
+    a, b = max(((i, j) for i in range(4) for j in range(4)), key=lambda t: abs(mat[t]))
+    # Extract sub-factors touching the reference cell.
+    f1 = np.zeros((2, 2), dtype=np.complex128)
+    f2 = np.zeros((2, 2), dtype=np.complex128)
+    for i in range(2):
+        for j in range(2):
+            f1[(a >> 1) ^ i, (b >> 1) ^ j] = mat[a ^ (i << 1), b ^ (j << 1)]
+            f2[(a & 1) ^ i, (b & 1) ^ j] = mat[a ^ i, b ^ j]
+    # Rescale factors to have unit determinants.
+    f1 /= np.sqrt(np.linalg.det(f1)) or 1
+    f2 /= np.sqrt(np.linalg.det(f2)) or 1
+    # Determine global phase.
+    denominator = f1[a >> 1, b >> 1] * f2[a & 1, b & 1]
+    if denominator == 0:
+        raise ZeroDivisionError("denominator cannot be zero.")
+    g = mat[a, b] / denominator
+    if np.real(g) < 0:
+        f1 *= -1
+        g = -g
+    return f1, f2
+
+
+def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
+    name_phase = gate.name + '_phase'
+    name_theta = gate.name + '_theta'
+    name_phi = gate.name + '_phi'
+    name_lam = gate.name + '_lam'
+    obj = gate.obj_qubits
+    mat = gate.matrix()
+    circ = Circuit()
     if basis == 'zyz':
-        circ += RZ(str_lam).on(obj)
-        circ += RY(str_theta).on(obj)
-        circ += RZ(str_phi).on(obj)
-        if with_phase:
-            circ += GlobalPhase(str_phase).on(obj)
+        phase, theta, phi, lam = decompose_zyz(mat)
+        circ += RZ(name_lam).on(obj)
+        circ += RY(name_theta).on(obj)
+        circ += RZ(name_phi).on(obj)
     elif basis == 'u3':
-        circ += U3(str_theta, str_phi, str_lam).on(obj)
-        phase += (phi + lam) / 2
-        if with_phase:
-            circ += GlobalPhase(str_phase).on(obj)
+        circ += U3(name_theta, name_phi, name_lam).on(obj)
+        phase, theta, phi, lam = decompose_u3(mat)
     else:
         raise ValueError(f'{basis} is not a supported decomposition method of {optional_basis}')
-    pr = {str_phase: phase, str_phi: phi, str_theta: theta, str_lam: lam}
+    if with_phase:
+        circ += GlobalPhase(name_phase).on(obj)
+    pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
     return circ, pr
 
 
-def partial_trace(rho: np.ndarray, index: List[int]) -> np.ndarray:
+def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
+    name_rxx = gate.name + '_Rxx'
+    name_ryy = gate.name + '_Ryy'
+    name_rzz = gate.name + '_Rzz'
+    name_phase = gate.name + '_phase'
+    obj0, obj1 = gate.obj_qubits
+    mat = gate.matrix()
+    circ = Circuit()
+    circ_d = Circuit()
+    ur = np.real(M.conj().T @ mat @ M)
+    ui = np.imag(M.conj().T @ mat @ M)
+    QL, QR, D = simult_svd(ur, ui)
+    A1, A0 = kron_factor_4x4_to_2x2s(M @ QL @ M.conj().T)
+    B1, B0 = kron_factor_4x4_to_2x2s(M @ QR.T @ M.conj().T)
+    k = (A.T / 4) @ np.angle(np.diag(D))
+    pr = {name_rxx: -2 * k[1], name_ryy: -2 * k[2], name_rzz: -2 * k[3], name_phase: k[0] / -2}
+    circ += UnivMathGate(gate.name + '_B0', B0).on(obj0)
+    circ += UnivMathGate(gate.name + '_B1', B1).on(obj1)
+    circ += Rxx(name_rxx).on([obj0, obj1])
+    circ += Ryy(name_ryy).on([obj0, obj1])
+    circ += Rzz(name_rzz).on([obj0, obj1])
+    circ += GlobalPhase(name_phase).on(obj0)
+    circ += GlobalPhase(name_phase).on(obj1)
+    circ += UnivMathGate(gate.name + '_A0', A0).on(obj0)
+    circ += UnivMathGate(gate.name + '_A1', A1).on(obj1)
+    for g in circ:
+        if len(g.obj_qubits) == 1 and isinstance(g, UnivMathGate):
+            if basis == 'zyz':
+                gate_d, para = one_qubit_decompose(g, 'zyz', False)
+            elif basis == 'u3':
+                gate_d, para = one_qubit_decompose(g, 'u3')
+            else:
+                raise ValueError(f'{basis} is not a supported decomposition method of {optional_basis}')
+            circ_d += gate_d
+            pr.update(para)
+        else:
+            circ_d += g
+    return circ_d, pr
+
+
+def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
     nq = int(rho.shape[0] / 2)
     d = int(np.log2(nq))
     pt = np.zeros([nq, nq], dtype=np.complex128)
     for i in range(nq):
         i_ = bin(i)[2::].zfill(d)
-        i0 = int(i_[:index] + '0' + i_[index:], 2)
-        i1 = int(i_[:index] + '1' + i_[index:], 2)
+        i0 = int(i_[:ind] + '0' + i_[ind:], 2)
+        i1 = int(i_[:ind] + '1' + i_[ind:], 2)
         for j in range(nq):
             j_ = bin(j)[2::].zfill(d)
-            j0 = int(j_[:index] + '0' + j_[index:], 2)
-            j1 = int(j_[:index] + '1' + j_[index:], 2)
-            pt[i, j] = rho[i0, j0] + rho[i1, j1]
+            j0 = int(j_[:ind] + '0' + j_[ind:], 2)
+            j1 = int(j_[:ind] + '1' + j_[ind:], 2)
+            pt[i][j] = rho[i0][j0] + rho[i1][j1]
     return pt
 
 
@@ -119,7 +218,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
                 ii = qubits_i * num_j
                 jj = np.repeat(qubits_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
-                data = np.ones(num_i * num_j) * qudit[i, j] / div
+                data = np.ones(num_i * num_j) * qudit[i][j] / div
                 qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
         qubits = qubits.toarray()
     elif len(d) == 1 or (len(d) == 2 and (d[0] == 1 or d[1] == 1)):
@@ -156,7 +255,6 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
             ind = (np.zeros(num_i), qubits_i)
             qubits += csr_matrix((data, ind), shape=(1, 2**nq))
         qubits = qubits.toarray().flatten()
-        qubits /= norm(qubits)
     else:
         raise ValueError('Wrong Input!')
     return qubits

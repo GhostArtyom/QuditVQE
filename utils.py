@@ -46,10 +46,10 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     return circ, pr
 
 
-def partial_trace(rho: np.array, index: List[int]) -> np.array:
+def partial_trace(rho: np.ndarray, index: List[int]) -> np.ndarray:
     nq = int(rho.shape[0] / 2)
     d = int(np.log2(nq))
-    pt = np.zeros([nq, nq], dtype=complex)
+    pt = np.zeros([nq, nq], dtype=np.complex128)
     for i in range(nq):
         i_ = bin(i)[2::].zfill(d)
         i0 = int(i_[:index] + '0' + i_[index:], 2)
@@ -62,7 +62,7 @@ def partial_trace(rho: np.array, index: List[int]) -> np.array:
     return pt
 
 
-def reduced_density_matrix(rho: np.array, position: List[int]) -> np.array:
+def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
     nq = int(np.log2(rho.shape[0]))
     p = [x for x in range(nq) if x not in position]
     for i in p[::-1]:
@@ -70,7 +70,7 @@ def reduced_density_matrix(rho: np.array, position: List[int]) -> np.array:
     return rho
 
 
-def fidelity(rho: np.array, sigma: np.array) -> float:
+def fidelity(rho: np.ndarray, sigma: np.ndarray) -> float:
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
     if sigma.ndim == 2 and (sigma.shape[0] == 1 or sigma.shape[1] == 1):
@@ -88,7 +88,7 @@ def fidelity(rho: np.array, sigma: np.array) -> float:
     return f
 
 
-def su2_encoding(qudit: np.array) -> np.array:
+def su2_encoding(qudit: np.ndarray) -> np.ndarray:
     d = np.shape(qudit)
     if len(d) == 2 and d[0] == d[1]:
         d = d[0]
@@ -122,7 +122,7 @@ def su2_encoding(qudit: np.array) -> np.array:
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
                 qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
         qubits = qubits.toarray()
-    elif len(d) == 1 or (len(d) == 2 and d[0] == 1 or d[1] == 1):
+    elif len(d) == 1 or (len(d) == 2 and (d[0] == 1 or d[1] == 1)):
         if len(d) == 2 and d[0] == 1:
             qudit = qudit.flatten()
             d = d[1]

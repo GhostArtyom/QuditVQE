@@ -14,9 +14,14 @@ A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
 
+def is_power_of_two(num):
+    return (num & (num - 1) == 0) and num != 0
+
+
 def decompose_zyz(mat: np.array):
-    d = mat.shape[0]
-    if not np.allclose(np.eye(d), mat @ mat.conj().T):
+    if mat.shape != (2, 2):
+        raise ValueError('The gate is not a 2*2 matrix')
+    if not np.allclose(np.eye(2), mat @ mat.conj().T):
         raise ValueError('The gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = mat * np.exp(1j * phase)
@@ -31,6 +36,30 @@ def decompose_u3(mat: np.array):
     phase, theta, phi, lam = decompose_zyz(mat)
     phase += (phi + lam) / 2
     return phase, theta, phi, lam
+
+
+def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
+    name_phase = gate.name + '_phase'
+    name_theta = gate.name + '_theta'
+    name_phi = gate.name + '_phi'
+    name_lam = gate.name + '_lam'
+    obj = gate.obj_qubits
+    mat = gate.matrix()
+    circ = Circuit()
+    if basis == 'zyz':
+        phase, theta, phi, lam = decompose_zyz(mat)
+        circ += RZ(name_lam).on(obj)
+        circ += RY(name_theta).on(obj)
+        circ += RZ(name_phi).on(obj)
+    elif basis == 'u3':
+        circ += U3(name_theta, name_phi, name_lam).on(obj)
+        phase, theta, phi, lam = decompose_u3(mat)
+    else:
+        raise ValueError(f'{basis} is not in {optional_basis}')
+    if with_phase:
+        circ += GlobalPhase(name_phase).on(obj)
+    pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
+    return circ, pr
 
 
 def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
@@ -73,36 +102,12 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     # Determine global phase.
     denominator = f1[a >> 1, b >> 1] * f2[a & 1, b & 1]
     if denominator == 0:
-        raise ZeroDivisionError("denominator cannot be zero.")
+        raise ZeroDivisionError('denominator cannot be zero.')
     g = mat[a, b] / denominator
     if np.real(g) < 0:
         f1 *= -1
         g = -g
     return f1, f2
-
-
-def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
-    name_phase = gate.name + '_phase'
-    name_theta = gate.name + '_theta'
-    name_phi = gate.name + '_phi'
-    name_lam = gate.name + '_lam'
-    obj = gate.obj_qubits
-    mat = gate.matrix()
-    circ = Circuit()
-    if basis == 'zyz':
-        phase, theta, phi, lam = decompose_zyz(mat)
-        circ += RZ(name_lam).on(obj)
-        circ += RY(name_theta).on(obj)
-        circ += RZ(name_phi).on(obj)
-    elif basis == 'u3':
-        circ += U3(name_theta, name_phi, name_lam).on(obj)
-        phase, theta, phi, lam = decompose_u3(mat)
-    else:
-        raise ValueError(f'{basis} is not a supported decomposition method of {optional_basis}')
-    if with_phase:
-        circ += GlobalPhase(name_phase).on(obj)
-    pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
-    return circ, pr
 
 
 def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
@@ -137,7 +142,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             elif basis == 'u3':
                 gate_d, para = one_qubit_decompose(g, 'u3')
             else:
-                raise ValueError(f'{basis} is not a supported decomposition method of {optional_basis}')
+                raise ValueError(f'{basis} is not in {optional_basis}')
             circ_d += gate_d
             pr.update(para)
         else:
@@ -146,15 +151,18 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
 
 
 def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
-    nq = int(rho.shape[0] / 2)
-    d = int(np.log2(nq))
-    pt = np.zeros([nq, nq], dtype=np.complex128)
-    for i in range(nq):
-        i_ = bin(i)[2::].zfill(d)
+    d = rho.shape[0]
+    n = d // 2
+    if not is_power_of_two(d):
+        raise ValueError(f'{d} is not a power of 2')
+    nq = int(np.log2(d)) - 1
+    pt = np.zeros([n, n], dtype=np.complex128)
+    for i in range(n):
+        i_ = bin(i)[2::].zfill(nq)
         i0 = int(i_[:ind] + '0' + i_[ind:], 2)
         i1 = int(i_[:ind] + '1' + i_[ind:], 2)
-        for j in range(nq):
-            j_ = bin(j)[2::].zfill(d)
+        for j in range(n):
+            j_ = bin(j)[2::].zfill(nq)
             j0 = int(j_[:ind] + '0' + j_[ind:], 2)
             j1 = int(j_[:ind] + '1' + j_[ind:], 2)
             pt[i][j] = rho[i0][j0] + rho[i1][j1]
@@ -162,7 +170,10 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
 
 
 def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
-    nq = int(np.log2(rho.shape[0]))
+    d = rho.shape[0]
+    if not is_power_of_two(d):
+        raise ValueError(f'{d} is not a power of 2')
+    nq = int(np.log2(d))
     p = [x for x in range(nq) if x not in position]
     for i in p[::-1]:
         rho = partial_trace(rho, i)
@@ -192,7 +203,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
     if len(d) == 2 and d[0] == d[1]:
         d = d[0]
         nq = d - 1
-        qubits = csr_matrix(np.zeros([2**nq, 2**nq], dtype=np.complex128))
+        qubits = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
         if d < 15:
             nq_bin = {}
             for i in range(2**nq):
@@ -231,7 +242,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
         else:
             d = d[0]
         nq = d - 1
-        qubits = csr_matrix(np.zeros(2**nq, dtype=np.complex128))
+        qubits = csr_matrix((1, 2**nq), dtype=np.complex128)
         if d < 15:
             nq_bin = {}
             for i in range(2**nq):

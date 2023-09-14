@@ -5,9 +5,9 @@ import numpy as np
 from typing import List
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
+from numpy.linalg import det, eigh, svd
 from mindquantum.core.circuit import Circuit
-from numpy.linalg import det, eigh, norm, svd
-from mindquantum.core.gates import RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
+from mindquantum.core.gates import RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
 optional_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
@@ -154,9 +154,12 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
 
 
 def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
-    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
+    if rho.ndim == 1:
+        rho = np.outer(rho.conj().T, rho)
+    elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
-    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+        rho = np.outer(rho.conj().T, rho)
+    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
@@ -165,34 +168,26 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
     nq = int(np.log2(n))
     if ind < 0 or ind > nq:
         raise ValueError(f'Index should be 0 to {nq}')
-    if rho.ndim == 1:
-        pt = np.zeros(n, dtype=np.complex128)
-        for i in range(n):
-            i_ = bin(i)[2::].zfill(nq)
-            i0 = int(i_[:ind] + '0' + i_[ind:], 2)
-            i1 = int(i_[:ind] + '1' + i_[ind:], 2)
-            pt[i] = rho[i0] + rho[i1]
-    elif rho.ndim == 2:
-        pt = np.zeros([n, n], dtype=np.complex128)
-        for i in range(n):
-            i_ = bin(i)[2::].zfill(nq)
-            i0 = int(i_[:ind] + '0' + i_[ind:], 2)
-            i1 = int(i_[:ind] + '1' + i_[ind:], 2)
-            for j in range(n):
-                j_ = bin(j)[2::].zfill(nq)
-                j0 = int(j_[:ind] + '0' + j_[ind:], 2)
-                j1 = int(j_[:ind] + '1' + j_[ind:], 2)
-                pt[i][j] = rho[i0][j0] + rho[i1][j1]
-    else:
-        raise ValueError('Wrong Input!')
+    pt = np.zeros([n, n], dtype=np.complex128)
+    for i in range(n):
+        i_ = bin(i)[2::].zfill(nq)
+        i0 = int(i_[:ind] + '0' + i_[ind:], 2)
+        i1 = int(i_[:ind] + '1' + i_[ind:], 2)
+        for j in range(n):
+            j_ = bin(j)[2::].zfill(nq)
+            j0 = int(j_[:ind] + '0' + j_[ind:], 2)
+            j1 = int(j_[:ind] + '1' + j_[ind:], 2)
+            pt[i][j] = rho[i0][j0] + rho[i1][j1]
     return pt
 
 
 def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
-    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
+    if rho.ndim == 1:
+        rho = np.outer(rho.conj().T, rho)
+    elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
         rho = np.outer(rho.conj().T, rho)
-    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):

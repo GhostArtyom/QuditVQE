@@ -20,9 +20,9 @@ def is_power_of_two(num):
 
 def decompose_zyz(mat: np.array):
     if mat.shape != (2, 2):
-        raise ValueError('The gate is not a 2*2 matrix')
+        raise ValueError('Gate is not one qubit')
     if not np.allclose(np.eye(2), mat @ mat.conj().T):
-        raise ValueError('The gate is not unitary')
+        raise ValueError('Gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
     cos = np.sqrt(np.real(matU[0][0] * matU[1][1]))
@@ -102,10 +102,10 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     f1 /= np.sqrt(np.linalg.det(f1)) or 1
     f2 /= np.sqrt(np.linalg.det(f2)) or 1
     # Determine global phase.
-    denominator = f1[a >> 1, b >> 1] * f2[a & 1, b & 1]
-    if denominator == 0:
-        raise ZeroDivisionError('denominator cannot be zero.')
-    g = mat[a, b] / denominator
+    div = f1[a >> 1, b >> 1] * f2[a & 1, b & 1]
+    if div == 0:
+        raise ZeroDivisionError('Div cannot be 0')
+    g = mat[a, b] / div
     if np.real(g) < 0:
         f1 *= -1
         g = -g
@@ -154,25 +154,46 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
 
 
 def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
+    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
+        rho = rho.flatten()
+    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+        raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]
-    n = d // 2
     if not is_power_of_two(d):
         raise ValueError(f'{d} is not a power of 2')
-    nq = int(np.log2(d)) - 1
-    pt = np.zeros([n, n], dtype=np.complex128)
-    for i in range(n):
-        i_ = bin(i)[2::].zfill(nq)
-        i0 = int(i_[:ind] + '0' + i_[ind:], 2)
-        i1 = int(i_[:ind] + '1' + i_[ind:], 2)
-        for j in range(n):
-            j_ = bin(j)[2::].zfill(nq)
-            j0 = int(j_[:ind] + '0' + j_[ind:], 2)
-            j1 = int(j_[:ind] + '1' + j_[ind:], 2)
-            pt[i][j] = rho[i0][j0] + rho[i1][j1]
+    n = d // 2
+    nq = int(np.log2(n))
+    if ind < 0 or ind > nq:
+        raise ValueError(f'Index should be 0 to {nq}')
+    if rho.ndim == 1:
+        pt = np.zeros(n, dtype=np.complex128)
+        for i in range(n):
+            i_ = bin(i)[2::].zfill(nq)
+            i0 = int(i_[:ind] + '0' + i_[ind:], 2)
+            i1 = int(i_[:ind] + '1' + i_[ind:], 2)
+            pt[i] = rho[i0] + rho[i1]
+    elif rho.ndim == 2:
+        pt = np.zeros([n, n], dtype=np.complex128)
+        for i in range(n):
+            i_ = bin(i)[2::].zfill(nq)
+            i0 = int(i_[:ind] + '0' + i_[ind:], 2)
+            i1 = int(i_[:ind] + '1' + i_[ind:], 2)
+            for j in range(n):
+                j_ = bin(j)[2::].zfill(nq)
+                j0 = int(j_[:ind] + '0' + j_[ind:], 2)
+                j1 = int(j_[:ind] + '1' + j_[ind:], 2)
+                pt[i][j] = rho[i0][j0] + rho[i1][j1]
+    else:
+        raise ValueError('Wrong Input!')
     return pt
 
 
 def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
+    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
+        rho = rho.flatten()
+        rho = np.outer(rho.conj().T, rho)
+    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+        raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
         raise ValueError(f'{d} is not a power of 2')
@@ -202,49 +223,13 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray) -> float:
 
 
 def su2_encoding(qudit: np.ndarray) -> np.ndarray:
-    d = np.shape(qudit)
-    if len(d) == 2 and d[0] == d[1]:
-        d = d[0]
-        nq = d - 1
-        qubits = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
-        if d < 15:
-            nq_bin = {}
-            for i in range(2**nq):
-                num1 = bin(i).count('1')
-                if num1 in nq_bin:
-                    nq_bin[num1].append(i)
-                else:
-                    nq_bin[num1] = [i]
-        elif d >= 15 and d <= 25:
-            name = 'nq_bin_d=%d.pkl' % d
-            path = os.path.join(sys.path[0], 'nq_bin', name)
-            f_read = open(path, 'rb')
-            nq_bin = pickle.load(f_read)
-            f_read.close()
-        else:
-            raise ValueError('d is over 25!')
-        for i in range(d):
-            qubits_i = nq_bin[i]
-            num_i = len(qubits_i)
-            for j in range(d):
-                qubits_j = nq_bin[j]
-                num_j = len(qubits_j)
-                ii = qubits_i * num_j
-                jj = np.repeat(qubits_j, num_i)
-                div = np.sqrt(num_i) * np.sqrt(num_j)
-                data = np.ones(num_i * num_j) * qudit[i][j] / div
-                qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
-        qubits = qubits.toarray()
-    elif len(d) == 1 or (len(d) == 2 and (d[0] == 1 or d[1] == 1)):
-        if len(d) == 2 and d[0] == 1:
-            qudit = qudit.flatten()
-            d = d[1]
-        elif len(d) == 2 and d[1] == 1:
-            qudit = qudit.flatten()
-            d = d[0]
-        else:
-            d = d[0]
-        nq = d - 1
+    if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
+        qudit = qudit.flatten()
+    if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
+        raise ValueError(f'Wrong input shape {qudit.shape}')
+    d = qudit.shape[0]
+    nq = d - 1
+    if qudit.ndim == 1:
         qubits = csr_matrix((1, 2**nq), dtype=np.complex128)
         if d < 15:
             nq_bin = {}
@@ -261,7 +246,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
             nq_bin = pickle.load(f_read)
             f_read.close()
         else:
-            raise ValueError('d is over 25!')
+            raise ValueError(f'd = {d} is over 25')
         for i in range(d):
             qubits_i = nq_bin[i]
             num_i = len(qubits_i)
@@ -269,6 +254,36 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
             ind = (np.zeros(num_i), qubits_i)
             qubits += csr_matrix((data, ind), shape=(1, 2**nq))
         qubits = qubits.toarray().flatten()
+    elif qudit.ndim == 2:
+        qubits = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
+        if d < 15:
+            nq_bin = {}
+            for i in range(2**nq):
+                num1 = bin(i).count('1')
+                if num1 in nq_bin:
+                    nq_bin[num1].append(i)
+                else:
+                    nq_bin[num1] = [i]
+        elif d >= 15 and d <= 25:
+            name = 'nq_bin_d=%d.pkl' % d
+            path = os.path.join(sys.path[0], 'nq_bin', name)
+            f_read = open(path, 'rb')
+            nq_bin = pickle.load(f_read)
+            f_read.close()
+        else:
+            raise ValueError(f'd = {d} is over 25')
+        for i in range(d):
+            qubits_i = nq_bin[i]
+            num_i = len(qubits_i)
+            for j in range(d):
+                qubits_j = nq_bin[j]
+                num_j = len(qubits_j)
+                ii = qubits_i * num_j
+                jj = np.repeat(qubits_j, num_i)
+                div = np.sqrt(num_i) * np.sqrt(num_j)
+                data = np.ones(num_i * num_j) * qudit[i][j] / div
+                qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
+        qubits = qubits.toarray()
     else:
         raise ValueError('Wrong Input!')
     return qubits

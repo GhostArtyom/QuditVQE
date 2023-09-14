@@ -24,8 +24,10 @@ def decompose_zyz(mat: np.array):
     if not np.allclose(np.eye(2), mat @ mat.conj().T):
         raise ValueError('The gate is not unitary')
     phase = -np.angle(det(mat)) / 2
-    matU = mat * np.exp(1j * phase)
+    matU = np.exp(1j * phase) * mat
     cos = np.sqrt(np.real(matU[0][0] * matU[1][1]))
+    if abs(cos) > 1:
+        cos = np.clip(cos, -1, 1)
     theta = 2 * np.arccos(cos)
     phi = np.angle(matU[1][1]) + np.angle(matU[1][0])
     lam = np.angle(matU[1][1]) - np.angle(matU[1][0])

@@ -133,8 +133,9 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     circ += Rxx(name_rxx).on([obj0, obj1])
     circ += Ryy(name_ryy).on([obj0, obj1])
     circ += Rzz(name_rzz).on([obj0, obj1])
-    circ += GlobalPhase(name_phase).on(obj0)
-    circ += GlobalPhase(name_phase).on(obj1)
+    if with_phase:
+        circ += GlobalPhase(name_phase).on(obj0)
+        circ += GlobalPhase(name_phase).on(obj1)
     circ += UnivMathGate(gate.name + '_A0', A0).on(obj0)
     circ += UnivMathGate(gate.name + '_A1', A1).on(obj1)
     for g in circ:

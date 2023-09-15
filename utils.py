@@ -99,8 +99,8 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
             f1[(a >> 1) ^ i, (b >> 1) ^ j] = mat[a ^ (i << 1), b ^ (j << 1)]
             f2[(a & 1) ^ i, (b & 1) ^ j] = mat[a ^ i, b ^ j]
     # Rescale factors to have unit determinants.
-    f1 /= np.sqrt(np.linalg.det(f1)) or 1
-    f2 /= np.sqrt(np.linalg.det(f2)) or 1
+    f1 /= np.sqrt(det(f1)) or 1
+    f2 /= np.sqrt(det(f2)) or 1
     # Determine global phase.
     div = f1[a >> 1, b >> 1] * f2[a & 1, b & 1]
     if div == 0:
@@ -143,7 +143,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             if basis == 'zyz':
                 gate_d, para = one_qubit_decompose(g, 'zyz', False)
             elif basis == 'u3':
-                gate_d, para = one_qubit_decompose(g, 'u3')
+                gate_d, para = one_qubit_decompose(g, 'u3', with_phase)
             else:
                 raise ValueError(f'{basis} is not in {optional_basis}')
             circ_d += gate_d

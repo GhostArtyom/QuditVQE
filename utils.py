@@ -224,24 +224,24 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
         raise ValueError(f'Wrong input shape {qudit.shape}')
     d = qudit.shape[0]
     nq = d - 1
+    if d < 15:
+        nq_bin = {}
+        for i in range(2**nq):
+            num1 = bin(i).count('1')
+            if num1 in nq_bin:
+                nq_bin[num1].append(i)
+            else:
+                nq_bin[num1] = [i]
+    elif d >= 15 and d <= 25:
+        name = 'nq_bin_d=%d.pkl' % d
+        path = os.path.join(sys.path[0], 'nq_bin', name)
+        f_read = open(path, 'rb')
+        nq_bin = pickle.load(f_read)
+        f_read.close()
+    else:
+        raise ValueError(f'd = {d} is over 25')
     if qudit.ndim == 1:
         qubits = csr_matrix((1, 2**nq), dtype=np.complex128)
-        if d < 15:
-            nq_bin = {}
-            for i in range(2**nq):
-                num1 = bin(i).count('1')
-                if num1 in nq_bin:
-                    nq_bin[num1].append(i)
-                else:
-                    nq_bin[num1] = [i]
-        elif d >= 15 and d <= 25:
-            name = 'nq_bin_d=%d.pkl' % d
-            path = os.path.join(sys.path[0], 'nq_bin', name)
-            f_read = open(path, 'rb')
-            nq_bin = pickle.load(f_read)
-            f_read.close()
-        else:
-            raise ValueError(f'd = {d} is over 25')
         for i in range(d):
             qubits_i = nq_bin[i]
             num_i = len(qubits_i)
@@ -251,22 +251,6 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
         qubits = qubits.toarray().flatten()
     elif qudit.ndim == 2:
         qubits = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
-        if d < 15:
-            nq_bin = {}
-            for i in range(2**nq):
-                num1 = bin(i).count('1')
-                if num1 in nq_bin:
-                    nq_bin[num1].append(i)
-                else:
-                    nq_bin[num1] = [i]
-        elif d >= 15 and d <= 25:
-            name = 'nq_bin_d=%d.pkl' % d
-            path = os.path.join(sys.path[0], 'nq_bin', name)
-            f_read = open(path, 'rb')
-            nq_bin = pickle.load(f_read)
-            f_read.close()
-        else:
-            raise ValueError(f'd = {d} is over 25')
         for i in range(d):
             qubits_i = nq_bin[i]
             num_i = len(qubits_i)

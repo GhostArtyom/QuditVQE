@@ -6,21 +6,25 @@ import time
 import numpy as np
 import scipy as sp
 from utils import *
-from math import atan2
+import mindspore as ms
+from scipy.sparse import csr_matrix
+from scipy.optimize import minimize
 from mindquantum.framework import *
 from mindquantum.core.gates import *
 from scipy.stats import unitary_group
 from mindquantum.core.circuit import *
-from numpy.linalg import det, svd, norm
 from mindquantum.core.operators import *
 from mindquantum.algorithm.nisq import *
+from mindspore.common.initializer import *
 from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
-from mindquantum.core.parameterresolver import *
+from numpy.linalg import det, svd, eigh, norm
+from scipy.linalg import expm, sqrtm, block_diag
 
 np.set_printoptions(linewidth=200)
 
 # d = 2
+# # gate = unitary_group.rvs(d)
 # gate = unitary_group.rvs(d, random_state=42)
 # print(gate)
 # gate_u = UnivMathGate('gate', gate).on(0)
@@ -31,6 +35,7 @@ np.set_printoptions(linewidth=200)
 # print(norm(gate - gate_d.matrix(pr)))
 
 # d = 4
+# # gate = unitary_group.rvs(d)
 # gate = unitary_group.rvs(d, random_state=42)
 # print(gate)
 # gate_u = UnivMathGate('', gate).on([0, 1])

@@ -4,6 +4,7 @@ import time
 import numpy as np
 from utils import *
 import mindspore as ms
+from numpy.linalg import norm
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
 from mindquantum.simulator import Simulator
@@ -16,19 +17,19 @@ np.set_printoptions(linewidth=200)
 device_target = ms.get_context("device_target")
 
 
-def fun(p0, sim_grad, energy_list=None):
+def fun(p0, sim_grad, iter_list=None):
     f, g = sim_grad(p0)
     f = np.real(f)[0, 0]
     g = np.real(g)[0, 0]
-    if energy_list is not None:
-        energy_list.append(f)
-        i = len(energy_list)
+    if iter_list is not None:
+        iter_list.append(f)
+        i = len(iter_list)
         if i % 1 == 0:
-            print('Energy Gap: %.12f, %d' % (f, i))
+            print('Optimal Gap: %.12f, %d' % (f, i))
     return f, g
 
 
-g = h5py.File('mat/322_d2_num1_model957_site3_gates_L39_N9_zhu(2).mat', 'r')
+g = h5py.File('./mat/322_d2_num1_model957_site3_gates_L39_N9_zhu(2).mat', 'r')
 # position = g['position'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 file keys
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
@@ -39,33 +40,30 @@ k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
 
-r = h5py.File('mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
+r = h5py.File('./mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
 l = list(r.keys())
 rdm = [r[i][:].view('complex').T for i in l]
 rdm.insert(0, [])
 r.close()
 
-pr = {}
-circ_u = Circuit()
-circ_d = Circuit()
+gate_pr = {}
+ansatz = Circuit()
 for i in range(len(g_name)):
     for j in range(k):
-        gate_name = 'G' + str(j + 1) + '_L' + str(i + 1)
-        gate_mat = gates[i][j]
+        name = 'G' + str(j + 1) + '_L' + str(i + 1)
+        mat = gates[i][j]
         if j == k - 1:
-            gate_u = UnivMathGate(gate_name, gate_mat).on(k - j - 1)
+            gate_u = UnivMathGate(name, mat).on(k - j - 1)
             gate_d, para = one_qubit_decompose(gate_u)
-            pr.update(para)
-            circ_u += gate_u
-            circ_d += gate_d
+            gate_pr.update(para)
+            ansatz += gate_d
         else:
-            gate_u = UnivMathGate(gate_name, gate_mat).on([k - j - 2, k - j - 1])
+            gate_u = UnivMathGate(name, mat).on([k - j - 2, k - j - 1])
             gate_d, para = two_qubit_decompose(gate_u)
-            pr.update(para)
-            circ_u += gate_u
-            circ_d += gate_d
+            gate_pr.update(para)
+            ansatz += gate_d
 
-ansatz = circ_d.as_ansatz()
+ansatz = ansatz.as_ansatz()
 params_name = ansatz.ansatz_params_name
 params_size = len(params_name)
 print('Number of params: %d' % params_size)
@@ -73,12 +71,6 @@ print('Number of params: %d' % params_size)
 ham = np.kron(np.kron(rdm[3], rdm[3]), rdm[3])
 print('Hamiltonian Dimension:', ham.shape)
 Ham = Hamiltonian(csr_matrix(ham))
-
-eigval, eigvec = np.linalg.eig(ham)
-eigvec = np.transpose(eigvec)
-min_eigval = np.min(eigval)
-min_eigvec = eigvec[np.argmin(eigval)]
-print('Minimum Eigenvalue:', min_eigval)
 
 if device_target == 'CPU':
     sim = Simulator('mqvector', ansatz.n_qubits)
@@ -91,11 +83,25 @@ p0 = np.zeros(params_size)
 f, g = sim_grad(p0)
 
 fun(p0, sim_grad)
-energy_list = []
-res = minimize(fun, p0, args=(sim_grad, energy_list), method='bfgs', jac=True)
+iter_list = []
+res = minimize(fun, p0, args=(sim_grad, iter_list), method='bfgs', jac=True, tol=1e-6)
 
-print('Optimized Energy: %.12f' % res.fun)
-print('Energy Gap: %.12f' % res.fun)
+print(res.message)
+print('Optimal Value: %.12f' % res.fun)
+
+sim.reset()
+res_pr = dict(zip(params_name, res.x))
+sim.apply_circuit(ansatz.apply_value(res_pr))
+psi_res = sim.get_qs()
+sim.reset()
+sim.apply_circuit(ansatz.apply_value(gate_pr))
+psi = sim.get_qs()
+rho = np.outer(psi_res.conj(), psi_res)
+rho = reduced_density_matrix(rho, [3, 4, 5])
+print('psi norm: %.20f' % norm(psi - psi_res, 2))
+print('psi fidelity: %.20f' % fidelity(psi, psi_res))
+print('rdm[3] norm: %.20f' % norm(rdm[3] - rho, 2))
+print('rdm[3] fidelity: %.20f' % fidelity(rdm[3], rho))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

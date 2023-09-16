@@ -3,6 +3,7 @@ import h5py
 import time
 import numpy as np
 from utils import *
+import mindspore as ms
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
 from mindquantum.simulator import Simulator
@@ -12,6 +13,7 @@ from mindquantum.core.operators import Hamiltonian
 
 start = time.perf_counter()
 np.set_printoptions(linewidth=200)
+device_target = ms.get_context("device_target")
 
 
 def fun(p0, sim_grad, energy_list=None):
@@ -21,9 +23,8 @@ def fun(p0, sim_grad, energy_list=None):
     if energy_list is not None:
         energy_list.append(f)
         i = len(energy_list)
-        if i % 10 == 0:
-            energy_gap = abs(min_eigval - f)
-            print('Energy Gap: %.12f, %d' % (energy_gap, i))
+        if i % 1 == 0:
+            print('Energy Gap: %.12f, %d' % (f, i))
     return f, g
 
 
@@ -79,7 +80,12 @@ min_eigval = np.min(eigval)
 min_eigvec = eigvec[np.argmin(eigval)]
 print('Minimum Eigenvalue:', min_eigval)
 
-sim = Simulator('mqvector', ansatz.n_qubits)
+if device_target == 'CPU':
+    sim = Simulator('mqvector', ansatz.n_qubits)
+elif device_target == 'GPU':
+    sim = Simulator('mqvector_gpu', ansatz.n_qubits)
+else:
+    raise ValueError(f'{device_target} is not applicable')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 p0 = np.zeros(params_size)
 f, g = sim_grad(p0)
@@ -89,7 +95,7 @@ energy_list = []
 res = minimize(fun, p0, args=(sim_grad, energy_list), method='bfgs', jac=True)
 
 print('Optimized Energy: %.12f' % res.fun)
-print('Energy Gap: %.12f' % abs(min_eigval - res.fun))
+print('Energy Gap: %.12f' % res.fun)
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

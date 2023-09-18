@@ -155,10 +155,10 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
 
 def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
     if rho.ndim == 1:
-        rho = np.outer(rho.conj().T, rho)
+        rho = np.outer(rho, rho.conj())
     elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
-        rho = np.outer(rho.conj().T, rho)
+        rho = np.outer(rho, rho.conj())
     if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]
@@ -183,10 +183,10 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
 
 def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
     if rho.ndim == 1:
-        rho = np.outer(rho.conj().T, rho)
+        rho = np.outer(rho, rho.conj())
     elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
-        rho = np.outer(rho.conj().T, rho)
+        rho = np.outer(rho, rho.conj())
     if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong input shape {rho.shape}')
     d = rho.shape[0]

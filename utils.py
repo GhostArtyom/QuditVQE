@@ -60,7 +60,9 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
         raise ValueError(f'{basis} is not in {optional_basis}')
     if with_phase:
         circ += GlobalPhase(name_phase).on(obj)
-    pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
+        pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
+    else:
+        pr = {name_phi: phi, name_theta: theta, name_lam: lam}
     return circ, pr
 
 
@@ -214,7 +216,7 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray) -> float:
         f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
     else:
         raise ValueError('Wrong Input!')
-    return f
+    return np.clip(f, -1, 1)
 
 
 def su2_encoding(qudit: np.ndarray) -> np.ndarray:

@@ -24,7 +24,9 @@ def fun(p0, sim_grad, args=None):
         args.append(f)
         i = len(args)
         if i % 10 == 0:
-            print('Optimal Gap: %.12f, %d' % (f, i))
+            global start
+            t = time.perf_counter() - start
+            print('Optimal Gap: %.20f, %d, %.4f' % (f, i, t))
     return f, g
 
 
@@ -46,7 +48,7 @@ rdm = [r[i][:].view('complex').T for i in l]
 rdm.insert(0, [])
 r.close()
 
-gate_pr = {}
+pr = {}
 ansatz = Circuit()
 for i in range(len(g_name)):
     for j in range(k):
@@ -55,53 +57,55 @@ for i in range(len(g_name)):
         if j == k - 1:
             gate_u = UnivMathGate(name, mat).on(k - j - 1)
             gate_d, para = one_qubit_decompose(gate_u)
-            gate_pr.update(para)
+            pr.update(para)
             ansatz += gate_d
         else:
             gate_u = UnivMathGate(name, mat).on([k - j - 2, k - j - 1])
             gate_d, para = two_qubit_decompose(gate_u)
-            gate_pr.update(para)
+            pr.update(para)
             ansatz += gate_d
 
 ansatz = ansatz.as_ansatz()
-params_name = ansatz.ansatz_params_name
-params_size = len(params_name)
-print('Number of params: %d' % params_size)
+nq = ansatz.n_qubits
+p_name = ansatz.ansatz_params_name
+p_num = len(p_name)
+print('Number of params: %d' % p_num)
 
-sim = Simulator('mqvector', ansatz.n_qubits)
-sim.apply_circuit(ansatz.apply_value(gate_pr))
+sim_list = set([i[0] for i in get_supported_simulator()])
+if 'mqvector_gpu' in sim_list and nq > 10:
+    sim = Simulator('mqvector_gpu', nq)
+    method = 'BFGS'
+    print(f'Simulator: mqvector_gpu, Method: {method}')
+else:
+    sim = Simulator('mqvector', nq)
+    method = 'TNC'
+    print(f'Simulator: mqvector: Method: {method}')
+
+pr = {i: pr[i] for i in p_name}
+sim.apply_circuit(ansatz.apply_value(pr))
 psi = sim.get_qs()
 rho = np.outer(psi, psi.conj())
+rho_rdm = reduced_density_matrix(rho, position)
+print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
+
 ham = rho
 # ham = np.kron(np.kron(rdm[3], rdm[3]), rdm[3])
 print('Hamiltonian Dimension:', ham.shape)
 Ham = Hamiltonian(csr_matrix(ham))
 
-sim_list = set([i[0] for i in get_supported_simulator()])
-print(sim_list)
-if 'mqvector_gpu' in sim_list:
-    sim = Simulator('mqvector_gpu', ansatz.n_qubits)
-else:
-    sim = Simulator('mqvector', ansatz.n_qubits)
+sim.reset()
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
-
-gate_pr = {i: gate_pr[i] for i in params_name}
-# p0 = np.array(list(gate_pr.values())) + np.random.uniform(-1, 1, params_size)
-p0 = np.random.uniform(-1, 1, params_size)
+# p0 = np.array(list(pr.values()))
+p0 = np.random.uniform(-1, 1, p_num)
 fun(p0, sim_grad)
-res = minimize(fun, p0, args=(sim_grad, []), method='bfgs', jac=True, tol=1e-6)
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
 
 print(res.message)
-print('Optimal Value: %.12f' % res.fun)
+print('Optimal Value: %.20f' % res.fun)
 
 sim.reset()
-sim.apply_circuit(ansatz.apply_value(gate_pr))
-psi = sim.get_qs()
-rho = np.outer(psi, psi.conj())
-rho_rdm = reduced_density_matrix(rho, position)
-
-sim.reset()
-res_pr = dict(zip(params_name, res.x))
+res_pr = dict(zip(p_name, res.x))
 sim.apply_circuit(ansatz.apply_value(res_pr))
 psi_res = sim.get_qs()
 rho_res = np.outer(psi_res, psi_res.conj())
@@ -109,10 +113,8 @@ rho_res_rdm = reduced_density_matrix(rho_res, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
-print('res norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
-print('res fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
+print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

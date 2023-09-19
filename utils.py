@@ -14,7 +14,8 @@ A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
 
-def is_power_of_two(num):
+def is_power_of_two(num: int) -> bool:
+    num = int(num)
     return (num & (num - 1) == 0) and num != 0
 
 

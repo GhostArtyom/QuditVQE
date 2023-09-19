@@ -26,12 +26,12 @@ def decompose_zyz(mat: np.array):
         raise ValueError('Gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
-    cos = np.sqrt(np.real(matU[0][0] * matU[1][1]))
+    cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
     if abs(cos) > 1:
         cos = np.clip(cos, -1, 1)
     theta = 2 * np.arccos(cos)
-    phi = np.angle(matU[1][1]) + np.angle(matU[1][0])
-    lam = np.angle(matU[1][1]) - np.angle(matU[1][0])
+    phi = np.angle(matU[1, 1]) + np.angle(matU[1, 0])
+    lam = np.angle(matU[1, 1]) - np.angle(matU[1, 0])
     return phase, theta, phi, lam
 
 
@@ -180,7 +180,7 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
             j_ = bin(j)[2::].zfill(nq)
             j0 = int(j_[:ind] + '0' + j_[ind:], 2)
             j1 = int(j_[:ind] + '1' + j_[ind:], 2)
-            pt[i][j] = rho[i0][j0] + rho[i1][j1]
+            pt[i, j] = rho[i0, j0] + rho[i1, j1]
     return pt
 
 
@@ -266,7 +266,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
                 ii = qubits_i * num_j
                 jj = np.repeat(qubits_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
-                data = np.ones(num_i * num_j) * qudit[i][j] / div
+                data = np.ones(num_i * num_j) * qudit[i, j] / div
                 qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
         qubits = qubits.toarray()
     else:

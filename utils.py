@@ -19,6 +19,52 @@ def is_power_of_two(num: int) -> bool:
     return (num & (num - 1) == 0) and num != 0
 
 
+def is_unitary(mat: np.ndarray) -> bool:
+    if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
+        d = mat.shape[0]
+        i = np.eye(d)
+        a = mat @ mat.conj().T
+        return np.allclose(i, a)
+    else:
+        raise ValueError(f'Wrong input shape {mat.shape}')
+
+
+def is_symmetric(mat: np.ndarray) -> bool:
+    if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
+        mat = mat.flatten()
+    if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
+        raise ValueError(f'Wrong input shape {mat.shape}')
+    b = True
+    nq_bin = {}
+    d = mat.shape[0]
+    if not is_power_of_two(d):
+        raise ValueError(f'{d} is not a power of 2')
+    nq = int(np.log2(d)) + 1
+    for i in range(d):
+        num1 = bin(i).count('1')
+        if num1 in nq_bin:
+            nq_bin[num1].append(i)
+        else:
+            nq_bin[num1] = [i]
+    if mat.ndim == 1:
+        for i in range(nq):
+            ii = nq_bin[i]
+            if len(ii) != 1:
+                a = mat[ii]
+                b = b & np.allclose(a, a[0])
+    elif mat.ndim == 2:
+        for i in range(nq):
+            ii = nq_bin[i]
+            for j in range(nq):
+                jj = nq_bin[j]
+                if len(ii) != 1 or len(jj) != 1:
+                    a = mat[np.ix_(ii, jj)]
+                    b = b & np.allclose(a, a[0][0])
+    else:
+        raise ValueError('Wrong Input!')
+    return b
+
+
 def decompose_zyz(mat: np.array):
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat

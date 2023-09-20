@@ -20,10 +20,6 @@ def is_power_of_two(num: int) -> bool:
 
 
 def decompose_zyz(mat: np.array):
-    if mat.shape != (2, 2):
-        raise ValueError('Gate is not one qubit')
-    if not np.allclose(np.eye(2), mat @ mat.conj().T):
-        raise ValueError('Gate is not unitary')
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
     cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
@@ -49,6 +45,10 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     obj = gate.obj_qubits
     mat = gate.matrix()
     circ = Circuit()
+    if mat.shape != (2, 2):
+        raise ValueError('Gate is not one qubit')
+    if not np.allclose(np.eye(2), mat @ mat.conj().T):
+        raise ValueError('Gate is not unitary')
     if basis == 'zyz':
         phase, theta, phi, lam = decompose_zyz(mat)
         circ += RZ(name_lam).on(obj)
@@ -124,6 +124,10 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     mat = gate.matrix()
     circ = Circuit()
     circ_d = Circuit()
+    if mat.shape != (4, 4):
+        raise ValueError('Gate is not two qubit')
+    if not np.allclose(np.eye(4), mat @ mat.conj().T):
+        raise ValueError('Gate is not unitary')
     ur = np.real(M.conj().T @ mat @ M)
     ui = np.imag(M.conj().T @ mat @ M)
     QL, QR, D = simult_svd(ur, ui)

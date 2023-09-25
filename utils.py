@@ -297,28 +297,28 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
     else:
         raise ValueError(f'd = {d} is over 25')
     if qudit.ndim == 1:
-        qubits = csr_matrix((1, 2**nq), dtype=np.complex128)
+        qubit = csr_matrix((1, 2**nq), dtype=np.complex128)
         for i in range(d):
-            qubits_i = nq_bin[i]
-            num_i = len(qubits_i)
+            ind_i = nq_bin[i]
+            num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
-            ind = (np.zeros(num_i), qubits_i)
-            qubits += csr_matrix((data, ind), shape=(1, 2**nq))
-        qubits = qubits.toarray().flatten()
+            ind = (np.zeros(num_i), ind_i)
+            qubit += csr_matrix((data, ind), shape=(1, 2**nq))
+        qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
-        qubits = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
+        qubit = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
         for i in range(d):
-            qubits_i = nq_bin[i]
-            num_i = len(qubits_i)
+            ind_i = nq_bin[i]
+            num_i = len(ind_i)
             for j in range(d):
-                qubits_j = nq_bin[j]
-                num_j = len(qubits_j)
-                ii = qubits_i * num_j
-                jj = np.repeat(qubits_j, num_i)
+                ind_j = nq_bin[j]
+                num_j = len(ind_j)
+                ii = ind_i * num_j
+                jj = np.repeat(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
-                qubits += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
-        qubits = qubits.toarray()
+                qubit += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
+        qubit = qubit.toarray()
     else:
         raise ValueError('Wrong Input!')
-    return qubits
+    return qubit

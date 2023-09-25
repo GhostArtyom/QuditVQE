@@ -1,7 +1,6 @@
-import os
-import sys
 import pickle
 import numpy as np
+from math import log
 from typing import List
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
@@ -273,40 +272,41 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         return f**2
 
 
-def su2_encoding(qudit: np.ndarray) -> np.ndarray:
+def su2_encoding(qudit: np.ndarray, d=None) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
         raise ValueError(f'Wrong input shape {qudit.shape}')
-    d = qudit.shape[0]
-    nq = d - 1
+    if d is None:
+        d = qudit.shape[0]
+    elif log(qudit.shape[0], d) % 1 != 0:
+        raise ValueError(f'Wrong input shape {qudit.shape} or dim {d}')
+    n = 2**(d - 1)
     if d < 15:
         nq_bin = {}
-        for i in range(2**nq):
+        for i in range(n):
             num1 = bin(i).count('1')
             if num1 in nq_bin:
                 nq_bin[num1].append(i)
             else:
                 nq_bin[num1] = [i]
     elif d >= 15 and d <= 25:
-        name = 'nq_bin_d=%d.pkl' % d
-        path = os.path.join(sys.path[0], 'nq_bin', name)
-        f_read = open(path, 'rb')
+        f_read = open('./nq_bin/nq_bin_d=%d.pkl' % d, 'rb')
         nq_bin = pickle.load(f_read)
         f_read.close()
     else:
         raise ValueError(f'd = {d} is over 25')
     if qudit.ndim == 1:
-        qubit = csr_matrix((1, 2**nq), dtype=np.complex128)
+        qubit = csr_matrix((1, n), dtype=np.complex128)
         for i in range(d):
             ind_i = nq_bin[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
             ind = (np.zeros(num_i), ind_i)
-            qubit += csr_matrix((data, ind), shape=(1, 2**nq))
+            qubit += csr_matrix((data, ind), shape=(1, n))
         qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
-        qubit = csr_matrix((2**nq, 2**nq), dtype=np.complex128)
+        qubit = csr_matrix((n, n), dtype=np.complex128)
         for i in range(d):
             ind_i = nq_bin[i]
             num_i = len(ind_i)
@@ -317,7 +317,7 @@ def su2_encoding(qudit: np.ndarray) -> np.ndarray:
                 jj = np.repeat(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
-                qubit += csr_matrix((data, (ii, jj)), shape=(2**nq, 2**nq))
+                qubit += csr_matrix((data, (ii, jj)), shape=(n, n))
         qubit = qubit.toarray()
     else:
         raise ValueError('Wrong Input!')

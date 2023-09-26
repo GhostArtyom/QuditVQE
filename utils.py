@@ -1,4 +1,3 @@
-import pickle
 import numpy as np
 from math import log
 from typing import List
@@ -25,14 +24,14 @@ def is_unitary(mat: np.ndarray) -> bool:
         a = mat @ mat.conj().T
         return np.allclose(i, a)
     else:
-        raise ValueError(f'Wrong input shape {mat.shape}')
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
 def is_symmetric(mat: np.ndarray) -> bool:
     if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
         mat = mat.flatten()
     if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
-        raise ValueError(f'Wrong input shape {mat.shape}')
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
     b = True
     nq_bin = {}
     d = mat.shape[0]
@@ -212,7 +211,7 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
         rho = rho.flatten()
         rho = np.outer(rho, rho.conj())
     if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
-        raise ValueError(f'Wrong input shape {rho.shape}')
+        raise ValueError(f'Wrong state shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
         raise ValueError(f'{d} is not a power of 2')
@@ -240,7 +239,7 @@ def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
         rho = rho.flatten()
         rho = np.outer(rho, rho.conj())
     if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
-        raise ValueError(f'Wrong input shape {rho.shape}')
+        raise ValueError(f'Wrong state shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
         raise ValueError(f'{d} is not a power of 2')
@@ -272,17 +271,16 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         return f**2
 
 
-def su2_encoding(qudit: np.ndarray, d=None) -> np.ndarray:
+def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
-        raise ValueError(f'Wrong input shape {qudit.shape}')
-    if d is None:
+        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+    if qudit.ndim != 1 and qudit != 2:
+        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+    if m == 1:
         d = qudit.shape[0]
-    elif log(qudit.shape[0], d) % 1 != 0:
-        raise ValueError(f'Wrong input shape {qudit.shape} or dim {d}')
-    n = 2**(d - 1)
-    if d < 15:
+        n = 2**(d - 1)
         nq_bin = {}
         for i in range(n):
             num1 = bin(i).count('1')
@@ -290,15 +288,26 @@ def su2_encoding(qudit: np.ndarray, d=None) -> np.ndarray:
                 nq_bin[num1].append(i)
             else:
                 nq_bin[num1] = [i]
-    elif d >= 15 and d <= 25:
-        f_read = open('./nq_bin/nq_bin_d=%d.pkl' % d, 'rb')
-        nq_bin = pickle.load(f_read)
-        f_read.close()
+    elif qudit.shape[0]**(1 / m) % 1 == 0:
+        d = int(qudit.shape[0]**(1 / m))
+        nq = (d - 1) * m
+        n = 2**nq
+        nq_b = {}
+        nq_bin = {}
+        for i in range(2**(d - 1)):
+            num1 = bin(i).count('1')
+            bin_i = bin(i)[2::].zfill(d - 1)
+            if num1 in nq_b:
+                nq_b[num1].append(bin_i)
+            else:
+                nq_b[num1] = [bin_i]
+        for i in range(d**m):
+            nq_bin[i] = [int(a + b, 2) for a in nq_b[i // d] for b in nq_b[i % d]]
     else:
-        raise ValueError(f'd = {d} is over 25')
+        raise ValueError(f'Wrong qudit shape {qudit.shape} or num {m}')
     if qudit.ndim == 1:
         qubit = csr_matrix((1, n), dtype=np.complex128)
-        for i in range(d):
+        for i in range(d**m):
             ind_i = nq_bin[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
@@ -307,10 +316,10 @@ def su2_encoding(qudit: np.ndarray, d=None) -> np.ndarray:
         qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
         qubit = csr_matrix((n, n), dtype=np.complex128)
-        for i in range(d):
+        for i in range(d**m):
             ind_i = nq_bin[i]
             num_i = len(ind_i)
-            for j in range(d):
+            for j in range(d**m):
                 ind_j = nq_bin[j]
                 num_j = len(ind_j)
                 ii = ind_i * num_j
@@ -319,6 +328,4 @@ def su2_encoding(qudit: np.ndarray, d=None) -> np.ndarray:
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
                 qubit += csr_matrix((data, (ii, jj)), shape=(n, n))
         qubit = qubit.toarray()
-    else:
-        raise ValueError('Wrong Input!')
     return qubit

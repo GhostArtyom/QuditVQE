@@ -265,10 +265,7 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
     else:
         raise ValueError('Wrong Input!')
-    if sqrt:
-        return f
-    else:
-        return f**2
+    return f if sqrt else f**2
 
 
 def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
@@ -290,19 +287,22 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
                 nq_bin[num1] = [i]
     elif qudit.shape[0]**(1 / m) % 1 == 0:
         d = int(qudit.shape[0]**(1 / m))
-        nq = (d - 1) * m
-        n = 2**nq
-        nq_b = {}
-        nq_bin = {}
+        n = 2**((d - 1) * m)
+        nq_bin, temp1 = {}, {}
         for i in range(2**(d - 1)):
             num1 = bin(i).count('1')
             bin_i = bin(i)[2::].zfill(d - 1)
-            if num1 in nq_b:
-                nq_b[num1].append(bin_i)
+            if num1 in temp1:
+                temp1[num1].append(bin_i)
             else:
-                nq_b[num1] = [bin_i]
+                temp1[num1] = [bin_i]
         for i in range(d**m):
-            nq_bin[i] = [int(a + b, 2) for a in nq_b[i // d] for b in nq_b[i % d]]
+            multi = ['']
+            base_d = np.base_repr(i, d).zfill(m)
+            for j in range(m):
+                temp2 = temp1[int(base_d[j])]
+                multi = [x + y for x in multi for y in temp2]
+            nq_bin[i] = [int(x, 2) for x in multi]
     else:
         raise ValueError(f'Wrong qudit shape {qudit.shape} or num {m}')
     if qudit.ndim == 1:

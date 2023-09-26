@@ -23,6 +23,15 @@ from scipy.linalg import expm, sqrtm, block_diag
 
 np.set_printoptions(linewidth=200)
 
+d, m = 3, 2
+a = np.arange(d) + 1
+for i in range(m):
+    qudit = a if i == 0 else np.kron(qudit, a)
+qubit = su2_encoding(qudit, m)
+print(qudit, qudit.shape)
+print(qubit, qubit.shape)
+print(is_symmetric(qubit))
+
 # d = 2
 # # gate = unitary_group.rvs(d)
 # gate = unitary_group.rvs(d, random_state=42)

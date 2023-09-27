@@ -6,7 +6,7 @@ from numpy.linalg import det, eigh, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
-optional_basis = ['zyz', 'u3']
+opt_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
@@ -19,47 +19,64 @@ def is_power_of_two(num: int) -> bool:
 def is_unitary(mat: np.ndarray) -> bool:
     if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
         d = mat.shape[0]
-        i = np.eye(d)
-        a = mat @ mat.conj().T
-        return np.allclose(i, a)
+        return np.allclose(np.eye(d), mat @ mat.conj().T)
     else:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
-def is_symmetric(mat: np.ndarray) -> bool:
+def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
     if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
         mat = mat.flatten()
     if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
-    b = True
-    nq_bin = {}
-    d = mat.shape[0]
-    if not is_power_of_two(d):
-        raise ValueError(f'{d} is not a power of 2')
-    nq = int(np.log2(d)) + 1
-    for i in range(d):
-        num1 = bin(i).count('1')
-        if num1 in nq_bin:
-            nq_bin[num1].append(i)
-        else:
-            nq_bin[num1] = [i]
+    if mat.ndim != 1 and mat.ndim != 2:
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
+    is_sym = True
+    n = mat.shape[0]
+    if not is_power_of_two(n):
+        raise ValueError(f'{n} is not a power of 2')
+    nq = int(np.log2(n))
+    d = nq // m + 1
+    if m == 1:
+        ind = {}
+        for i in range(n):
+            num1 = bin(i).count('1')
+            if num1 in ind:
+                ind[num1].append(i)
+            else:
+                ind[num1] = [i]
+    elif nq % m == 0:
+        ind, ind_ = {}, {}
+        for i in range(2**(d - 1)):
+            num1 = bin(i).count('1')
+            i_ = bin(i)[2::].zfill(d - 1)
+            if num1 in ind_:
+                ind_[num1].append(i_)
+            else:
+                ind_[num1] = [i_]
+        for i in range(d**m):
+            multi = ['']
+            base = np.base_repr(i, d).zfill(m)
+            for j in range(m):
+                multi = [x + y for x in multi for y in ind_[int(base[j])]]
+            ind[i] = [int(x, 2) for x in multi]
+    else:
+        raise ValueError(f'Wrong matrix shape {mat.shape} or num {m}')
     if mat.ndim == 1:
         for i in range(nq):
-            ii = nq_bin[i]
-            if len(ii) != 1:
-                a = mat[ii]
-                b = b & np.allclose(a, a[0])
+            i_ = ind[i]
+            if len(i_) != 1:
+                a = mat[i_]
+                is_sym = is_sym & np.allclose(a, a[0])
     elif mat.ndim == 2:
         for i in range(nq):
-            ii = nq_bin[i]
+            i_ = ind[i]
             for j in range(nq):
-                jj = nq_bin[j]
-                if len(ii) != 1 or len(jj) != 1:
-                    a = mat[np.ix_(ii, jj)]
-                    b = b & np.allclose(a, a[0][0])
-    else:
-        raise ValueError('Wrong Input!')
-    return b
+                j_ = ind[j]
+                if len(i_) != 1 or len(j_) != 1:
+                    a = mat[np.ix_(i_, j_)]
+                    is_sym = is_sym & np.allclose(a, a[0][0])
+    return is_sym
 
 
 def decompose_zyz(mat: np.array):
@@ -89,7 +106,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     mat = gate.matrix()
     circ = Circuit()
     if mat.shape != (2, 2):
-        raise ValueError('Gate is not one qubit')
+        raise ValueError('Gate is not one-qubit')
     if not np.allclose(np.eye(2), mat @ mat.conj().T):
         raise ValueError('Gate is not unitary')
     if basis == 'zyz':
@@ -101,7 +118,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
         circ += U3(name_theta, name_phi, name_lam).on(obj)
         phase, theta, phi, lam = decompose_u3(mat)
     else:
-        raise ValueError(f'{basis} is not in {optional_basis}')
+        raise ValueError(f'{basis} is not in {opt_basis}')
     if with_phase:
         circ += GlobalPhase(name_phase).on(obj)
         pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
@@ -168,7 +185,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     circ = Circuit()
     circ_d = Circuit()
     if mat.shape != (4, 4):
-        raise ValueError('Gate is not two qubit')
+        raise ValueError('Gate is not two-qubit')
     if not np.allclose(np.eye(4), mat @ mat.conj().T):
         raise ValueError('Gate is not unitary')
     ur = np.real(M.conj().T @ mat @ M)
@@ -195,7 +212,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             elif basis == 'u3':
                 gate_d, para = one_qubit_decompose(g, 'u3', with_phase)
             else:
-                raise ValueError(f'{basis} is not in {optional_basis}')
+                raise ValueError(f'{basis} is not in {opt_basis}')
             circ_d += gate_d
             pr.update(para)
         else:
@@ -209,7 +226,9 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
     elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
         rho = np.outer(rho, rho.conj())
-    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
+    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+        raise ValueError(f'Wrong state shape {rho.shape}')
+    if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
@@ -217,7 +236,7 @@ def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:
     n = d // 2
     nq = int(np.log2(n))
     if ind < 0 or ind > nq:
-        raise ValueError(f'Index should be 0 to {nq}')
+        raise ValueError(f'Index {ind} should be 0 to {nq}')
     pt = np.zeros([n, n], dtype=np.complex128)
     for i in range(n):
         i_ = bin(i)[2::].zfill(nq)
@@ -237,7 +256,9 @@ def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
     elif rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
         rho = np.outer(rho, rho.conj())
-    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
+    if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
+        raise ValueError(f'Wrong state shape {rho.shape}')
+    if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
     d = rho.shape[0]
     if not is_power_of_two(d):
@@ -250,10 +271,18 @@ def reduced_density_matrix(rho: np.ndarray, position: List[int]) -> np.ndarray:
 
 
 def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
-    if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
-        rho = rho.flatten()
-    if sigma.ndim == 2 and (sigma.shape[0] == 1 or sigma.shape[1] == 1):
-        sigma = sigma.flatten()
+    state = {'rho': rho, 'sigma': sigma}
+    for i, mat in state.items():
+        if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
+            mat = mat.flatten()
+            state[i] = mat
+        if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
+            raise ValueError(f'Wrong {i} shape {mat.shape}')
+        if mat.ndim != 1 and mat.ndim != 2:
+            raise ValueError(f'Wrong {i} shape {mat.shape}')
+    rho, sigma = state.values()
+    if rho.shape != sigma.shape:
+        raise ValueError(f'State shape not match: rho {rho.shape}, sigma {sigma.shape}')
     if rho.ndim == 1 and sigma.ndim == 1:
         f = np.abs(rho.conj() @ sigma)
     elif rho.ndim == 1 and sigma.ndim == 2:
@@ -262,8 +291,6 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         f = np.sqrt(np.real(sigma.conj().T @ rho @ sigma))
     elif rho.ndim == 2 and sigma.ndim == 2:
         f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
-    else:
-        raise ValueError('Wrong Input!')
     return f if sqrt else f**2
 
 
@@ -277,54 +304,53 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
     if m == 1:
         d = qudit.shape[0]
         n = 2**(d - 1)
-        nq_bin = {}
+        ind = {}
         for i in range(n):
             num1 = bin(i).count('1')
-            if num1 in nq_bin:
-                nq_bin[num1].append(i)
+            if num1 in ind:
+                ind[num1].append(i)
             else:
-                nq_bin[num1] = [i]
+                ind[num1] = [i]
     elif round(qudit.shape[0]**(1 / m), 15) % 1 == 0:
         d = int(round(qudit.shape[0]**(1 / m), 15))
         n = 2**((d - 1) * m)
-        nq_bin, temp1 = {}, {}
+        ind, ind_ = {}, {}
         for i in range(2**(d - 1)):
             num1 = bin(i).count('1')
-            bin_i = bin(i)[2::].zfill(d - 1)
-            if num1 in temp1:
-                temp1[num1].append(bin_i)
+            i_ = bin(i)[2::].zfill(d - 1)
+            if num1 in ind_:
+                ind_[num1].append(i_)
             else:
-                temp1[num1] = [bin_i]
+                ind_[num1] = [i_]
         for i in range(d**m):
             multi = ['']
-            base_d = np.base_repr(i, d).zfill(m)
+            base = np.base_repr(i, d).zfill(m)
             for j in range(m):
-                temp2 = temp1[int(base_d[j])]
-                multi = [x + y for x in multi for y in temp2]
-            nq_bin[i] = [int(x, 2) for x in multi]
+                multi = [x + y for x in multi for y in ind_[int(base[j])]]
+            ind[i] = [int(x, 2) for x in multi]
     else:
         raise ValueError(f'Wrong qudit shape {qudit.shape} or num {m}')
     if qudit.ndim == 1:
         qubit = csr_matrix((1, n), dtype=np.complex128)
         for i in range(d**m):
-            ind_i = nq_bin[i]
+            ind_i = ind[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
-            ind = (np.zeros(num_i), ind_i)
-            qubit += csr_matrix((data, ind), shape=(1, n))
+            i_ = (np.zeros(num_i), ind_i)
+            qubit += csr_matrix((data, i_), shape=(1, n))
         qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
         qubit = csr_matrix((n, n), dtype=np.complex128)
         for i in range(d**m):
-            ind_i = nq_bin[i]
+            ind_i = ind[i]
             num_i = len(ind_i)
             for j in range(d**m):
-                ind_j = nq_bin[j]
+                ind_j = ind[j]
                 num_j = len(ind_j)
-                ii = ind_i * num_j
-                jj = np.repeat(ind_j, num_i)
+                i_ = ind_i * num_j
+                j_ = np.repeat(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
-                qubit += csr_matrix((data, (ii, jj)), shape=(n, n))
+                qubit += csr_matrix((data, (i_, j_)), shape=(n, n))
         qubit = qubit.toarray()
     return qubit

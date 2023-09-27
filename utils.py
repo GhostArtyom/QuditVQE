@@ -1,5 +1,4 @@
 import numpy as np
-from math import log
 from typing import List
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
@@ -13,7 +12,7 @@ M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / n
 
 
 def is_power_of_two(num: int) -> bool:
-    num = int(num)
+    num = round(num)
     return (num & (num - 1) == 0) and num != 0
 
 
@@ -273,7 +272,7 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
         raise ValueError(f'Wrong qudit shape {qudit.shape}')
-    if qudit.ndim != 1 and qudit != 2:
+    if qudit.ndim != 1 and qudit.ndim != 2:
         raise ValueError(f'Wrong qudit shape {qudit.shape}')
     if m == 1:
         d = qudit.shape[0]
@@ -285,8 +284,8 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
                 nq_bin[num1].append(i)
             else:
                 nq_bin[num1] = [i]
-    elif qudit.shape[0]**(1 / m) % 1 == 0:
-        d = int(qudit.shape[0]**(1 / m))
+    elif round(qudit.shape[0]**(1 / m), 15) % 1 == 0:
+        d = int(round(qudit.shape[0]**(1 / m), 15))
         n = 2**((d - 1) * m)
         nq_bin, temp1 = {}, {}
         for i in range(2**(d - 1)):

@@ -79,7 +79,7 @@ def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
     return is_sym
 
 
-def decompose_zyz(mat: np.array):
+def decompose_zyz(mat: np.ndarray):
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
     cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
@@ -91,7 +91,7 @@ def decompose_zyz(mat: np.array):
     return phase, theta, phi, lam
 
 
-def decompose_u3(mat: np.array):
+def decompose_u3(mat: np.ndarray):
     phase, theta, phi, lam = decompose_zyz(mat)
     phase += (phi + lam) / 2
     return phase, theta, phi, lam

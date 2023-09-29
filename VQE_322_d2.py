@@ -30,9 +30,8 @@ def fun(p0, sim_grad, args=None):
     return f, g
 
 
-g = h5py.File('./mat/322_d2_num1_model957_site3_gates_L39_N9_zhu(2).mat', 'r')
-# position = g['position'][:] - 1  # subtract index of matlab to python
-position = [3, 4, 5]
+g = h5py.File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9_variational.mat', 'r')
+position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 file keys
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
@@ -54,16 +53,10 @@ for i in range(len(g_name)):
     for j in range(k):
         name = 'G' + str(j + 1) + '_L' + str(i + 1)
         mat = gates[i][j]
-        if j == k - 1:
-            gate_u = UnivMathGate(name, mat).on(k - j - 1)
-            gate_d, para = one_qubit_decompose(gate_u)
-            pr.update(para)
-            ansatz += gate_d
-        else:
-            gate_u = UnivMathGate(name, mat).on([k - j - 2, k - j - 1])
-            gate_d, para = two_qubit_decompose(gate_u)
-            pr.update(para)
-            ansatz += gate_d
+        gate_u = UnivMathGate(name, mat).on([k - j - 1, k - j])
+        gate_d, para = two_qubit_decompose(gate_u)
+        pr.update(para)
+        ansatz += gate_d
 
 ansatz = ansatz.as_ansatz()
 nq = ansatz.n_qubits

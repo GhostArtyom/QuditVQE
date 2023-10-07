@@ -281,7 +281,7 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         if mat.ndim != 1 and mat.ndim != 2:
             raise ValueError(f'Wrong {i} shape {mat.shape}')
     rho, sigma = state.values()
-    if rho.shape != sigma.shape:
+    if rho.shape[0] != sigma.shape[0]:
         raise ValueError(f'State shape not match: rho {rho.shape}, sigma {sigma.shape}')
     if rho.ndim == 1 and sigma.ndim == 1:
         f = np.abs(rho.conj() @ sigma)

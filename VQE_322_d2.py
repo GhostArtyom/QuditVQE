@@ -48,6 +48,7 @@ rdm.insert(0, [])
 r.close()
 
 pr = {}
+circ = Circuit()
 ansatz = Circuit()
 for i in range(len(g_name)):
     for j in range(k):
@@ -56,13 +57,17 @@ for i in range(len(g_name)):
         gate_u = UnivMathGate(name, mat).on([k - j - 1, k - j])
         gate_d, para = two_qubit_decompose(gate_u)
         pr.update(para)
+        circ += gate_u
         ansatz += gate_d
 
 ansatz = ansatz.as_ansatz()
 nq = ansatz.n_qubits
 p_name = ansatz.ansatz_params_name
+pr = {i: pr[i] for i in p_name}
 p_num = len(p_name)
+g_num = sum(1 for _ in ansatz)
 print('Number of params: %d' % p_num)
+print('Number of gates: %d' % g_num)
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -74,8 +79,7 @@ else:
     method = 'TNC'
     print(f'Simulator: mqvector: Method: {method}')
 
-pr = {i: pr[i] for i in p_name}
-sim.apply_circuit(ansatz.apply_value(pr))
+sim.apply_circuit(circ)
 psi = sim.get_qs()
 rho = np.outer(psi, psi.conj())
 rho_rdm = reduced_density_matrix(rho, position)
@@ -84,7 +88,10 @@ print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 ham = rho
 # ham = np.kron(np.kron(rdm[3], rdm[3]), rdm[3])
+ham_rdm = reduced_density_matrix(ham, position)
 print('Hamiltonian Dimension:', ham.shape)
+print('ham norm: %.20f' % norm(rdm[3] - ham_rdm, 2))
+print('ham fidelity: %.20f' % fidelity(rdm[3], ham_rdm))
 Ham = Hamiltonian(csr_matrix(ham))
 
 sim.reset()

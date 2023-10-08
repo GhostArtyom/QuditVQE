@@ -1,8 +1,8 @@
 import re
-import h5py
 import time
 import numpy as np
 from utils import *
+from h5py import File
 from numpy.linalg import norm
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
@@ -30,7 +30,7 @@ def fun(p0, sim_grad, args=None):
     return f, g
 
 
-g = h5py.File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9_variational.mat', 'r')
+g = File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9_variational.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 file keys
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
@@ -41,7 +41,7 @@ k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
 
-r = h5py.File('./mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
+r = File('./mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
 l = list(r.keys())
 rdm = [r[i][:].view('complex').T for i in l]
 rdm.insert(0, [])

@@ -1,11 +1,11 @@
 import re
 import os
 import sys
-import h5py
 import time
 import numpy as np
 import scipy as sp
 from utils import *
+from h5py import File
 import mindspore as ms
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize

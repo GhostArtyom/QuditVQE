@@ -31,8 +31,9 @@ def fun(p0, sim_grad, args=None):
 
 
 g = File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9_variational.mat', 'r')
+d = g['d'][0]  # dimension of qudit state
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
-l = list(g.keys())  # list of HDF5 file keys
+l = list(g.keys())  # list of HDF5 gates file keys
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -42,7 +43,7 @@ gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
 
 r = File('./mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
-l = list(r.keys())
+l = list(r.keys())  # list of HDF5 rdm file keys
 rdm = [r[i][:].view('complex').T for i in l]
 rdm.insert(0, [])
 r.close()
@@ -60,25 +61,16 @@ for i in range(len(g_name)):
         circ += gate_u
         ansatz += gate_d
 
-ansatz = ansatz.as_ansatz()
 nq = ansatz.n_qubits
 p_name = ansatz.ansatz_params_name
 pr = {i: pr[i] for i in p_name}
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
+print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
 
-sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq > 10:
-    sim = Simulator('mqvector_gpu', nq)
-    method = 'BFGS'
-    print(f'Simulator: mqvector_gpu, Method: {method}')
-else:
-    sim = Simulator('mqvector', nq)
-    method = 'TNC'
-    print(f'Simulator: mqvector: Method: {method}')
-
+sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
 rho = np.outer(psi, psi.conj())
@@ -94,7 +86,15 @@ print('ham norm: %.20f' % norm(rdm[3] - ham_rdm, 2))
 print('ham fidelity: %.20f' % fidelity(rdm[3], ham_rdm))
 Ham = Hamiltonian(csr_matrix(ham))
 
-sim.reset()
+sim_list = set([i[0] for i in get_supported_simulator()])
+if 'mqvector_gpu' in sim_list and nq > 10:
+    sim = Simulator('mqvector_gpu', nq)
+    method = 'BFGS'
+    print(f'Simulator: mqvector_gpu, Method: {method}')
+else:
+    sim = Simulator('mqvector', nq)
+    method = 'TNC'
+    print(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 # p0 = np.array(list(pr.values()))
 p0 = np.random.uniform(-1, 1, p_num)

@@ -53,7 +53,7 @@ circ = Circuit()
 ansatz = Circuit()
 for i in range(len(g_name)):
     for j in range(k):
-        name = 'G' + str(j + 1) + '_L' + str(i + 1)
+        name = f'G{j + 1}_L{i + 1}'
         mat = gates[i][j]
         gate_u = UnivMathGate(name, mat).on([k - j - 1, k - j])
         gate_d, para = two_qubit_decompose(gate_u)

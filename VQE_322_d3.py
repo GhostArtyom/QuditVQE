@@ -59,7 +59,7 @@ nq = (k + 1) * (d - 1)
 c = np.eye(2**(2 * (d - 1))) - su2_encoding(np.eye(d**2), 2)
 for i in range(len(g_name)):
     for j in range(k):
-        name = 'G' + str(j + 1) + '_L' + str(i + 1)
+        name = f'G{j + 1}_L{i + 1}'
         mat = su2_encoding(gates[i][j], 2) + c
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)

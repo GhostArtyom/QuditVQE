@@ -24,61 +24,6 @@ def is_unitary(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
-def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
-    if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
-        mat = mat.flatten()
-    if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
-        raise ValueError(f'Wrong matrix shape {mat.shape}')
-    if mat.ndim != 1 and mat.ndim != 2:
-        raise ValueError(f'Wrong matrix shape {mat.shape}')
-    is_sym = True
-    n = mat.shape[0]
-    if not is_power_of_two(n):
-        raise ValueError(f'{n} is not a power of 2')
-    nq = int(np.log2(n))
-    d = nq // m + 1
-    if m == 1:
-        ind = {}
-        for i in range(n):
-            num1 = bin(i).count('1')
-            if num1 in ind:
-                ind[num1].append(i)
-            else:
-                ind[num1] = [i]
-    elif nq % m == 0:
-        ind, ind_ = {}, {}
-        for i in range(2**(d - 1)):
-            num1 = bin(i).count('1')
-            i_ = bin(i)[2::].zfill(d - 1)
-            if num1 in ind_:
-                ind_[num1].append(i_)
-            else:
-                ind_[num1] = [i_]
-        for i in range(d**m):
-            multi = ['']
-            base = np.base_repr(i, d).zfill(m)
-            for j in range(m):
-                multi = [x + y for x in multi for y in ind_[int(base[j])]]
-            ind[i] = [int(x, 2) for x in multi]
-    else:
-        raise ValueError(f'Wrong matrix shape {mat.shape} or num {m}')
-    if mat.ndim == 1:
-        for i in range(nq):
-            i_ = ind[i]
-            if len(i_) != 1:
-                a = mat[i_]
-                is_sym = is_sym & np.allclose(a, a[0])
-    elif mat.ndim == 2:
-        for i in range(nq):
-            i_ = ind[i]
-            for j in range(nq):
-                j_ = ind[j]
-                if len(i_) != 1 or len(j_) != 1:
-                    a = mat[np.ix_(i_, j_)]
-                    is_sym = is_sym & np.allclose(a, a[0][0])
-    return is_sym
-
-
 def decompose_zyz(mat: np.ndarray):
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
@@ -300,26 +245,16 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
     return f if sqrt else f**2
 
 
-def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
-    if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
-        qudit = qudit.flatten()
-    if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
-        raise ValueError(f'Wrong qudit shape {qudit.shape}')
-    if qudit.ndim != 1 and qudit.ndim != 2:
-        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+def sym_ind(d: int, m: int) -> dict:
     if m == 1:
-        d = qudit.shape[0]
-        n = 2**(d - 1)
         ind = {}
-        for i in range(n):
+        for i in range(2**(d - 1)):
             num1 = bin(i).count('1')
             if num1 in ind:
                 ind[num1].append(i)
             else:
                 ind[num1] = [i]
-    elif round(qudit.shape[0]**(1 / m), 15) % 1 == 0:
-        d = int(round(qudit.shape[0]**(1 / m), 15))
-        n = 2**((d - 1) * m)
+    else:
         ind, ind_ = {}, {}
         for i in range(2**(d - 1)):
             num1 = bin(i).count('1')
@@ -334,6 +269,92 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
             for j in range(m):
                 multi = [x + y for x in multi for y in ind_[int(base[j])]]
             ind[i] = [int(x, 2) for x in multi]
+    return ind
+
+
+def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
+    if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
+        mat = mat.flatten()
+    if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
+    if mat.ndim != 1 and mat.ndim != 2:
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
+    is_sym = True
+    n = mat.shape[0]
+    if not is_power_of_two(n):
+        raise ValueError(f'{n} is not a power of 2')
+    nq = int(np.log2(n))
+    d = nq // m + 1
+    if nq % m == 0:
+        ind = sym_ind(d, m)
+    else:
+        raise ValueError(f'Wrong matrix shape {mat.shape} or num {m}')
+    if mat.ndim == 1:
+        for i in range(d**m):
+            i_ = ind[i]
+            if len(i_) != 1:
+                a = mat[i_]
+                is_sym = is_sym & np.allclose(a, a[0])
+    elif mat.ndim == 2:
+        for i in range(d**m):
+            i_ = ind[i]
+            for j in range(d**m):
+                j_ = ind[j]
+                if len(i_) != 1 or len(j_) != 1:
+                    a = mat[np.ix_(i_, j_)]
+                    is_sym = is_sym & np.allclose(a, a[0][0])
+    return is_sym
+
+
+def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
+    if qubit.ndim == 2 and (qubit.shape[0] == 1 or qubit.shape[1] == 1):
+        qubit = qubit.flatten()
+    if qubit.ndim == 2 and qubit.shape[0] != qubit.shape[1]:
+        raise ValueError(f'Wrong qubit shape {qubit.shape}')
+    if qubit.ndim != 1 and qubit.ndim != 2:
+        raise ValueError(f'Wrong qubit shape {qubit.shape}')
+    is_sym = True
+    n = qubit.shape[0]
+    if not is_power_of_two(n):
+        raise ValueError(f'{n} is not a power of 2')
+    nq = int(np.log2(n))
+    d = nq // m + 1
+    ind = sym_ind(d, m)
+    if qubit.ndim == 1:
+        qudit = np.zeros(d**m, dtype=np.complex128)
+        for i in range(d**m):
+            i_ = ind[i]
+            qubit_i = qubit[i_]
+            if np.allclose(qubit_i, qubit_i[0]):
+                qudit[i] = qubit_i[0] * np.sqrt(len(i_))
+            else:
+                raise ValueError('Qubit is not symmetric')
+    elif qubit.ndim == 2:
+        qudit = np.zeros([d**m, d**m], dtype=np.complex128)
+        for i in range(d**m):
+            i_ = ind[i]
+            for j in range(d**m):
+                j_ = ind[j]
+                qubit_ij = qubit[np.ix_(i_, j_)]
+            if np.allclose(qubit_ij, qubit_ij[0][0]):
+                div = np.sqrt(len(i_)) * np.sqrt(len(j_))
+                qudit[i, j] = qubit_ij[0][0] * div
+            else:
+                raise ValueError('Qubit is not symmetric')
+    return qudit
+
+
+def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
+    if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
+        qudit = qudit.flatten()
+    if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
+        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+    if qudit.ndim != 1 and qudit.ndim != 2:
+        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+    if round(qudit.shape[0]**(1 / m), 15) % 1 == 0:
+        d = int(round(qudit.shape[0]**(1 / m), 15))
+        n = 2**((d - 1) * m)
+        ind = sym_ind(d, m)
     else:
         raise ValueError(f'Wrong qudit shape {qudit.shape} or num {m}')
     if qudit.ndim == 1:

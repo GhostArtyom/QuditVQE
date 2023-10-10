@@ -97,18 +97,18 @@ def decompose_u3(mat: np.ndarray):
     return phase, theta, phi, lam
 
 
-def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
+def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True) -> Circuit:
     name_phase = gate.name + '_phase'
     name_theta = gate.name + '_theta'
     name_phi = gate.name + '_phi'
     name_lam = gate.name + '_lam'
-    obj = gate.obj_qubits
     mat = gate.matrix()
-    circ = Circuit()
     if mat.shape != (2, 2):
         raise ValueError('Gate is not one-qubit')
     if not np.allclose(np.eye(2), mat @ mat.conj().T):
         raise ValueError('Gate is not unitary')
+    circ = Circuit()
+    obj = gate.obj_qubits
     if basis == 'zyz':
         phase, theta, phi, lam = decompose_zyz(mat)
         circ += RZ(name_lam).on(obj)
@@ -124,7 +124,10 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
         pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
     else:
         pr = {name_phi: phi, name_theta: theta, name_lam: lam}
-    return circ, pr
+    if with_params:
+        return circ, pr
+    else:
+        return circ.apply_value(pr)
 
 
 def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
@@ -175,15 +178,12 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     return f1, f2
 
 
-def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True) -> Circuit:
+def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True) -> Circuit:
     name_rxx = gate.name + '_Rxx'
     name_ryy = gate.name + '_Ryy'
     name_rzz = gate.name + '_Rzz'
     name_phase = gate.name + '_phase'
-    obj0, obj1 = gate.obj_qubits
     mat = gate.matrix()
-    circ = Circuit()
-    circ_d = Circuit()
     if mat.shape != (4, 4):
         raise ValueError('Gate is not two-qubit')
     if not np.allclose(np.eye(4), mat @ mat.conj().T):
@@ -195,6 +195,9 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     B1, B0 = kron_factor_4x4_to_2x2s(M @ QR.T @ M.conj().T)
     k = (A.T / 4) @ np.angle(np.diag(D))
     pr = {name_rxx: -2 * k[1], name_ryy: -2 * k[2], name_rzz: -2 * k[3], name_phase: k[0] / -2}
+    circ = Circuit()
+    circ_d = Circuit()
+    obj0, obj1 = gate.obj_qubits
     circ += UnivMathGate(gate.name + '_B0', B0).on(obj0)
     circ += UnivMathGate(gate.name + '_B1', B1).on(obj1)
     circ += Rxx(name_rxx).on([obj0, obj1])
@@ -217,7 +220,10 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             pr.update(para)
         else:
             circ_d += g
-    return circ_d, pr
+    if with_params:
+        return circ_d, pr
+    else:
+        return circ_d.apply_value(pr)
 
 
 def partial_trace(rho: np.ndarray, ind: int) -> np.ndarray:

@@ -31,9 +31,9 @@ def fun(p0, sim_grad, args=None):
 
 
 g = File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9_variational.mat', 'r')
-d = g['d'][0]  # dimension of qudit state
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
+d = int(g['d'][0])  # dimension of qudit state
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -73,18 +73,14 @@ print('Number of gates: %d' % g_num)
 sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
-rho = np.outer(psi, psi.conj())
-rho_rdm = reduced_density_matrix(rho, position)
+
+ham = np.outer(psi, psi.conj())
+print('Hamiltonian Dimension:', ham.shape)
+Ham = Hamiltonian(csr_matrix(ham))
+
+rho_rdm = reduced_density_matrix(psi, d, position)
 print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
 print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
-
-ham = rho
-# ham = np.kron(np.kron(rdm[3], rdm[3]), rdm[3])
-ham_rdm = reduced_density_matrix(ham, position)
-print('Hamiltonian Dimension:', ham.shape)
-print('ham norm: %.20f' % norm(rdm[3] - ham_rdm, 2))
-print('ham fidelity: %.20f' % fidelity(rdm[3], ham_rdm))
-Ham = Hamiltonian(csr_matrix(ham))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -108,8 +104,7 @@ sim.reset()
 res_pr = dict(zip(p_name, res.x))
 sim.apply_circuit(ansatz.apply_value(res_pr))
 psi_res = sim.get_qs()
-rho_res = np.outer(psi_res, psi_res.conj())
-rho_res_rdm = reduced_density_matrix(rho_res, position)
+rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))

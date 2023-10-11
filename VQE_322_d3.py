@@ -33,11 +33,9 @@ def fun(p0, sim_grad, args=None):
 
 
 g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7_variational.mat', 'r')
-d = g['d'][0]  # dimension of qudit state
-p = g['RDM_site'][:] - 1  # subtract index of matlab to python
-p *= (d - 1)  # multiply number of qubits for one qudit
-position = np.arange(p[0], p[-1] + d - 1)  # qubit circuit
+position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
+d = int(g['d'][0])  # dimension of qudit state
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -68,7 +66,7 @@ for i in range(len(g_name)):
         circ += gate_u
         # ansatz += gate_d
 
-ansatz = HardwareEfficientAnsatz(nq, [RX, RY, RZ], X, depth=10).circuit
+# ansatz =
 p_name = ansatz.ansatz_params_name
 # pr = {i: pr[i] for i in p_name}
 p_num = len(p_name)
@@ -80,18 +78,15 @@ print('Number of gates: %d' % g_num)
 sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
-rho = np.outer(psi, psi.conj())
-rdm3 = su2_encoding(rdm[3], 3)
-# rho_rdm = reduced_density_matrix(rho, position)
-# print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
-# print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
-ham = rho
-# ham_rdm = reduced_density_matrix(ham, position)
+ham = np.outer(psi, psi.conj())
 print('Hamiltonian Dimension:', ham.shape)
-# print('ham norm: %.20f' % norm(rdm3 - ham_rdm, 2))
-# print('ham fidelity: %.20f' % fidelity(rdm3, ham_rdm))
 Ham = Hamiltonian(csr_matrix(ham))
+
+psi = su2_decoding(psi, k + 1)
+rho_rdm = reduced_density_matrix(psi, d, position)
+print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -115,13 +110,13 @@ sim.reset()
 res_pr = dict(zip(p_name, res.x))
 sim.apply_circuit(ansatz.apply_value(res_pr))
 psi_res = sim.get_qs()
-rho_res = np.outer(psi_res, psi_res.conj())
-rho_res_rdm = reduced_density_matrix(rho_res, position)
+psi_res = su2_decoding(psi_res, k + 1)
+rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
+print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

@@ -26,6 +26,7 @@ Qudit variational quantum eigensolver
   - [ ] one-qudit unitary -> symmetric $(d-1)$-qubit unitary
   - [ ] two-qudit unitary -> symmetric $(d-1)^2$-qubit unitary
 - [x] Feature `sym_ind()` & `su2_decoding()` 
+- [ ] Feature `partial_trace()` for qudit
 - [ ] Feature `partial_trace()` for `psi` 
 - [ ] Loss function with gradient
     - [x] Now: using `ham=rho` instead of `rdm[3]` 
@@ -40,6 +41,19 @@ Qudit variational quantum eigensolver
 ## Read
 
 - [ ] Unitary 2-design / t-design
+
+Universal Qudit Gates
+
+- [ ] Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation
+- [ ] Brennen, O’Leary & Bullock - Criteria for exact qudit universality
+- [ ] Bullock, O’Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems
+- [ ] Brennen, Bullock & O’Leary - Efficient Circuits for Exact-Universal Computation With Qudits
+- [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition
+- [ ] Sawicki & Karnas - Universality of Single-Qudit Gates
+- [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates
+- [ ] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space
+- [ ] Luo & Wang - Universal quantum computation with qudits
+- [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing
 
 Martin Aulbach - Classification of Entanglement in Symmetric States
 
@@ -61,7 +75,6 @@ Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum 
 
 ## Extra Work
 
-基于SciPy的qutrit模拟模块
-- [ ] qutrit模拟
-- [ ] 通用量子门
-- [ ] 通用量子电路
+- [ ] Qutrit Simulator
+- [ ] Qudit Simulator
+- [ ] Universal Gates

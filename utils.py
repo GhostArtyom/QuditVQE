@@ -75,7 +75,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
         pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
     else:
         pr = {name_phi: phi, name_theta: theta, name_lam: lam}
-    return circ, pr if with_params else circ.apply_value(pr)
+    return (circ, pr) if with_params else circ.apply_value(pr)
 
 
 def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
@@ -168,7 +168,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             pr.update(para)
         else:
             circ_d += g
-    return circ_d, pr if with_params else circ_d.apply_value(pr)
+    return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
 def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
@@ -202,6 +202,7 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
             for k in range(d):
                 pt[i, j] += rho[ii[k], jj[k]]
     return pt
+
 
 def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.ndarray:
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):

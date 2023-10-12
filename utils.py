@@ -69,7 +69,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
         circ += U3(name_theta, name_phi, name_lam).on(obj)
         phase, theta, phi, lam = decompose_u3(mat)
     else:
-        raise ValueError(f'{basis} is not in {opt_basis}')
+        raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
     if with_phase:
         circ += GlobalPhase(name_phase).on(obj)
         pr = {name_phase: phase, name_phi: phi, name_theta: theta, name_lam: lam}
@@ -163,7 +163,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
             elif basis == 'u3':
                 gate_d, para = one_qubit_decompose(g, 'u3', with_phase)
             else:
-                raise ValueError(f'{basis} is not in {opt_basis}')
+                raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
             circ_d += gate_d
             pr.update(para)
         else:
@@ -183,24 +183,37 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
     if not isinstance(ind, int):
         raise ValueError(f'Wrong index type {ind} {type(ind)}')
     n = rho.shape[0] // d
-    if n == 1:
+    if n == 1 and rho.ndim == 1:
+        return rho.conj() @ rho
+    elif n == 1 and rho.ndim == 2:
         return np.trace(rho)
     nq = round(log(n, d), 12)
     if nq % 1 == 0:
         nq = int(nq)
     else:
-        raise ValueError(f'{n} is not a power of {d}')
+        raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
     if ind < 0 or ind > nq:
-        raise ValueError(f'Index {ind} should be 0 to {nq}')
+        raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
     pt = np.zeros([n, n], dtype=np.complex128)
-    for i in range(n):
-        i_ = np.base_repr(i, d).zfill(nq)
-        ii = [int(i_[:ind] + str(k) + i_[ind:], d) for k in range(d)]
-        for j in range(n):
-            j_ = np.base_repr(j, d).zfill(nq)
-            jj = [int(j_[:ind] + str(k) + j_[ind:], d) for k in range(d)]
-            for k in range(d):
-                pt[i, j] += rho[ii[k], jj[k]]
+    if rho.ndim == 1:
+        for i in range(n):
+            ii = np.base_repr(i, d).zfill(nq)
+            i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
+            for j in range(i, n):
+                jj = np.base_repr(j, d).zfill(nq)
+                j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
+                for k in range(d):
+                    pt[i, j] += rho[i_[k]] * rho[j_[k]].conj()
+        pt += np.triu(pt, k=1).conj().T
+    elif rho.ndim == 2:
+        for i in range(n):
+            ii = np.base_repr(i, d).zfill(nq)
+            i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
+            for j in range(n):
+                jj = np.base_repr(j, d).zfill(nq)
+                j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
+                for k in range(d):
+                    pt[i, j] += rho[i_[k], j_[k]]
     return pt
 
 
@@ -220,7 +233,7 @@ def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.n
     if nq % 1 == 0:
         nq = int(nq)
     else:
-        raise ValueError(f'{n} is not a power of {d}')
+        raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
     p = [x for x in range(nq) if x not in position]
     for ind in p[::-1]:
         rho = partial_trace(rho, d, ind)
@@ -239,13 +252,13 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
             raise ValueError(f'Wrong {i} shape {mat.shape}')
     rho, sigma = state.values()
     if rho.shape[0] != sigma.shape[0]:
-        raise ValueError(f'State shape not match: rho {rho.shape}, sigma {sigma.shape}')
+        raise ValueError(f'Mismatch state shape: rho {rho.shape}, sigma {sigma.shape}')
     if rho.ndim == 1 and sigma.ndim == 1:
         f = np.abs(rho.conj() @ sigma)
     elif rho.ndim == 1 and sigma.ndim == 2:
-        f = np.sqrt(np.real(rho.conj().T @ sigma @ rho))
+        f = np.sqrt(np.real(rho.conj() @ sigma @ rho))
     elif rho.ndim == 2 and sigma.ndim == 1:
-        f = np.sqrt(np.real(sigma.conj().T @ rho @ sigma))
+        f = np.sqrt(np.real(sigma.conj() @ rho @ sigma))
     elif rho.ndim == 2 and sigma.ndim == 2:
         f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
     return f if sqrt else f**2
@@ -292,7 +305,7 @@ def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
     is_sym = True
     n = mat.shape[0]
     if not is_power_of_two(n):
-        raise ValueError(f'{n} is not a power of 2')
+        raise ValueError(f'Wrong matrix size {n} is not a power of 2')
     nq = int(np.log2(n))
     d = nq // m + 1
     if nq % m == 0:
@@ -325,7 +338,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
         raise ValueError(f'Wrong qubit shape {qubit.shape}')
     n = qubit.shape[0]
     if not is_power_of_two(n):
-        raise ValueError(f'{n} is not a power of 2')
+        raise ValueError(f'Wrong matrix size {n} is not a power of 2')
     nq = int(np.log2(n))
     d = nq // m + 1
     if nq % m == 0:
@@ -387,8 +400,8 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
             for j in range(d**m):
                 ind_j = ind[j]
                 num_j = len(ind_j)
-                i_ = ind_i * num_j
-                j_ = np.repeat(ind_j, num_i)
+                i_ = np.repeat(ind_i, num_j)
+                j_ = np.tile(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
                 qubit += csr_matrix((data, (i_, j_)), shape=(n, n))

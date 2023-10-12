@@ -27,7 +27,7 @@ Qudit variational quantum eigensolver
   - [ ] two-qudit unitary -> symmetric $(d-1)^2$-qubit unitary
 - [x] Feature `sym_ind()` & `su2_decoding()` 
 - [x] Feature `partial_trace()` for qudit
-- [ ] Feature `partial_trace()` for `psi` 
+- [x] Feature `partial_trace()` for `psi` 
 - [ ] Loss function with gradient
     - [x] Now: using `ham=rho` instead of `rdm[3]` 
     - [ ] Only using `rdm[3]` for Hamiltonian

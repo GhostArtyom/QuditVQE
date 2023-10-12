@@ -6,11 +6,10 @@ from h5py import File
 from numpy.linalg import norm
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
-from mindquantum.simulator import Simulator
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
-from mindquantum.simulator import get_supported_simulator
+from mindquantum.simulator import Simulator, get_supported_simulator
 
 start = time.perf_counter()
 np.set_printoptions(linewidth=200)

@@ -8,6 +8,9 @@ from utils import *
 from math import log
 from h5py import File
 import mindspore as ms
+from numpy.linalg import *
+from scipy.linalg import *
+from mindquantum.simulator import *
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
 from mindquantum.framework import *
@@ -17,10 +20,7 @@ from mindquantum.core.circuit import *
 from mindquantum.core.operators import *
 from mindquantum.algorithm.nisq import *
 from mindspore.common.initializer import *
-from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
-from numpy.linalg import det, svd, eigh, norm
-from scipy.linalg import expm, sqrtm, block_diag
 
 np.set_printoptions(linewidth=200)
 

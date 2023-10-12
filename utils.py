@@ -30,6 +30,13 @@ def is_unitary(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
+def is_hermitian(mat: np.ndarray) -> bool:
+    if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
+        return np.allclose(mat, mat.conj().T)
+    else:
+        raise ValueError(f'Wrong matrix shape {mat.shape}')
+
+
 def decompose_zyz(mat: np.ndarray):
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
@@ -84,7 +91,7 @@ def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
     u_a_h = u_a.conj().T
     v_a = v_a_h.conj().T
     if np.count_nonzero(d_a) != d:
-        raise ValueError('Not implemented yet for the situation that mat1 is not full-rank')
+        raise ValueError('Mat1 is not full-rank')
     # g commutes with d
     g = u_a_h @ mat2 @ v_a
     # because g is hermitian, eigen-decomposition is its spectral decomposition
@@ -196,6 +203,7 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
     pt = np.zeros([n, n], dtype=np.complex128)
     if rho.ndim == 1:
+        rho = np.outer(rho, rho.conj())
         for i in range(n):
             ii = np.base_repr(i, d).zfill(nq)
             i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
@@ -203,17 +211,28 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
                 jj = np.base_repr(j, d).zfill(nq)
                 j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
                 for k in range(d):
-                    pt[i, j] += rho[i_[k]] * rho[j_[k]].conj()
+                    pt[i, j] += rho[i_[k], j_[k]]
         pt += np.triu(pt, k=1).conj().T
     elif rho.ndim == 2:
-        for i in range(n):
-            ii = np.base_repr(i, d).zfill(nq)
-            i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
-            for j in range(n):
-                jj = np.base_repr(j, d).zfill(nq)
-                j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
-                for k in range(d):
-                    pt[i, j] += rho[i_[k], j_[k]]
+        if is_hermitian(rho):
+            for i in range(n):
+                ii = np.base_repr(i, d).zfill(nq)
+                i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
+                for j in range(i, n):
+                    jj = np.base_repr(j, d).zfill(nq)
+                    j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
+                    for k in range(d):
+                        pt[i, j] += rho[i_[k], j_[k]]
+            pt += np.triu(pt, k=1).conj().T
+        else:
+            for i in range(n):
+                ii = np.base_repr(i, d).zfill(nq)
+                i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
+                for j in range(n):
+                    jj = np.base_repr(j, d).zfill(nq)
+                    j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
+                    for k in range(d):
+                        pt[i, j] += rho[i_[k], j_[k]]
     return pt
 
 

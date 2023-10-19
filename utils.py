@@ -327,7 +327,7 @@ def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
         raise ValueError(f'Wrong matrix size {n} is not a power of 2')
     nq = int(np.log2(n))
     d = nq // m + 1
-    if nq % m == 0:
+    if nq % m == 0 and nq != m:
         ind = sym_ind(d, m)
     else:
         raise ValueError(f'Wrong matrix shape {mat.shape} or multi {m}')
@@ -360,7 +360,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
         raise ValueError(f'Wrong matrix size {n} is not a power of 2')
     nq = int(np.log2(n))
     d = nq // m + 1
-    if nq % m == 0:
+    if nq % m == 0 and nq != m:
         ind = sym_ind(d, m)
     else:
         raise ValueError(f'Wrong matrix shape {qubit.shape} or multi {m}')

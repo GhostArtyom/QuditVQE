@@ -380,11 +380,11 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
             for j in range(d**m):
                 j_ = ind[j]
                 qubit_ij = qubit[np.ix_(i_, j_)]
-            if np.allclose(qubit_ij, qubit_ij[0][0]):
-                div = np.sqrt(len(i_)) * np.sqrt(len(j_))
-                qudit[i, j] = qubit_ij[0][0] * div
-            else:
-                raise ValueError('Qubit matrix is not symmetric')
+                if np.allclose(qubit_ij, qubit_ij[0][0]):
+                    div = np.sqrt(len(i_)) * np.sqrt(len(j_))
+                    qudit[i, j] = qubit_ij[0][0] * div
+                else:
+                    raise ValueError('Qubit matrix is not symmetric')
     return qudit
 
 

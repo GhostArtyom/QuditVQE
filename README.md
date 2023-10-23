@@ -66,7 +66,9 @@ Universal Qudit Gates
 
 Martin Aulbach - Classification of Entanglement in Symmetric States
 
+- [x] Chapter 1.3.1: Majorana Representation
 - [ ] Chapter 3: Majorana Representation
+- [ ] Chapter 5: Classification of Symmetric State
 
 Matthew Robinson - Symmetry and the Standard Model꞉ Mathematics and Particle Physics
 
@@ -84,6 +86,10 @@ Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum 
 
 ## Extra Work
 
-- [ ] Qutrit Simulator
+- [ ] Qudit Gates
+  - [x] Rotation gate matrix
+  - [ ] Rotation gate params
+- [ ] Qudit Circuit
+  - [ ] Circuit on obj ⊗
+  - [ ] Circuit on ctrl ⊕
 - [ ] Qudit Simulator
-- [ ] Universal Gates

@@ -10,19 +10,15 @@ qubit_gates = {
 }
 
 
-class QuantumGate:
-    '''Base class for quantum gates'''
+class QuditGate:
+    '''Base class for qudit gates'''
 
     def __init__(self, name, n_qudits):
-        '''Initialize a QuantumGate.'''
+        '''Initialize a QuditGate.'''
         if not isinstance(name, str):
             raise TypeError(f'Excepted string for gate name, get {type(name)}')
         self.name = name
         self.n_qudits = n_qudits
-
-    def __iter__(self):
-        '''Iterate quantum circuit'''
-        yield from super().__iter__()
 
     def on(self, obj_qudits, ctrl_qudits=None):
         '''Define which qudits the gate act on and control qudits'''
@@ -45,10 +41,10 @@ class QuantumGate:
         return self
 
 
-class RotationGate(QuantumGate):
+class RotationGate(QuditGate):
     '''Rotation qudit gate'''
 
-    def __init__(self, name, n_qudits, dim, ind):
+    def __init__(self, name, n_qudits, dim, ind, obj_qudits=None, ctrl_qudits=None):
         '''Initialize an RotationGate'''
         super().__init__(name, n_qudits)
         if len(ind) != 2:
@@ -59,25 +55,58 @@ class RotationGate(QuantumGate):
             raise ValueError(f'{name} ind {ind} should in 0 to {dim-1}')
         self.name = name
         self.n_qudits = n_qudits
+        self.obj_qudits = obj_qudits
+        self.ctrl_qudits = ctrl_qudits
+
+    def __str_special__(self):
+        special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
+        str_pr = self.pr
+        if str_pr == 0 or abs(str_pr) == 1:
+            return str_pr
+        div = -1 if str_pr < 0 else 1
+        str_pr *= -1 if str_pr < 0 else 1
+        for key, val in special.items():
+            if isinstance(str_pr, str):
+                break
+            if np.isclose(str_pr / val % 1, 0):
+                div *= int(str_pr / val)
+                str_pr = key if div == 1 else f'-{key}' if div == -1 else f'{div}{key}'
+            elif np.isclose(val / str_pr % 1, 0):
+                div *= int(val / str_pr)
+                key = 1 if val == 1 else key
+                str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
+        else:
+            str_pr = round(str_pr * div, 4)
+        return str_pr
+
+    def __str__(self):
+        """Return a string representation of the object."""
+        str_obj = ' '.join([str(i) for i in self.obj_qudits])
+        str_ctrl = ' '.join([str(i) for i in self.ctrl_qudits])
+        str_pr = self.__str_special__()
+        if len(str_ctrl):
+            return f'{self.name}({str_pr}|{str_obj} <-: {str_ctrl})'
+        else:
+            return f'{self.name}({str_pr}|{str_obj})'
 
     def matrix(self):
         '''Get matrix of the gate'''
         ind = self.ind
         pauli = qubit_gates[self.name[-1]]
         mat = np.eye(self.dim, dtype=np.complex128)
-        mat[np.ix_(ind, ind)] = expm(-.5j * self.theta * pauli)
+        mat[np.ix_(ind, ind)] = expm(-0.5j * self.pr * pauli)
         return mat
 
 
 class RX(RotationGate):
     '''Rotation qudit gate around x-axis'''
 
-    def __init__(self, dim, theta, ind):
+    def __init__(self, dim, pr, ind):
         '''Initialize an RX gate'''
         super().__init__('RX', 1, dim, ind)
         self.dim = dim
         self.ind = ind
-        self.theta = theta
+        self.pr = pr
 
 
 class Circuit(list):
@@ -96,7 +125,9 @@ class Circuit(list):
         '''Addition operator'''
         if self.dim != gate.dim:
             raise ValueError(f'{gate.name} gate requires dimension of {self.dim}, but gets {gate.dim}')
-        if isinstance(gate, QuantumGate):
+        if not gate.obj_qudits:
+            raise ValueError(f'{gate.name} gate should act on some qudits first')
+        if isinstance(gate, QuditGate):
             self.append(gate)
         else:
             self.extend(gate)
@@ -104,7 +135,11 @@ class Circuit(list):
 
     def __iadd__(self, gate):
         '''In-place addition operator'''
-        if isinstance(gate, QuantumGate):
+        if self.dim != gate.dim:
+            raise ValueError(f'{gate.name} gate requires dimension of {self.dim}, but gets {gate.dim}')
+        if not gate.obj_qudits:
+            raise ValueError(f'{gate.name} gate should act on some qudits first')
+        if isinstance(gate, QuditGate):
             self.append(gate)
         else:
             self.extend(gate)
@@ -112,8 +147,6 @@ class Circuit(list):
 
     def matrix(self):
         '''Get matrix of the circuit'''
-        for g in self:
-            print(g)
 
 
 d = 3
@@ -121,5 +154,5 @@ t = np.pi / 2
 circ = Circuit(d) + RX(d, t, [0, 2]).on(0, 1) + RX(d, t, [0, 1]).on(1)
 circ += RX(d, t, [0, 2]).on(2)
 for i in circ:
-    print(i.matrix())
-circ.matrix()
+    print(i)
+circ

@@ -10,6 +10,27 @@ qubit_gates = {
 }
 
 
+def str_special(str_pr):
+    special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
+    if str_pr == 0 or abs(str_pr) == 1:
+        return str_pr
+    div = -1 if str_pr < 0 else 1
+    str_pr *= -1 if str_pr < 0 else 1
+    for key, val in special.items():
+        if isinstance(str_pr, str):
+            break
+        if np.isclose(str_pr / val % 1, 0):
+            div *= int(str_pr / val)
+            str_pr = key if div == 1 else f'-{key}' if div == -1 else f'{div}{key}'
+        elif np.isclose(val / str_pr % 1, 0):
+            div *= int(val / str_pr)
+            key = 1 if val == 1 else key
+            str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
+    else:
+        str_pr = round(str_pr * div, 4)
+    return str_pr
+
+
 class QuditGate:
     '''Base class for qudit gates'''
 
@@ -44,7 +65,7 @@ class QuditGate:
 class RotationGate(QuditGate):
     '''Rotation qudit gate'''
 
-    def __init__(self, name, n_qudits, dim, ind, obj_qudits=None, ctrl_qudits=None):
+    def __init__(self, name, n_qudits, dim, pr, ind, obj_qudits=None, ctrl_qudits=None):
         '''Initialize an RotationGate'''
         super().__init__(name, n_qudits)
         if len(ind) != 2:
@@ -53,41 +74,24 @@ class RotationGate(QuditGate):
             raise ValueError(f'{name} ind {ind} cannot be repeated')
         if min(ind) < 0 or max(ind) >= dim:
             raise ValueError(f'{name} ind {ind} should in 0 to {dim-1}')
+        self.pr = pr
+        self.dim = dim
+        self.ind = ind
         self.name = name
         self.n_qudits = n_qudits
         self.obj_qudits = obj_qudits
         self.ctrl_qudits = ctrl_qudits
 
-    def __str_special__(self):
-        special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
-        str_pr = self.pr
-        if str_pr == 0 or abs(str_pr) == 1:
-            return str_pr
-        div = -1 if str_pr < 0 else 1
-        str_pr *= -1 if str_pr < 0 else 1
-        for key, val in special.items():
-            if isinstance(str_pr, str):
-                break
-            if np.isclose(str_pr / val % 1, 0):
-                div *= int(str_pr / val)
-                str_pr = key if div == 1 else f'-{key}' if div == -1 else f'{div}{key}'
-            elif np.isclose(val / str_pr % 1, 0):
-                div *= int(val / str_pr)
-                key = 1 if val == 1 else key
-                str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
-        else:
-            str_pr = round(str_pr * div, 4)
-        return str_pr
-
     def __str__(self):
         """Return a string representation of the object."""
         str_obj = ' '.join([str(i) for i in self.obj_qudits])
         str_ctrl = ' '.join([str(i) for i in self.ctrl_qudits])
-        str_pr = self.__str_special__()
+        str_ind = ''.join([str(i) for i in self.ind])
+        str_pr = str_special(self.pr)
         if len(str_ctrl):
-            return f'{self.name}({str_pr}|{str_obj} <-: {str_ctrl})'
+            return f'{self.name}{str_ind}({str_pr}|{str_obj} <-: {str_ctrl})'
         else:
-            return f'{self.name}({str_pr}|{str_obj})'
+            return f'{self.name}{str_ind}({str_pr}|{str_obj})'
 
     def matrix(self):
         '''Get matrix of the gate'''
@@ -103,10 +107,23 @@ class RX(RotationGate):
 
     def __init__(self, dim, pr, ind):
         '''Initialize an RX gate'''
-        super().__init__('RX', 1, dim, ind)
-        self.dim = dim
-        self.ind = ind
-        self.pr = pr
+        super().__init__('RX', 1, dim, pr, ind)
+
+
+class RY(RotationGate):
+    '''Rotation qudit gate around y-axis'''
+
+    def __init__(self, dim, pr, ind):
+        '''Initialize an RY gate'''
+        super().__init__('RY', 1, dim, pr, ind)
+
+
+class RZ(RotationGate):
+    '''Rotation qudit gate around z-axis'''
+
+    def __init__(self, dim, pr, ind):
+        '''Initialize an RZ gate'''
+        super().__init__('RZ', 1, dim, pr, ind)
 
 
 class Circuit(list):
@@ -116,10 +133,6 @@ class Circuit(list):
         '''Initialize a Circuit'''
         list.__init__([])
         self.dim = dim
-
-    def extend(self, gate):
-        '''Extend a circuit'''
-        super().extend(gate)
 
     def __add__(self, gate):
         '''Addition operator'''
@@ -145,14 +158,18 @@ class Circuit(list):
             self.extend(gate)
         return self
 
+    def extend(self, gate):
+        '''Extend a circuit'''
+        super().extend(gate)
+
     def matrix(self):
         '''Get matrix of the circuit'''
 
 
 d = 3
-t = np.pi / 2
-circ = Circuit(d) + RX(d, t, [0, 2]).on(0, 1) + RX(d, t, [0, 1]).on(1)
-circ += RX(d, t, [0, 2]).on(2)
-for i in circ:
-    print(i)
-circ
+t = np.pi
+circ = Circuit(d) + RX(d, t, [0, 2]).on(0, 1) + RY(d, t / 2, [0, 1]).on(1)
+circ += RZ(d, t / 3, [0, 2]).on(2)
+for g in circ:
+    print(g)
+print(circ)

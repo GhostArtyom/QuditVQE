@@ -1,4 +1,6 @@
 import numpy as np
+from math import log
+from numpy.linalg import norm
 from scipy.linalg import expm
 
 np.set_printoptions(linewidth=200)
@@ -12,8 +14,10 @@ qubit_gates = {
 
 def str_special(str_pr):
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
-    if str_pr == 0 or abs(str_pr) == 1:
-        return str_pr
+    if isinstance(str_pr, (int, str)):
+        return str(str_pr)
+    elif str_pr % 1 == 0:
+        return str(int(str_pr))
     div = -1 if str_pr < 0 else 1
     str_pr *= -1 if str_pr < 0 else 1
     for key, val in special.items():
@@ -26,9 +30,42 @@ def str_special(str_pr):
             div *= int(val / str_pr)
             key = 1 if val == 1 else key
             str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
-    else:
-        str_pr = round(str_pr * div, 4)
-    return str_pr
+    if isinstance(str_pr, str):
+        return str_pr
+    return str(round(str_pr * div, 4))
+
+
+def str_ket(state: np.ndarray, dim: int) -> str:
+    '''Get ket format of the qudit state'''
+    if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
+        state = state.flatten()
+    if state.ndim != 1:
+        raise ValueError(f'State requires a 1-D ndarray, but get {state.shape}')
+    nq = round(log(len(state), dim), 12)
+    if nq % 1 != 0:
+        raise ValueError(f'Wrong state shape {state.shape} is not a power of {dim}')
+    nq = int(nq)
+    tol = 1e-8
+    string = []
+    for ind, val in enumerate(state):
+        base = np.base_repr(ind, dim).zfill(nq)
+        real = np.real(val)
+        imag = np.imag(val)
+        str_real = str_special(real)
+        str_imag = str_special(imag)
+        if np.abs(val) < tol:
+            continue
+        if np.abs(real) < tol:
+            string.append(f'{str_imag}j¦{base}⟩')
+            continue
+        if np.abs(imag) < tol:
+            string.append(f'{str_real}¦{base}⟩')
+            continue
+        if str_imag.startswith('-'):
+            string.append(f'{str_real}{str_imag}j¦{base}⟩')
+        else:
+            string.append(f'{str_real}+{str_imag}j¦{base}⟩')
+    return '\n'.join(string)
 
 
 class QuditGate:
@@ -82,11 +119,11 @@ class RotationGate(QuditGate):
         self.obj_qudits = obj_qudits
         self.ctrl_qudits = ctrl_qudits
 
-    def __str__(self):
-        """Return a string representation of the object."""
-        str_obj = ' '.join([str(i) for i in self.obj_qudits])
-        str_ctrl = ' '.join([str(i) for i in self.ctrl_qudits])
-        str_ind = ''.join([str(i) for i in self.ind])
+    def __repr__(self):
+        '''Return a string representation of the object.'''
+        str_obj = ' '.join(str(i) for i in self.obj_qudits)
+        str_ctrl = ' '.join(str(i) for i in self.ctrl_qudits)
+        str_ind = ''.join(str(i) for i in self.ind)
         str_pr = str_special(self.pr)
         if len(str_ctrl):
             return f'{self.name}{str_ind}({str_pr}|{str_obj} <-: {str_ctrl})'
@@ -166,6 +203,60 @@ class Circuit(list):
         '''Get matrix of the circuit'''
 
 
+# Simulator
+class Simulator:
+    '''Qudit simulator which simulate qudit circuit'''
+
+    def __init__(self, dim, n_qudits):
+        '''Initialize a Simulator object'''
+        state = np.zeros(dim**n_qudits, dtype=np.complex128)
+        state[0] = 1
+        self.dim = dim
+        self.sim = state
+        self.n_qudits = n_qudits
+
+    def __repr__(self):
+        '''Return a string representation of the object'''
+        if self.n_qudits < 4:
+            return self.get_qs(True)
+        return str(self.get_qs())
+
+    def reset(self):
+        '''Reset simulator to qudit zero state'''
+        state = np.zeros(self.dim**self.n_qudits, dtype=np.complex128)
+        state[0] = 1
+        self.sim = state
+
+    def get_qs(self, ket: bool = False) -> np.ndarray:
+        '''Get qudit state of the simluator'''
+        if not isinstance(ket, bool):
+            raise TypeError(f'ket requires a bool, but get {type(ket)}')
+        state = np.array(self.sim)
+        if ket:
+            return str_ket(state, self.dim)
+        return state
+
+    def set_qs(self, state: np.ndarray):
+        '''Set qudit state of the simluator'''
+        if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
+            state = state.flatten()
+        if state.ndim != 1:
+            raise ValueError(f'State requires a 1-D ndarray, but get {state.shape}')
+        nq = round(log(len(state), self.dim), 12)
+        if nq % 1 != 0:
+            raise ValueError(f'Wrong state shape {state.shape} is not a power of {self.dim}')
+        nq = int(nq)
+        if self.n_qudits != nq:
+            raise ValueError(f'Mismatch number of qudits: state {nq}, simulator {self.n_qudits}')
+        div = norm(state, 2)
+        if np.isclose(div, 0):
+            raise ValueError('Norm of state is equal to 0')
+        self.sim = state / div
+
+    def apply_circuit(self, circuit, pr=None):
+        '''Apply a circuit on the simulator'''
+
+
 d = 3
 t = np.pi
 circ = Circuit(d) + RX(d, t, [0, 2]).on(0, 1) + RY(d, t / 2, [0, 1]).on(1)
@@ -173,3 +264,10 @@ circ += RZ(d, t / 3, [0, 2]).on(2)
 for g in circ:
     print(g)
 print(circ)
+
+sim = Simulator(d, 2)
+state = np.kron(np.array([1, 1j, 0]), np.array([0, 0.2, 0]))
+print(state)
+print(state / norm(state))
+sim.set_qs(state)
+print(sim)

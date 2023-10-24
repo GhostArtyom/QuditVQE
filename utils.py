@@ -15,10 +15,9 @@ M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / n
 def is_power_of_two(num: int) -> bool:
     if not isinstance(num, int):
         num = round(num, 12)
-        if num % 1 == 0:
-            num = int(num)
-        else:
+        if num % 1 != 0:
             raise ValueError(f'Wrong number type {num} {type(num)}')
+        num = int(num)
     return (num & (num - 1) == 0) and num != 0
 
 
@@ -195,10 +194,9 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
     elif n == 1 and rho.ndim == 2:
         return np.trace(rho)
     nq = round(log(n, d), 12)
-    if nq % 1 == 0:
-        nq = int(nq)
-    else:
+    if nq % 1 != 0:
         raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
+    nq = int(nq)
     if ind < 0 or ind > nq:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
     pt = np.zeros([n, n], dtype=np.complex128)
@@ -249,10 +247,9 @@ def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.n
         position = [position]
     n = rho.shape[0]
     nq = round(log(n, d), 12)
-    if nq % 1 == 0:
-        nq = int(nq)
-    else:
+    if nq % 1 != 0:
         raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
+    nq = int(nq)
     p = [x for x in range(nq) if x not in position]
     for ind in p[::-1]:
         rho = partial_trace(rho, d, ind)

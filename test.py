@@ -7,7 +7,6 @@ import scipy as sp
 from utils import *
 from math import log
 from h5py import File
-import mindspore as ms
 from numpy.linalg import *
 from scipy.linalg import *
 from mindquantum.simulator import *
@@ -19,7 +18,6 @@ from scipy.stats import unitary_group
 from mindquantum.core.circuit import *
 from mindquantum.core.operators import *
 from mindquantum.algorithm.nisq import *
-from mindspore.common.initializer import *
 from mindquantum.algorithm.compiler import *
 
 np.set_printoptions(linewidth=200)

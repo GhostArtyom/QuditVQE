@@ -199,6 +199,15 @@ class Circuit(list):
         '''Extend a circuit'''
         super().extend(gate)
 
+    @property
+    def n_qudits(self):
+        '''Number of qudit circuit'''
+        site = []
+        for g in circ:
+            site += g.obj_qudits
+            site += g.ctrl_qudits
+        return len(set(site))
+
     def matrix(self):
         '''Get matrix of the circuit'''
 
@@ -231,10 +240,9 @@ class Simulator:
         '''Get qudit state of the simluator'''
         if not isinstance(ket, bool):
             raise TypeError(f'ket requires a bool, but get {type(ket)}')
-        state = np.array(self.sim)
         if ket:
-            return str_ket(state, self.dim)
-        return state
+            return str_ket(self.sim, self.dim)
+        return self.sim
 
     def set_qs(self, state: np.ndarray):
         '''Set qudit state of the simluator'''
@@ -253,21 +261,39 @@ class Simulator:
             raise ValueError('Norm of state is equal to 0')
         self.sim = state / div
 
-    def apply_circuit(self, circuit, pr=None):
+    def apply_circuit(self, circuit):
         '''Apply a circuit on the simulator'''
+        if self.dim != circuit.dim:
+            raise ValueError(f'Mismatch dimension: circuit {circuit.dim}, simulator {self.dim}')
+        if self.n_qudits < circuit.n_qudits:
+            raise ValueError(f'Mismatch number of qudits: circuit {circuit.n_qudits}, simulator {self.n_qudits}')
+        d = self.dim
+        state = self.sim
+        nq = self.n_qudits
+        n = self.sim.shape[0]
+        for g in circuit:
+            ind = nq - g.obj_qudits[0] - 1
+            for i in range(n // d):
+                ii = np.base_repr(i, d).zfill(nq - 1)
+                i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
+                state[i_] = g.matrix() @ state[i_]
 
 
-d = 3
-t = np.pi
-circ = Circuit(d) + RX(d, t, [0, 2]).on(0, 1) + RY(d, t / 2, [0, 1]).on(1)
-circ += RZ(d, t / 3, [0, 2]).on(2)
+d = 2
+t = np.pi / 2
+circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t / 2, [0, 1]).on(1)
+circ += RZ(d, t / 3, [0, 1]).on(2)
+nq = circ.n_qudits
 for g in circ:
     print(g)
 print(circ)
 
-sim = Simulator(d, 2)
-state = np.kron(np.array([1, 1j, 0]), np.array([0, 0.2, 0]))
-print(state)
-print(state / norm(state))
+sim = Simulator(d, nq)
+np.random.seed(42)
+state = np.random.rand(d**nq) + 1j * np.random.rand(d**nq)
+state /= norm(state)
+
 sim.set_qs(state)
-print(sim)
+print(sim.get_qs())
+sim.apply_circuit(circ)
+print(sim.get_qs())

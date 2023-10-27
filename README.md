@@ -41,6 +41,7 @@ Qudit variational quantum eigensolver
 ## Read
 
 - [ ] Unitary 2-design / t-design
+- [ ] Kochen-Specker Contextuality
 
 Universal Qudit Gates
 
@@ -53,9 +54,9 @@ Universal Qudit Gates
 
 - [x] JL & R Brylinski - Universal Quantum Gates
 - [x] Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation, $\Gamma_2[Y_d]$ 
-- [ ] Brennen, O’Leary & Bullock - Criteria for exact qudit universality PRA, CINC
-- [ ] Bullock, O’Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems PRL & arXiv, QR
-- [ ] Brennen, Bullock & O’Leary - Efficient Circuits for Exact-Universal Computation With Qudits QIC & arXiv, CINC & QR
+- [ ] Brennen, O'Leary & Bullock - Criteria for exact qudit universality, PRA, CINC
+- [ ] Bullock, O'Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems, PRL & arXiv, QR
+- [ ] Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits, QIC & arXiv, CINC & QR
 - [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition, CSD
 - [x] Sawicki & Karnas - Universality of Single-Qudit Gates
 - [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, GCX
@@ -72,7 +73,7 @@ Martin Aulbach - Classification of Entanglement in Symmetric States
 
 Matthew Robinson - Symmetry and the Standard Model꞉ Mathematics and Particle Physics
 
-- [ ] Chapter 3.2.7: $SU(2)$ Groups
+- [ ] Chapter 3.2: Introduction to Lie Groups
 
 Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum to Supersymmetry
 
@@ -84,12 +85,28 @@ Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum 
 - [x] Improve precision of `params_zyz()` 
 - [x] Fix wrong index of return values of `kron_factor_4x4_to_2x2s()` 
 
-## Extra Work
 
-- [ ] Qudit Gates
-  - [x] Rotation gate matrix
-  - [ ] Rotation gate params
-- [ ] Qudit Circuit
-  - [ ] Circuit on obj ⊗
-  - [ ] Circuit on ctrl ⊕
-- [ ] Qudit Simulator
+
+# QuditSim
+
+QuditGate
+
+- [x] PauliGate
+- [x] RotationGate
+- [ ] Control gate
+- [ ] Parameter gate
+- [ ] Multi-qudit gate
+
+Circuit
+- [x] add +
+- [x] iadd +=
+- [x] extend
+- [x] n_qudits
+
+Simulator
+- [x] reset
+- [x] get_qs
+- [x] set_qs
+- [ ] apply_circuit
+    - [x] on obj_qudits
+    - [ ] on ctrl_qudits

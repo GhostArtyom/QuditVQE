@@ -99,6 +99,45 @@ class QuditGate:
         return self
 
 
+class PauliGate(QuditGate):
+    '''Pauli qudit gate'''
+
+    def __init__(self, name, n_qudits, dim, ind, obj_qudits=None, ctrl_qudits=None):
+        '''Initialize an PauliGate'''
+        super().__init__(name, n_qudits)
+        if len(ind) != 2:
+            raise ValueError(f'{name} index length {len(ind)} should be 2')
+        if len(set(ind)) != len(ind):
+            raise ValueError(f'{name} index {ind} cannot be repeated')
+        if min(ind) < 0 or max(ind) >= dim:
+            raise ValueError(f'{name} index {ind} should in 0 to {dim-1}')
+        ind.sort()
+        self.dim = dim
+        self.ind = ind
+        self.name = name
+        self.n_qudits = n_qudits
+        self.obj_qudits = obj_qudits
+        self.ctrl_qudits = ctrl_qudits
+
+    def __repr__(self):
+        '''Return a string representation of the object.'''
+        str_obj = ' '.join(str(i) for i in self.obj_qudits)
+        str_ctrl = ' '.join(str(i) for i in self.ctrl_qudits)
+        str_ind = ''.join(str(i) for i in self.ind)
+        if len(str_ctrl):
+            return f'{self.name}{str_ind}({str_obj} <-: {str_ctrl})'
+        else:
+            return f'{self.name}{str_ind}({str_obj})'
+
+    def matrix(self):
+        '''Get matrix of the gate'''
+        ind = self.ind
+        pauli = qubit_gates[self.name]
+        mat = np.eye(self.dim, dtype=np.complex128)
+        mat[np.ix_(ind, ind)] = pauli
+        return mat
+
+
 class RotationGate(QuditGate):
     '''Rotation qudit gate'''
 
@@ -106,11 +145,12 @@ class RotationGate(QuditGate):
         '''Initialize an RotationGate'''
         super().__init__(name, n_qudits)
         if len(ind) != 2:
-            raise ValueError(f'{name} ind length {len(ind)} should be 2')
+            raise ValueError(f'{name} index length {len(ind)} should be 2')
         if len(set(ind)) != len(ind):
-            raise ValueError(f'{name} ind {ind} cannot be repeated')
+            raise ValueError(f'{name} index {ind} cannot be repeated')
         if min(ind) < 0 or max(ind) >= dim:
-            raise ValueError(f'{name} ind {ind} should in 0 to {dim-1}')
+            raise ValueError(f'{name} index {ind} should in 0 to {dim-1}')
+        ind.sort()
         self.pr = pr
         self.dim = dim
         self.ind = ind
@@ -137,6 +177,30 @@ class RotationGate(QuditGate):
         mat = np.eye(self.dim, dtype=np.complex128)
         mat[np.ix_(ind, ind)] = expm(-0.5j * self.pr * pauli)
         return mat
+
+
+class X(PauliGate):
+    '''Pauli-X gate'''
+
+    def __init__(self, dim, ind):
+        '''Initialize an X gate'''
+        super().__init__('X', 1, dim, ind)
+
+
+class Y(PauliGate):
+    '''Pauli-Y gate'''
+
+    def __init__(self, dim, ind):
+        '''Initialize an Y gate'''
+        super().__init__('Y', 1, dim, ind)
+
+
+class Z(PauliGate):
+    '''Pauli-Z gate'''
+
+    def __init__(self, dim, ind):
+        '''Initialize an Z gate'''
+        super().__init__('Z', 1, dim, ind)
 
 
 class RX(RotationGate):
@@ -208,9 +272,6 @@ class Circuit(list):
             site += g.ctrl_qudits
         return len(set(site))
 
-    def matrix(self):
-        '''Get matrix of the circuit'''
-
 
 # Simulator
 class Simulator:
@@ -279,13 +340,13 @@ class Simulator:
                 state[i_] = g.matrix() @ state[i_]
 
 
-d = 2
+d = 3
 t = np.pi / 2
-circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t / 2, [0, 1]).on(1)
-circ += RZ(d, t / 3, [0, 1]).on(2)
+circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t, [0, 2]).on(1)
+circ += RZ(d, t, [2, 1]).on(2)
 nq = circ.n_qudits
 for g in circ:
-    print(g)
+    print(g.matrix(), g)
 print(circ)
 
 sim = Simulator(d, nq)
@@ -293,7 +354,8 @@ np.random.seed(42)
 state = np.random.rand(d**nq) + 1j * np.random.rand(d**nq)
 state /= norm(state)
 
-sim.set_qs(state)
-print(sim.get_qs())
-sim.apply_circuit(circ)
-print(sim.get_qs())
+# sim.set_qs(state)
+# print(sim.get_qs())
+# sim.apply_circuit(circ)
+# print(sim.get_qs())
+print(np.exp(1j * -t/2))

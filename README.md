@@ -1,8 +1,6 @@
-# Qudit_VQE
+# QuditVQE
 
 Qudit variational quantum eigensolver
-
-## Qudit VQE
 
 - [x] MPS -> Gates
   - [x] Reduced density matrix
@@ -79,7 +77,7 @@ Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum 
 
 - [ ] Chapter 6: Representations of the Rotation Group
 
-## mindquantum
+## MindQuantum
 
 - [x] Fix `NaN` error for `np.sqrt(eigvals)` 
 - [x] Improve precision of `params_zyz()` 

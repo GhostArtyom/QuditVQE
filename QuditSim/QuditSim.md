@@ -38,24 +38,27 @@
 - $i,j$ 为子空间位置 index，需满足 $0\le i\lt j\lt d$ 
 ```math
 \begin{align}
-X_d^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},\quad
-&RX_d^{(i,j)}=\exp\{-\mathrm{i}\theta X_d^{(i,j)}/2\} \\[.5ex]
-Y_d^{(i,j)}&=-\mathrm{i}\ket{i}\bra{j}+\mathrm{i}\ket{j}\bra{i},\quad
-&RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta Y_d^{(i,j)}/2\} \\[.5ex]
-Z_d^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},\quad
-&RZ_d^{(i,j)}=\exp\{-\mathrm{i}\theta Z_d^{(i,j)}/2\}
+\sigma_x^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},
+&X_d^{(i,j)}=\sigma_x^{(i,j)}+\sum_{k\ne i,j}\ket{k}\bra{k},\qquad
+&RX_d^{(i,j)}=\exp\{-\mathrm{i}\theta \sigma_x^{(i,j)}/2\} \\
+\sigma_y^{(i,j)}&=-\mathrm{i}\ket{i}\bra{j}+\mathrm{i}\ket{j}\bra{i},
+&Y_d^{(i,j)}=\sigma_y^{(i,j)}+\sum_{k\ne i,j}\ket{k}\bra{k},\qquad
+&RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta \sigma_y^{(i,j)}/2\} \\
+\sigma_z^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},
+&Z_d^{(i,j)}=\sigma_z^{(i,j)}+\sum_{k\ne i,j}\ket{k}\bra{k},\qquad
+&RZ_d^{(i,j)}=\exp\{-\mathrm{i}\theta \sigma_z^{(i,j)}/2\}
 \end{align}
 ```
 - 举例说明，此处设 $d=3$ 即 qutrit 体系
 ```math
 X_3^{(0,1)}=\begin{pmatrix}
-0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0
+0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1
 \end{pmatrix},\quad
 Y_3^{(0,2)}=\begin{pmatrix}
-0 & 0 & -\mathrm{i} \\ 0 & 0 & 0 \\ \mathrm{i} & 0 & 0
+0 & 0 & -\mathrm{i} \\ 0 & 1 & 0 \\ \mathrm{i} & 0 & 0
 \end{pmatrix},\quad
 Z_3^{(1,2)}=\begin{pmatrix}
-0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
+1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
 \end{pmatrix} \\
 ```
 ```math
@@ -84,11 +87,6 @@ RZ_3^{(1,2)}(\theta)=\begin{pmatrix}
 - 哈达玛门 Hadamard Gate
 ```math
 H_d\ket{j}=\frac{1}{\sqrt{d}}\sum_{i=0}^{d-1}\omega^{ij}\ket{i},\quad \omega=\mathrm{e}^{2\pi\mathrm{i}/d}
-```
-
-- 置换门 Permutation Gate
-```math
-P_d^{(i,j)}=\ket{i}\bra{j}+\ket{j}\bra{i}+\sum_{k\ne i,j}\ket{k}\bra{k}
 ```
 
 - 增量门 Increment Gate
@@ -146,12 +144,11 @@ C_k[R_d]=\mathbb{I}_{d^k-d}\oplus R_d
 \end{pmatrix}
 ```
 
-- 通用受控置换门 General Controlled X，当控制位为 $\ket{m}$ 态时，作用置换门 $P_d$ 到目标位上
+- 通用受控 X 门 General Controlled X，当控制位为 $\ket{m}$ 态时，作用置换门 $X_d^{(j,k)}$ 到目标位上 [5]
   
-    文献 [5] 所用符号为 $X^{(ij)}$，与本文档的置换门 $P_d^{(i,j)}$ 等价
 ```math
 \mathrm{GCX}_d\ket{i,j}=\left\{\begin{array}{c}
-\ket{i}\otimes P_d\ket{j} & i=m \\
+\ket{i}\otimes X_d^{(j,k)}\ket{j} & i=m \\
 \ket{i,j} & i\ne m
 \end{array}\right.
 ```

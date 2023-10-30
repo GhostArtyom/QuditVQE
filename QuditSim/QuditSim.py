@@ -111,7 +111,6 @@ class PauliGate(QuditGate):
             raise ValueError(f'{name} index {ind} cannot be repeated')
         if min(ind) < 0 or max(ind) >= dim:
             raise ValueError(f'{name} index {ind} should in 0 to {dim-1}')
-        ind.sort()
         self.dim = dim
         self.ind = ind
         self.name = name
@@ -133,7 +132,7 @@ class PauliGate(QuditGate):
         '''Get matrix of the gate'''
         ind = self.ind
         pauli = qubit_gates[self.name]
-        mat = np.zeros([self.dim, self.dim], dtype=np.complex128)
+        mat = np.eye(self.dim, dtype=np.complex128)
         mat[np.ix_(ind, ind)] = pauli
         return mat
 
@@ -150,7 +149,6 @@ class RotationGate(QuditGate):
             raise ValueError(f'{name} index {ind} cannot be repeated')
         if min(ind) < 0 or max(ind) >= dim:
             raise ValueError(f'{name} index {ind} should in 0 to {dim-1}')
-        ind.sort()
         self.pr = pr
         self.dim = dim
         self.ind = ind
@@ -344,6 +342,7 @@ d = 3
 t = np.pi / 2
 circ = Circuit(d) + X(d, [0, 1]).on(0) + Y(d, [0, 2]).on(1)
 circ += Z(d, [1, 2]).on(2)
+circ += Z(d, [2, 1]).on(2)
 # circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t, [0, 2]).on(1)
 # circ += RZ(d, t, [1, 2]).on(2)
 nq = circ.n_qudits

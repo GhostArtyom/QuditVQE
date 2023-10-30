@@ -39,7 +39,8 @@ Qudit variational quantum eigensolver
 ## Read
 
 - [ ] Unitary 2-design / t-design
-- [ ] Kochen-Specker Contextuality
+- [x] Kochen-Specker Contextuality
+- [ ] Semidefinite programming relaxations for quantum correlations
 
 Universal Qudit Gates
 
@@ -50,18 +51,19 @@ Universal Qudit Gates
 - GCX: Generalized Controlled-X gate
 - CDNOT: Controlled-Double-NOT gate
 
-- [x] JL & R Brylinski - Universal Quantum Gates
-- [x] Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation, $\Gamma_2[Y_d]$ 
-- [ ] Brennen, O'Leary & Bullock - Criteria for exact qudit universality, PRA, CINC
-- [ ] Bullock, O'Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems, PRL & arXiv, QR
-- [ ] Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits, QIC & arXiv, CINC & QR
-- [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition, CSD
-- [x] Sawicki & Karnas - Universality of Single-Qudit Gates
-- [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, GCX
-- [ ] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, ququart CDNOT
-- [ ] Luo & Wang - Universal quantum computation with qudits, $C_2[R_d]$ 
-- [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing, $C_2[R_d]$ 
-- [ ] Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate
+- [x] Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation, 2000 PRA, $\Gamma_2[Y_d]$ 
+- [x] JL & R Brylinski - Universal Quantum Gates, 2002 Mathematics of Quantum Computation & arXiv
+- [ ] Brennen, O'Leary & Bullock - Criteria for exact qudit universality, 2005 PRA, CINC
+- [ ] Bullock, O'Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems, 2005 PRL & 2004 arXiv, ancilla QR & CINC
+- [ ] Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits, 2006 QIC & 2005 arXiv, QR & CINC
+- [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition, 2006 Theor Comput Sci, CSD & uniformly controlled Givens rotation
+- [x] Sawicki & Karnas - Universality of Single-Qudit Gates, 2017 Annales Henri Poincaré
+- [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, 2013 PRA, GCX
+- [x] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, 2013 PRA, ququart CDNOT
+- [ ] Luo & Wang - Universal quantum computation with qudits, 2014 Sci China Phys Mech Astron, $C_2[R_d]$ 
+- [x] Luo, Chen, Yang & Wang - Geometry of Quantum Computation with Qudits, 2014 Sci Rep
+- [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing, 2020 Frontiers in Physics, $C_2[R_d]$ 
+- [x] Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate, 2023 arXiv, ancilla $\ket{0}\text{-}U$ 
 
 Martin Aulbach - Classification of Entanglement in Symmetric States
 
@@ -83,12 +85,9 @@ Chaichian & Hagedorn - Symmetries in Quantum Mechanics꞉ From Angular Momentum 
 - [x] Improve precision of `params_zyz()` 
 - [x] Fix wrong index of return values of `kron_factor_4x4_to_2x2s()` 
 
-
-
-# QuditSim
+## QuditSim
 
 QuditGate
-
 - [x] PauliGate
 - [x] RotationGate
 - [ ] Control gate

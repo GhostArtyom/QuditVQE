@@ -133,7 +133,7 @@ class PauliGate(QuditGate):
         '''Get matrix of the gate'''
         ind = self.ind
         pauli = qubit_gates[self.name]
-        mat = np.eye(self.dim, dtype=np.complex128)
+        mat = np.zeros([self.dim, self.dim], dtype=np.complex128)
         mat[np.ix_(ind, ind)] = pauli
         return mat
 
@@ -342,8 +342,10 @@ class Simulator:
 
 d = 3
 t = np.pi / 2
-circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t, [0, 2]).on(1)
-circ += RZ(d, t, [2, 1]).on(2)
+circ = Circuit(d) + X(d, [0, 1]).on(0) + Y(d, [0, 2]).on(1)
+circ += Z(d, [1, 2]).on(2)
+# circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t, [0, 2]).on(1)
+# circ += RZ(d, t, [1, 2]).on(2)
 nq = circ.n_qudits
 for g in circ:
     print(g.matrix(), g)
@@ -358,4 +360,3 @@ state /= norm(state)
 # print(sim.get_qs())
 # sim.apply_circuit(circ)
 # print(sim.get_qs())
-print(np.exp(1j * -t/2))

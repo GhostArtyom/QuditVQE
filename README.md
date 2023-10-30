@@ -50,7 +50,6 @@ Universal Qudit Gates
 - CINC: Controlled-Increment gate
 - GCX: Generalized Controlled-X gate
 - CDNOT: Controlled-Double-NOT gate
-
 - [x] Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation, 2000 PRA, $\Gamma_2[Y_d]$ 
 - [x] JL & R Brylinski - Universal Quantum Gates, 2002 Mathematics of Quantum Computation & arXiv
 - [ ] Brennen, O'Leary & Bullock - Criteria for exact qudit universality, 2005 PRA, CINC
@@ -60,10 +59,13 @@ Universal Qudit Gates
 - [x] Sawicki & Karnas - Universality of Single-Qudit Gates, 2017 Annales Henri Poincaré
 - [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, 2013 PRA, GCX
 - [x] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, 2013 PRA, ququart CDNOT
-- [ ] Luo & Wang - Universal quantum computation with qudits, 2014 Sci China Phys Mech Astron, $C_2[R_d]$ 
 - [x] Luo, Chen, Yang & Wang - Geometry of Quantum Computation with Qudits, 2014 Sci Rep
+- [ ] Luo & Wang - Universal quantum computation with qudits, 2014 Sci China Phys Mech Astron, $C_2[R_d]$ 
 - [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing, 2020 Frontiers in Physics, $C_2[R_d]$ 
+- [ ] Jiang, Wei, Song & Hua - Synthesis and upper bound of Schmidt rank of the bipartite controlled-unitary gates, 2022 arXiv, $\C^M\otimes\C^N$ & GCX
+- [ ] Jiang, Liu & Wei - Optimal synthesis of general multi-qutrit quantum computation, 2023 arXiv
 - [x] Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate, 2023 arXiv, ancilla $\ket{0}\text{-}U$ 
+- [ ] Fischer, Tavernelli, et al. - Universal Qudit Gate Synthesis for Transmons, 2023 PRX Quantum, $C^m[U]$ 
 
 Martin Aulbach - Classification of Entanglement in Symmetric States
 

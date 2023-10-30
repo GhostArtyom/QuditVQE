@@ -39,7 +39,7 @@
 ```math
 \begin{align}
 X_d^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},\quad
-&RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta X_d^{(i,j)}/2\} \\[.5ex]
+&RX_d^{(i,j)}=\exp\{-\mathrm{i}\theta X_d^{(i,j)}/2\} \\[.5ex]
 Y_d^{(i,j)}&=-\mathrm{i}\ket{i}\bra{j}+\mathrm{i}\ket{j}\bra{i},\quad
 &RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta Y_d^{(i,j)}/2\} \\[.5ex]
 Z_d^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},\quad
@@ -49,13 +49,13 @@ Z_d^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},\quad
 - 举例说明，此处设 $d=3$ 即 qutrit 体系
 ```math
 X_3^{(0,1)}=\begin{pmatrix}
-0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1
+0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0
 \end{pmatrix},\quad
 Y_3^{(0,2)}=\begin{pmatrix}
-0 & 0 & -\mathrm{i} \\ 0 & 1 & 0 \\ \mathrm{i} & 0 & 0
+0 & 0 & -\mathrm{i} \\ 0 & 0 & 0 \\ \mathrm{i} & 0 & 0
 \end{pmatrix},\quad
 Z_3^{(1,2)}=\begin{pmatrix}
-1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
+0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
 \end{pmatrix} \\
 ```
 ```math

@@ -179,5 +179,7 @@ C^m[U_d]=\ket{m}\bra{m}\otimes U_d+\sum_{i\ne m}\ket{i}\bra{i}\otimes\mathbb{I}_
 5. Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates
 6. Luo & Wang - Universal quantum computation with qudits
 7. Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing
-8. Shende, Bullock & Markov - Synthesis of quantum logic circuits
-9. Nielsen & Chuang - Quantum Computation and Quantum Information
+8. Jiang, Wei, Song & Hua - Synthesis and upper bound of Schmidt rank of the bipartite controlled-unitary gates
+9. Jiang, Liu & Wei - Optimal synthesis of general multi-qutrit quantum computation
+10. Shende, Bullock & Markov - Synthesis of quantum logic circuits
+11. Nielsen & Chuang - Quantum Computation and Quantum Information

@@ -63,7 +63,7 @@ Universal Qudit Gates
 - [ ] Luo & Wang - Universal quantum computation with qudits, 2014 Sci China Phys Mech Astron, $C_2[R_d]$ 
 - [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing, 2020 Frontiers in Physics, $C_2[R_d]$ 
 - [ ] Jiang, Wei, Song & Hua - Synthesis and upper bound of Schmidt rank of the bipartite controlled-unitary gates, 2022 arXiv, $\C^M\otimes\C^N$ & GCX
-- [ ] Jiang, Liu & Wei - Optimal synthesis of general multi-qutrit quantum computation, 2023 arXiv
+- [ ] Jiang, Liu & Wei - Optimal synthesis of general multi-qutrit quantum computation, 2023 arXiv, GCX & CINC
 - [x] Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate, 2023 arXiv, ancilla $\ket{0}\text{-}U$ 
 - [ ] Fischer, Tavernelli, et al. - Universal Qudit Gate Synthesis for Transmons, 2023 PRX Quantum, $C^m[U]$ 
 

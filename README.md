@@ -58,9 +58,9 @@ Universal Qudit Gates
 - [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition, CSD
 - [x] Sawicki & Karnas - Universality of Single-Qudit Gates
 - [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, GCX
-- [ ] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, CDNOT
-- [ ] Luo & Wang - Universal quantum computation with qudits
-- [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing
+- [ ] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, ququart CDNOT
+- [ ] Luo & Wang - Universal quantum computation with qudits, $C_2[R_d]$ 
+- [ ] Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing, $C_2[R_d]$ 
 - [ ] Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate
 
 Martin Aulbach - Classification of Entanglement in Symmetric States

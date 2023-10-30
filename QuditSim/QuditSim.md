@@ -3,8 +3,8 @@
 已实现
 
 - 常用 1-qudit 门
-    - 泡利门 $X^{(j,k)},Y^{(j,k)},Z^{(j,k)}$ 
-    - 旋转门 $RX^{(j,k)},RY^{(j,k)},RZ^{(j,k)}$ 
+    - 泡利门 $X_d^{(i,j)},Y_d^{(i,j)},Z_d^{(i,j)}$ 
+    - 旋转门 $RX_d^{(i,j)},RY_d^{(i,j)},RZ_d^{(i,j)}$ 
 - Qudit 电路 `class Circuit` 
     - 加号运算 `+` 
     - 增量赋值运算 `+=` 
@@ -21,84 +21,175 @@
 
 待实现
 
-> 有些函数可以套用 MindQuantum 的同名函数，但是需将判断是否为 2 次幂 `is_power_of_two` 换成判断是否为 d 次幂
+> 有些函数可以套用 MindQuantum 的同名函数
+> 但是需将判断是否为 2 次幂 `is_power_of_two` 换成判断是否为 d 次幂
 
-- 多 Qudit 门，受控 Qudit 门
-- 含参 Qudit 门的参数解析器 `ParameterResolver` 
-- 求给定hamiltonian的期望 `get_expectation` 
-- 求期望及梯度 `get_expectation_with_grad` 
+- 通用数学门 `UnivMathGate` 
+- 单 qudit 门 $H_d,P_d^{(i,j)},\mathrm{INC}_d$ 
+- 多 qudit 门 $\rm SWAP,MVCG$ 
+- 受控 qudit 门 $\mathrm{CINC}_d,C_2[R_d],C_m[R_d],\mathrm{GCX}_d,CU_d$ 
+- 含参 qudit 门的参数解析器 `ParameterResolver` 
+- 求给定 Hamiltonian 的期望 `get_expectation` 
+- 求 Hamiltonian 期望和梯度 `get_expectation_with_grad` 
 - 用生成梯度算子的信息包装梯度算子 `GradOpsWrapper` 
-- 计算当前密度矩阵的偏迹 `get_partial_trace` 
-- 计算两个量子态的保真度 `fidelity` 
 
 
 
-泡利门、旋转门矩阵形式
+泡利门、旋转门矩阵形式 [5]
 
-- $j,k$ 为子空间位置 index，需满足 $0\le j<k<d$ 
+- $i,j$ 为子空间位置 index，需满足 $0\le i<j<d$ 
 
 $$
 \begin{align}
-X^{(j,k)}&=\ket{j}\bra{k}+\ket{k}\bra{j},\quad
-&RY^{(j,k)}=\exp{-\mathrm{i}\theta X^{(j,k)}/2} \\[.5ex]
-Y^{(j,k)}&=-\mathrm{i}\ket{j}\bra{k}+\mathrm{i}\ket{k}\bra{j},\quad
-&RY^{(j,k)}=\exp{-\mathrm{i}\theta Y^{(j,k)}/2} \\[.5ex]
-Z^{(j,k)}&=\ket{j}\bra{j}-\ket{k}\bra{k},\quad
-&RZ^{(j,k)}=\exp{-\mathrm{i}\theta Z^{(j,k)}/2}
+X_d^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},\quad
+&RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta X_d^{(i,j)}/2\} \\[.5ex]
+Y_d^{(i,j)}&=-\mathrm{i}\ket{i}\bra{j}+\mathrm{i}\ket{j}\bra{i},\quad
+&RY_d^{(i,j)}=\exp\{-\mathrm{i}\theta Y_d^{(i,j)}/2\} \\[.5ex]
+Z_d^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},\quad
+&RZ_d^{(i,j)}=\exp\{-\mathrm{i}\theta Z_d^{(i,j)}/2\}
 \end{align}
 $$
 
 - 举例说明，此处设 $d=3$ 即 qutrit 体系
 
 $$
-X^{(0,1)}=\begin{pmatrix}
+X_3^{(0,1)}=\begin{pmatrix}
 0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1
 \end{pmatrix},\quad
-Y^{(0,2)}=\begin{pmatrix}
+Y_3^{(0,2)}=\begin{pmatrix}
 0 & 0 & -\mathrm{i} \\ 0 & 1 & 0 \\ \mathrm{i} & 0 & 0
 \end{pmatrix},\quad
-Z^{(1,2)}=\begin{pmatrix}
+Z_3^{(1,2)}=\begin{pmatrix}
 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
 \end{pmatrix} \\
 $$
 
 $$
-RX^{(0,1)}(\theta)=\begin{pmatrix}
+RX_3^{(0,1)}(\theta)=\begin{pmatrix}
 \cos\frac{\theta}{2} & -\mathrm{i}\sin\frac{\theta}{2} & 0 \\
 -\mathrm{i}\sin\frac{\theta}{2} & \cos\frac{\theta}{2} & 0 \\
 0 & 0 & 1
-\end{pmatrix},\quad
-RY^{(0,2)}(\theta)=\begin{pmatrix}
+\end{pmatrix},\;\;
+RY_3^{(0,2)}(\theta)=\begin{pmatrix}
 \cos\frac{\theta}{2} & 0 & -\sin\frac{\theta}{2} \\ 0 & 1 & 0 \\ \sin\frac{\theta}{2} & 0 & \cos\frac{\theta}{2}
-\end{pmatrix},\quad
-RZ^{(1,2)}(\theta)=\begin{pmatrix}
-1 & 0 & 0 \\ 0 & e^{-i\theta/2} & 0 \\ 0 & 0 & e^{i\theta/2}
+\end{pmatrix},\;\;
+RZ_3^{(1,2)}(\theta)=\begin{pmatrix}
+1 & 0 & 0 \\ 0 & \mathrm{e}^{-i\theta/2} & 0 \\ 0 & 0 & \mathrm{e}^{i\theta/2}
 \end{pmatrix} \\
 $$
 
+通用数学门 UnivMathGate
 
+- 输入单/多 qudit 酉矩阵，生成单/多 qudit 门
+- 判断输入矩阵值是否为酉矩阵，维度是否为 d 次幂
 
-多 Qudit 门
+单 qudit 门
 
+- 哈达玛门 Hadamard Gate
 
+$$
+H_d\ket{j}=\frac{1}{\sqrt{d}}\sum_{i=0}^{d-1}\omega^{ij}\ket{i},\quad \omega=\mathrm{e}^{2\pi\mathrm{i}/d}
+$$
 
-受控 Qudit 门
+- 置换门 Permutation Gate
 
+$$
+P_d^{(i,j)}=\ket{i}\bra{j}+\ket{j}\bra{i}+\sum_{k\ne i,j}\ket{k}\bra{k}
+$$
+
+- 增量门 Increment Gate
+
+$$
+\mathrm{INC}_d\ket{j}=\ket{(j+1)\bmod d},\quad
+\mathrm{INC}_3=\begin{pmatrix}
+0 & 0 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0
+\end{pmatrix}
+$$
+
+多 qudit 门
+
+- 交换门 Swap Gate [7]
+
+$$
+\mathrm{SWAP}\ket{i,j}=\ket{j,i}
+$$
+
+- 多值受控门 Multi-Value-Controlled Gate [7]，其中 $U_i$ 为单 qudit 门
+
+$$
+\mathrm{MVCG}=\bigoplus_{i=0}^{d-1}U_i
+=\begin{pmatrix}
+U_0 \\ & U_1 \\ && \ddots \\ &&& U_{d-1}
+\end{pmatrix}
+$$
+
+受控 qudit 门
+
+- 受控增量门 Controlled-Increment Gate，qudit 版本的 $\rm CNOT$ 门 [1,2,3]
+
+$$
+\mathrm{CINC}_d\ket{i,j}=\left\{\begin{array}{c}
+\ket{i,(j+1)\bmod d} & i=d-1 \\
+\ket{i,j} & i\ne d-1
+\end{array}\right.
+$$
+
+$$
+\mathrm{CINC}_d=\mathbb{I}_{d^2-d}\oplus\mathrm{INC}_d
+=\begin{pmatrix}
+\mathbb{I}_{d^2-d} & \\ & \mathrm{INC}_d
+\end{pmatrix}
+$$
+
+- 当控制位为 $\ket{d-1}$ 态时，单 qudit 受控门 [6,7]
+
+$$
+C_2[U_d]=\mathbb{I}_{d^2-d}\oplus R_d
+=\begin{pmatrix}
+\mathbb{I}_{d^2-d} & \\ & R_d
+\end{pmatrix}
+$$
+
+- 当控制位为 $\ket{d-1}$ 态时，多 qudit 受控门 [6,7]
+
+$$
+C_m[R_d]=\mathbb{I}_{d^m-d}\oplus R_d
+=\begin{pmatrix}
+\mathbb{I}_{d^m-d} & \\ & R_d
+\end{pmatrix}
+$$
+
+- 通用受控置换门 General Controlled X，当控制位为 $\ket{m}$ 态时，作用置换门 $P_d$ 到目标位上
+    文献 [5] 所用符号为 $X^{(ij)}$，与本文档的置换门 $P_d^{(i,j)}$ 等价
+
+$$
+\mathrm{GCX}_d\ket{i,j}=\left\{\begin{array}{c}
+\ket{i}\otimes P_d\ket{j} & i=m \\
+\ket{i,j} & i\ne m
+\end{array}\right.
+$$
+
+- 通用受控门，当控制位为 $\ket{m}$ 态时，作用 $U_d$ 到目标位上，其中 $U_d$ 为单 qudit 门
+
+$$
+CU_d\ket{i,j}=\left\{\begin{array}{c}
+\ket{i}\otimes U_d\ket{j} & i=m \\
+\ket{i,j} & i\ne m
+\end{array}\right.
+$$
+
+$$
+CU_d=\mathbb{I}_{dm}\oplus U_d\oplus\mathbb{I}_{d(d-m-1)}
+$$
 
 
 参考文献
 
-- JL & R Brylinski - Universal Quantum Gates
-- Muthukrishnan & Stroud Jr - Multivalued logic gates for quantum computation
-- Brennen, O'Leary & Bullock - Criteria for exact qudit universality
-- Bullock, O'Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems
-- Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits
-- Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition
-- Sawicki & Karnas - Universality of Single-Qudit Gates
-- Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates
-- Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space
-- Luo & Wang - Universal quantum computation with qudits
-- Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing
-- Zi, Li & Sun - Optimal Synthesis of Multi-Controlled Qudit Gate
-- Shende, Bullock & Markov - Synthesis of quantum logic circuits
-- Nielsen & Chuang - Quantum Computation and Quantum Information
+1. Brennen, O'Leary & Bullock - Criteria for exact qudit universality
+2. Bullock, O'Leary & Brennen - Asymptotically Optimal Quantum Circuits for d-Level Systems
+3. Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits
+4. Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition
+5. Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates
+6. Luo & Wang - Universal quantum computation with qudits
+7. Wang, Hu, Sanders & Kais - Qudits and High-Dimensional Quantum Computing
+8. Nielsen & Chuang - Quantum Computation and Quantum Information

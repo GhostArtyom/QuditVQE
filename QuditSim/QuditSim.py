@@ -332,7 +332,7 @@ class Simulator:
         n = self.sim.shape[0]
         for g in circuit:
             idx = nq - g.obj_qudits[0] - 1
-            if nq == circuit.n_qudits:
+            if nq == g.n_qudits:
                 state = g.matrix() @ state
             else:
                 for i in range(n // d):
@@ -344,9 +344,8 @@ class Simulator:
 
 d = 3
 t = np.pi / 2
-circ = Circuit(d) + X(d, [1, 2]).on(0)
-# circ = Circuit(d) + X(d, [0, 1]).on(0) + Y(d, [0, 2]).on(1)
-# circ += Z(d, [1, 2]).on(2)
+circ = Circuit(d) + X(d, [0, 1]).on(0) + Y(d, [0, 2]).on(1)
+circ += Z(d, [1, 2]).on(2)
 # circ = Circuit(d) + RX(d, t, [0, 1]).on(0) + RY(d, t, [0, 2]).on(1)
 # circ += RZ(d, t, [1, 2]).on(2)
 nq = circ.n_qudits
@@ -355,11 +354,23 @@ for g in circ:
 print(circ)
 
 sim = Simulator(d, nq)
-state = np.array([1, 0, 1], dtype=complex)
-# np.random.seed(42)
-# state = np.random.rand(d**nq) + 1j * np.random.rand(d**nq)
-# state /= norm(state)
+np.random.seed(42)
+state = np.random.rand(d**nq) + 1j * np.random.rand(d**nq)
+state /= norm(state)
 sim.set_qs(state)
 print(sim.get_qs())
 sim.apply_circuit(circ)
 print(sim.get_qs())
+
+q = {i: np.eye(d)[i] for i in range(d)}
+state = np.kron(q[0], q[1])
+state /= norm(state)
+print(str_ket(state, d))
+SWAP = np.zeros([d**2, d**2], dtype=int)
+for i in range(d**2):
+    base = np.base_repr(i, d).zfill(2)
+    j = int(base[::-1], d)
+    SWAP[i, j] = 1
+state = SWAP @ state
+print(str_ket(state, d))
+print(SWAP)

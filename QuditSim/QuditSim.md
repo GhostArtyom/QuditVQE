@@ -23,9 +23,10 @@
 > 有些函数可以套用 MindQuantum 的同名函数，但是需将判断是否为 2 次幂 `is_power_of_two` 换成判断是否为 d 次幂
 
 - 通用数学门 `UnivMathGate` 
-- 单 qudit 门 $H_d,P_d^{(i,j)},\mathrm{INC}_d$ 
-- 多 qudit 门 $\rm SWAP,MVCG$ 
-- 受控 qudit 门 $\mathrm{CINC}_d,C_2[R_d],C_k[R_d],\mathrm{GCX}_d,C^m[U_d]$ 
+- 单 qudit 门 $H_d,\,\mathrm{INC}_d$ 
+- 多 qudit 门 $\mathrm{SWAP}_d,\,\mathrm{MVCG}_d$ 
+- 受控 qudit 门 $\mathrm{CINC}_d,\,\mathrm{GCX}_d$ 
+- 已有 qudit 门的控制位与受控态
 - 含参 qudit 门的参数解析器 `ParameterResolver` 
 - 求给定 Hamiltonian 的期望 `get_expectation` 
 - 求 Hamiltonian 期望和梯度 `get_expectation_with_grad` 
@@ -33,9 +34,11 @@
 
 
 
-泡利门、旋转门矩阵形式 [5]
+泡利门、旋转门 [5,8,9]
 
-- $i,j$ 为子空间位置 index，需满足 $0\le i\lt j\lt d$ 
+- $i,j$ 为子空间的位置 index，需满足 $0\le i\le d-1,\,0\le j\le d-1$ 
+  - `X(dim, ind).on(obj_qudits, ctrl_qudits, ctrl_states)` 
+  - `RX(dim, pr, ind).on(obj_qudits, ctrl_qudits, ctrl_states)` 
 ```math
 \begin{align}
 \sigma_x^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},
@@ -59,7 +62,7 @@ Y_3^{(0,2)}=\begin{pmatrix}
 \end{pmatrix},\quad
 Z_3^{(1,2)}=\begin{pmatrix}
 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -1
-\end{pmatrix} \\
+\end{pmatrix}
 ```
 ```math
 RX_3^{(0,1)}(\theta)=\begin{pmatrix}
@@ -77,21 +80,34 @@ RZ_3^{(1,2)}(\theta)=\begin{pmatrix}
 
 
 
-通用数学门 UnivMathGate
+通用数学门 Universal Math Gate
 
 - 输入单/多 qudit 酉矩阵，生成单/多 qudit 门
 - 判断输入矩阵值是否为酉矩阵，维度是否为 d 次幂
+- `UnivMathGate(dim, name, mat).on(obj_qudits, ctrl_qudits, ctrl_states)`
 
 单 qudit 门
 
-- 哈达玛门 Hadamard Gate
+- 哈达玛门 Hadamard Gate [7]
+  - `H(dim).on(obj_qudits, ctrl_qudits, ctrl_states)` 
 ```math
-H_d\ket{j}=\frac{1}{\sqrt{d}}\sum_{i=0}^{d-1}\omega^{ij}\ket{i},\quad \omega=\mathrm{e}^{2\pi\mathrm{i}/d}
+H_d\ket{j}=\frac{1}{\sqrt{d}}\sum_{i=0}^{d-1}\omega^{ij}\ket{i},\;\; \omega=\mathrm{e}^{2\pi\mathrm{i}/d},\;\;
+(H_d)_{i,j}=\omega^{ij},\;\;
+H_3=\frac{1}{\sqrt{3}}
+\begin{pmatrix}
+1 & 1 & 1 \\
+1 & \omega^1 & \omega^{2} \\
+1 & \omega^2 & \omega^{4}
+\end{pmatrix}
 ```
 
-- 增量门 Increment Gate
+- 增量门 Increment Gate [1-3,9]
+  - `INC(dim).on(obj_qudits, ctrl_qudits, ctrl_states)` 
 ```math
-\mathrm{INC}_d\ket{j}=\ket{(j+1)\bmod d},\quad
+\mathrm{INC}_d\ket{j}=\ket{(j+1)\bmod d}
+=\begin{pmatrix}
+& 1 \\ \mathbb{I}_{d-1}
+\end{pmatrix},\quad
 \mathrm{INC}_3=\begin{pmatrix}
 0 & 0 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0
 \end{pmatrix}
@@ -100,13 +116,17 @@ H_d\ket{j}=\frac{1}{\sqrt{d}}\sum_{i=0}^{d-1}\omega^{ij}\ket{i},\quad \omega=\ma
 多 qudit 门
 
 - 交换门 Swap Gate [7]
+  - `SWAP(dim, obj_qudits=[i, j], ctrl_qudits, ctrl_states)` 
+  - 等价于 `SWAP(dim).on(obj_qudits=[i, j], ctrl_qudits, ctrl_states)` 
 ```math
-\mathrm{SWAP}\ket{i,j}=\ket{j,i}
+\mathrm{SWAP}_d\ket{i,j}=\ket{j,i}
 ```
 
-- 多值受控门 Multi-Value-Controlled Gate [7]，其中 $U_i$ 为单 qudit 门
+- 多值受控门 Multi-Value-Controlled Gate，其中 $U_i$ 为单 qudit 门 [7]
+  - `MVCG(dim, mat).on(obj_qudits, ctrl_qudits, ctrl_states)` 
+  - `mat` 为一组 d 个酉矩阵
 ```math
-\mathrm{MVCG}=\bigoplus_{i=0}^{d-1}U_i
+\mathrm{MVCG}_d=\bigoplus_{i=0}^{d-1}U_i
 =\begin{pmatrix}
 U_0 \\ & U_1 \\ && \ddots \\ &&& U_{d-1}
 \end{pmatrix}
@@ -114,7 +134,9 @@ U_0 \\ & U_1 \\ && \ddots \\ &&& U_{d-1}
 
 受控 qudit 门
 
-- 受控增量门 Controlled-Increment Gate，qudit 版本的 $\rm CNOT$ 门 [1,2,3]
+- 受控增量门 Controlled-Increment Gate，qudit 版本的 $\rm CNOT$ 门 [1-3,9]
+  - `CINC(dim, obj_qudits=i, ctrl_qudits=j, ctrl_states=d-1)` 
+  - 等价于 `INC(dim).on(obj_qudits=i, ctrl_qudits=j, ctrl_states=d-1)` 
 ```math
 \mathrm{CINC}_d\ket{i,j}=\left\{\begin{array}{c}
 \ket{i,(j+1)\bmod d} & i=d-1 \\
@@ -128,32 +150,34 @@ U_0 \\ & U_1 \\ && \ddots \\ &&& U_{d-1}
 \end{pmatrix}
 ```
 
-- 当控制位为 $\ket{d-1}$ 态时，单 qudit 受控门 [6,7]
+- 单受控 qudit 门，受控位为 $\ket{d-1}$ 态 [6,7]
 ```math
-C_2[U_d]=\mathbb{I}_{d^2-d}\oplus R_d
+C_2[U_d]=\mathbb{I}_{d^2-d}\oplus U_d
 =\begin{pmatrix}
-\mathbb{I}_{d^2-d} & \\ & R_d
+\mathbb{I}_{d^2-d} & \\ & U_d
 \end{pmatrix}
 ```
 
-- 当控制位为 $\ket{d-1}$ 态时，多 qudit 受控门 [6,7]
+- 多受控 qudit 门，受控位为 $\ket{d-1}$ 态 [6,7]
 ```math
-C_k[R_d]=\mathbb{I}_{d^k-d}\oplus R_d
+C_k[U_d]=\mathbb{I}_{d^k-d}\oplus U_d
 =\begin{pmatrix}
-\mathbb{I}_{d^k-d} & \\ & R_d
+\mathbb{I}_{d^k-d} & \\ & U_d
 \end{pmatrix}
 ```
 
-- 通用受控 X 门 General Controlled X，当控制位为 $\ket{m}$ 态时，作用置换门 $X_d^{(j,k)}$ 到目标位上 [5]
-  
+- 通用受控 X 门 General Controlled X：当控制位为 $\ket{m}$ 态时，作用泡利 X 门(置换门) $X_d^{(a,b)}$ 到目标位上，受控态需满足 $0\le m\le d-1$ [5,8,9]
+  - `GCX(dim, ind, obj_qudits=i, ctrl_qudits=j, ctrl_states=m)`
+  - 等价于 `X(dim, ind).on(obj_qudits=i, ctrl_qudits=j, ctrl_states=m)` 
 ```math
 \mathrm{GCX}_d\ket{i,j}=\left\{\begin{array}{c}
-\ket{i}\otimes X_d^{(j,k)}\ket{j} & i=m \\
+\ket{i}\otimes X_d^{(a,b)}\ket{j} & i=m \\
 \ket{i,j} & i\ne m
 \end{array}\right.
 ```
 
-- 通用受控门，当控制位为 $\ket{m}$ 态时，作用 $U_d$ 到目标位上，其中 $U_d$ 为单 qudit 门
+- 通用受控门：当控制位为 $\ket{m}$ 态时，作用 $U_d$ 到目标位上，其中 $U_d$ 为单 qudit 门
+  - 已有的门都能够如此控制 `.on(obj_qudits=i, ctrl_qudits=j, ctrl_states=m)` 
 ```math
 C^m[U_d]\ket{i,j}=\left\{\begin{array}{c}
 \ket{i}\otimes U_d\ket{j} & i=m \\
@@ -167,6 +191,11 @@ C^m[U_d]=\ket{m}\bra{m}\otimes U_d+\sum_{i\ne m}\ket{i}\bra{i}\otimes\mathbb{I}_
 \end{pmatrix}
 ```
 
+- 控制位和受控态
+  - `X(dim, ind).on(obj_qudits=0, ctrl_qudits=1)` 作用在 q0 位的 X 门，控制位为 q1, 默认受控态为 $\ket{d-1}$ 
+  - `X(dim, ind).on(obj_qudits=0, ctrl_qudits=1, ctrl_states=m)` 控制位为 q1，受控态为 $\ket{m}$ 
+  - `X(dim, ind).on(obj_qudits=0, ctrl_qudits=[1, 2], ctrl_states=m)` 控制位为 q1,q2，受控态均为 $\ket{m}$ 
+  - `X(dim, ind).on(obj_qudits=0, ctrl_qudits=[1, 2], ctrl_states=[m1, m2])` 控制位为 q1,q2，受控态分别为 $\ket{m_1},\ket{m_2}$，控制位的列表长度与受控态相等
 
 
 

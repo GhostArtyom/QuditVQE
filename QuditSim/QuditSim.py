@@ -363,13 +363,14 @@ sim.apply_circuit(circ)
 print(sim.get_qs())
 
 q = {i: np.eye(d)[i] for i in range(d)}
-state = np.kron(q[0], q[1])
+state = np.kron(q[0], q[1]) + np.kron(q[1], q[2])
 state /= norm(state)
 print(str_ket(state, d))
-SWAP = np.zeros([d**2, d**2], dtype=int)
+SWAP = np.zeros([d**2, d**2])
 for i in range(d**2):
     base = np.base_repr(i, d).zfill(2)
-    j = int(base[::-1], d)
+    j = np.mod(i * d + i // d, d**2)
+    print(i, base, base[::-1], int(base[::-1], d), j)
     SWAP[i, j] = 1
 state = SWAP @ state
 print(str_ket(state, d))

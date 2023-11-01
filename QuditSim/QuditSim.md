@@ -119,7 +119,30 @@ H_3=\frac{1}{\sqrt{3}}
   - `SWAP(dim, obj_qudits=[i, j], ctrl_qudits, ctrl_states)` 
   - 等价于 `SWAP(dim).on(obj_qudits=[i, j], ctrl_qudits, ctrl_states)` 
 ```math
-\mathrm{SWAP}_d\ket{i,j}=\ket{j,i}
+\mathrm{SWAP}_d\ket{i,j}=\ket{j,i},\quad
+(\mathrm{SWAP}_d)_{i,j}=\left\{\begin{array}{c}
+1, & j=(i\times d+\lfloor i/d\rfloor)\bmod d^2 \\
+0, & \text{others}
+\end{array}\right.
+```
+```math
+\mathrm{SWAP}_3=\begin{pmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{pmatrix}
+```
+```python
+SWAP = np.zeros([d**2, d**2], dtype=np.complex128)
+for i in range(d**2):
+    j = np.mod(i * d + i // d, d**2)
+    SWAP[i, j] = 1
 ```
 
 - 多值受控门 Multi-Value-Controlled Gate，其中 $U_i$ 为单 qudit 门 [7]

@@ -35,7 +35,7 @@ def str_special(str_pr):
     return str(round(str_pr * div, 4))
 
 
-def str_ket(state: np.ndarray, dim: int) -> str:
+def str_ket(dim: int, state: np.ndarray) -> str:
     '''Get ket format of the qudit state'''
     if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
         state = state.flatten()
@@ -300,7 +300,7 @@ class Simulator:
         if not isinstance(ket, bool):
             raise TypeError(f'ket requires a bool, but get {type(ket)}')
         if ket:
-            return str_ket(self.sim, self.dim)
+            return str_ket(self.dim, self.sim)
         return self.sim
 
     def set_qs(self, state: np.ndarray):
@@ -365,7 +365,7 @@ print(sim.get_qs())
 q = {i: np.eye(d)[i] for i in range(d)}
 state = np.kron(q[0], q[1]) + np.kron(q[1], q[2])
 state /= norm(state)
-print(str_ket(state, d))
+print(str_ket(d, state))
 SWAP = np.zeros([d**2, d**2])
 for i in range(d**2):
     base = np.base_repr(i, d).zfill(2)
@@ -373,5 +373,5 @@ for i in range(d**2):
     print(i, base, base[::-1], int(base[::-1], d), j)
     SWAP[i, j] = 1
 state = SWAP @ state
-print(str_ket(state, d))
+print(str_ket(d, state))
 print(SWAP)

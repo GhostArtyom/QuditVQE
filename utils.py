@@ -36,6 +36,62 @@ def is_hermitian(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
+def str_special(str_pr):
+    special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
+    if isinstance(str_pr, (int, str)):
+        return str(str_pr)
+    elif str_pr % 1 == 0:
+        return str(int(str_pr))
+    div = -1 if str_pr < 0 else 1
+    str_pr *= -1 if str_pr < 0 else 1
+    for key, val in special.items():
+        if isinstance(str_pr, str):
+            break
+        if np.isclose(str_pr / val % 1, 0):
+            div *= int(str_pr / val)
+            str_pr = key if div == 1 else f'-{key}' if div == -1 else f'{div}{key}'
+        elif np.isclose(val / str_pr % 1, 0):
+            div *= int(val / str_pr)
+            key = 1 if val == 1 else key
+            str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
+    if isinstance(str_pr, str):
+        return str_pr
+    return str(round(str_pr * div, 4))
+
+
+def str_ket(dim: int, state: np.ndarray) -> str:
+    '''Get ket format of the qudit state'''
+    if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
+        state = state.flatten()
+    if state.ndim != 1:
+        raise ValueError(f'State requires a 1-D ndarray, but get {state.shape}')
+    nq = round(log(len(state), dim), 12)
+    if nq % 1 != 0:
+        raise ValueError(f'Wrong state shape {state.shape} is not a power of {dim}')
+    nq = int(nq)
+    tol = 1e-8
+    string = []
+    for ind, val in enumerate(state):
+        base = np.base_repr(ind, dim).zfill(nq)
+        real = np.real(val)
+        imag = np.imag(val)
+        str_real = str_special(real)
+        str_imag = str_special(imag)
+        if np.abs(val) < tol:
+            continue
+        if np.abs(real) < tol:
+            string.append(f'{str_imag}j¦{base}⟩')
+            continue
+        if np.abs(imag) < tol:
+            string.append(f'{str_real}¦{base}⟩')
+            continue
+        if str_imag.startswith('-'):
+            string.append(f'{str_real}{str_imag}j¦{base}⟩')
+        else:
+            string.append(f'{str_real}+{str_imag}j¦{base}⟩')
+    return '\n'.join(string)
+
+
 def decompose_zyz(mat: np.ndarray):
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat

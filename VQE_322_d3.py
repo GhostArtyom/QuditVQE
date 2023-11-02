@@ -51,11 +51,12 @@ pr = {}
 circ = Circuit()
 ansatz = Circuit()
 nq = (k + 1) * (d - 1)
-c = np.eye(2**(2 * (d - 1))) - su2_encoding(np.eye(d**2), 2)
+Id = su2_encoding(np.eye(d**2), 2)
+p = np.eye(Id.shape[0]) - Id
 for i in range(len(g_name)):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
-        mat = su2_encoding(gates[i][j], 2) + c
+        mat = su2_encoding(gates[i][j], 2) + p
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)
         # gate_d, para = two_qubit_decompose(gate_u)

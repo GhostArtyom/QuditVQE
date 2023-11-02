@@ -89,7 +89,9 @@ def str_ket(dim: int, state: np.ndarray) -> str:
             string.append(f'{str_real}{str_imag}j¦{base}⟩')
         else:
             string.append(f'{str_real}+{str_imag}j¦{base}⟩')
-    return '\n'.join(string)
+    # return '\n'.join(string)
+    print('\n'.join(string))
+    print(state)
 
 
 def decompose_zyz(mat: np.ndarray):

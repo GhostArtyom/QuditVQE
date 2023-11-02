@@ -57,7 +57,8 @@ Universal Qudit Gates
 - [ ] Brennen, Bullock & O'Leary - Efficient Circuits for Exact-Universal Computation With Qudits, 2006 QIC & 2005 arXiv, QR & CINC
 - [ ] Khan & Perkowski - Synthesis of multi-qudit hybrid and d-valued quantum logic circuits by decomposition, 2006 Theor Comput Sci, CSD & uniformly controlled Givens rotation
 - [x] Sawicki & Karnas - Universality of Single-Qudit Gates, 2017 Annales Henri Poincaré
-- [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, 2013 PRA, GCX
+- [ ] Di & Wei - Synthesis of multivalued quantum logic circuits by elementary gates, 2013 PRA, GCX & QSD
+- [ ] Di & Wei - Optimal synthesis of multivalued quantum circuits, 2015 PRA, GCX & QSD_optimal
 - [x] Li, Gu, et al. - Efficient universal quantum computation with auxiliary Hilbert space, 2013 PRA, ququart CDNOT
 - [x] Luo, Chen, Yang & Wang - Geometry of Quantum Computation with Qudits, 2014 Sci Rep
 - [ ] Luo & Wang - Universal quantum computation with qudits, 2014 Sci China Phys Mech Astron, $C_2[R_d]$ 

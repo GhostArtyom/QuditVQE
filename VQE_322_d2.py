@@ -100,8 +100,8 @@ print(res.message)
 print('Optimal Value: %.20f' % res.fun)
 
 sim.reset()
-res_pr = dict(zip(p_name, res.x))
-sim.apply_circuit(ansatz.apply_value(res_pr))
+pr_res = dict(zip(p_name, res.x))
+sim.apply_circuit(ansatz.apply_value(pr_res))
 psi_res = sim.get_qs()
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 

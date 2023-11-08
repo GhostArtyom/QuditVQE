@@ -73,9 +73,9 @@ sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
 
-ham = np.outer(psi, psi.conj())
-print('Hamiltonian Dimension:', ham.shape)
-Ham = Hamiltonian(csr_matrix(ham))
+rho = np.outer(psi, psi.conj())
+Ham = Hamiltonian(csr_matrix(rho))
+print('Hamiltonian Dimension:', rho.shape)
 
 rho_rdm = reduced_density_matrix(psi, d, position)
 print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))

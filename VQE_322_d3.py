@@ -64,9 +64,8 @@ for i in range(len(g_name)):
         circ += gate_u
         # ansatz += gate_d
 
-# ansatz =
 p_name = ansatz.ansatz_params_name
-# pr = {i: pr[i] for i in p_name}
+pr = {i: pr[i] for i in p_name}
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
 print('Number of qubits: %d' % nq)
@@ -77,9 +76,9 @@ sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
 
-ham = np.outer(psi, psi.conj())
-print('Hamiltonian Dimension:', ham.shape)
-Ham = Hamiltonian(csr_matrix(ham))
+rho = np.outer(psi, psi.conj())
+Ham = Hamiltonian(csr_matrix(rho))
+print('Hamiltonian Dimension:', rho.shape)
 
 psi = su2_decoding(psi, k + 1)
 rho_rdm = reduced_density_matrix(psi, d, position)

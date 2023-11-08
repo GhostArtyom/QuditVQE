@@ -12,6 +12,7 @@ from QudiTop.gates import X, RY, RZ, GP, UMG
 from scipy.stats import unitary_group
 
 np.set_printoptions(linewidth=200)
+torch.set_printoptions(linewidth=200)
 
 
 def one_qutrit_ansatz(gate: UMG, with_phase: bool = False):
@@ -29,12 +30,11 @@ def one_qutrit_ansatz(gate: UMG, with_phase: bool = False):
     return circ
 
 
-d, nq = 3, 3
+d, nq = 3, 2
 circ = Circuit(d, nq)
 ansatz = Circuit(d, nq)
 for i in range(nq):
     mat = unitary_group.rvs(d)
-    print(mat)
     gate = UMG(d, mat, name=f'mat{i}').on(i)
     circ += gate
     ansatz += one_qutrit_ansatz(gate)
@@ -46,8 +46,8 @@ print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
 
 psi = circ.get_qs()
-rho = np.outer(psi, psi.conj())
 obj = list(range(nq))[::-1]
+rho = np.outer(psi, psi.conj())
 Ham = [(1, UMG(d, rho).on(obj))]
 expect = Expectation(Ham)
 print('Hamiltonian Dimension:', rho.shape)
@@ -56,7 +56,7 @@ start = time.perf_counter()
 target = torch.tensor([1], dtype=DTYPE)
 p0 = np.random.uniform(-1, 1, p_num)
 ansatz.assign_ansatz_parameters(p0)
-optimizer = optim.Adam(ansatz.parameters(), lr=1e-1)
+optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
 for i in range(1000):
     out = expect(ansatz())
     loss = nn.L1Loss()(out, target)

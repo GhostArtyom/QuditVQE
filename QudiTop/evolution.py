@@ -38,12 +38,10 @@ def get_general_controlled_gate_cmatrix(u, dim: int, ctrl_states: List):
 def evolution(op_mat: Tensor, qs: Tensor, target_indices: List[int]) -> Tensor:
     """Get the new quantum state after applying specific operation(gate or matrix).
     Refer: `https://pyquil-docs.rigetti.com/en/stable/_modules/pyquil/simulation/_numpy.html`
-
     Args:
         op_mat: The operation matrix that change the quantum state.
         qs: Current quantum state.
         target_indices: The qudits that `op_mat` acts on.
-
     Returns:
         The new quantum state.
     """
@@ -63,12 +61,10 @@ def evolution_complex(op_mat: Tuple, qs: Tuple, target_indices: List[int]) -> Te
     """Get the new quantum state after applying specific operation(gate or matrix).
     Since the auto-difference of complex number is not supported in PyTorch, Here just decompose the complex
     matrix as a tuple (real, imag) which represents the real part and imaginary part respectively.
-
     Args:
         op_mat: The operation matrix that change the quantum state.
         qs: Current quantum state.
         target_indices: The qudits that `op_mat` acts on.
-
     Returns:
         The new quantum state.
     """

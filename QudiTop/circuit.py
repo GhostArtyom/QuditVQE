@@ -16,8 +16,7 @@ class Circuit(nn.Module):
     """A list like container that contains qudit gates."""
 
     def __init__(self, dim: int, n_qudits: int, gates: Optional[Iterable[GateBase]] = None) -> None:
-        """Initialize.
-
+        """Initialize Circuit class.
         Args:
             dim: The dimension of qudits.
             n_qudits: The number of qudits this circuit contains.
@@ -111,7 +110,6 @@ class Circuit(nn.Module):
 
     def _assign_parameters(self, pr, trainable=False):
         """Assign parameter to circuit.
-
         Args:
             pr: The input parameters.
             trainable: If true, only assign to ansatz, otherwise only to encoder.
@@ -154,7 +152,6 @@ class Circuit(nn.Module):
 
     def get_qs(self, pr=None, ket: bool = False, endian_reverse=True):
         """Get quantum state.
-
         Args:
             pr: The given parameters. If None, use the current value of parameters. Otherwise assign
                 the value in `pr` to the parameters in circuit.
@@ -168,40 +165,33 @@ class Circuit(nn.Module):
         return qs
 
     def set_init_qs(self, qs):
-        """Set the initial state of circuit, initial state means the state that on the most left
-        state of circuit.
+        """Set the initial state of circuit, initial state means the state that on the most left state of circuit.
         Note: This function will not check if the state is a quantum state (such as if norm is 1).
         """
         shape = (self.dim, ) * self.n_qudits
         self.qs = get_complex_tuple(qs, shape)
 
     def no_grad_(self):
-        """Stop calculating gradient for all the parameterized gates, it's usually used as encoder.
-        This operation is inplace.
+        """Stop calculating gradient for all the parameterized gates, it's usually used as encoder. This operation is inplace.
         """
         for gate in self.gates:
             if isinstance(gate, WithParamGate):
                 gate.no_grad_()
 
     def with_grad_(self):
-        """Calculating gradient for all the parameterized gates, it's usually used as ansatz. This
-        operation is inplace.
+        """Calculating gradient for all the parameterized gates, it's usually used as ansatz. This operation is inplace.
         """
         for gate in self.gates:
             if isinstance(gate, WithParamGate):
                 gate.with_grad_()
 
     def as_encoder(self):
-        """Set the circuit as encoder, which means stopping calculating gradient for parameters.
-        This operation is inplace.
-        """
+        """Set the circuit as encoder, which means stopping calculating gradient for parameters. This operation is inplace."""
         self.no_grad_()
         return self
 
     def as_ansatz(self):
-        """Set the circuit as ansatz, which means it will calculate gradient for parameters. This
-        operation is inplace.
-        """
+        """Set the circuit as ansatz, which means it will calculate gradient for parameters. This operation is inplace."""
         self.with_grad_()
         return self
 
@@ -226,7 +216,6 @@ class Circuit(nn.Module):
 
     def sampling(self, shots: int = 1000, endian_reverse=True) -> None:
         """Measure the circuit `shots` times and calculate the result.
-
         Args:
             shots: The number of sampling.
             endian_reverse: If show the result in reversed endian. Since the endian is opposite to some other quantum

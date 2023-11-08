@@ -9,7 +9,6 @@ from math import log
 from h5py import File
 from numpy.linalg import *
 from scipy.linalg import *
-from mindquantum.simulator import *
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
 from mindquantum.framework import *
@@ -18,6 +17,7 @@ from scipy.stats import unitary_group
 from mindquantum.core.circuit import *
 from mindquantum.core.operators import *
 from mindquantum.algorithm.nisq import *
+from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
 
 np.set_printoptions(linewidth=200)

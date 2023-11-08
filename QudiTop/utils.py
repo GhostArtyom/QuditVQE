@@ -23,7 +23,6 @@ def _check_str(string, name):
 
 def ket(i, dim):
     """Get the numerical column vector.
-
     Args:
         i: Value of ket.
         dim: Dimension of qudits.
@@ -35,7 +34,6 @@ def ket(i, dim):
 
 def bra(i, dim):
     """Get the numerical row vector.
-
     Args:
         i: Value of ket.
         dim: Dimension of qudits.
@@ -59,10 +57,8 @@ def check_unitary(u: Tensor, atol=1e-8):
 
 def get_complex_tuple(mat, shape=None):
     """Convert the input matrix to a tuple which represents the complex matrix.
-
     Args:
-        mat: Input matrix, which can be real or complex, and data type can be numpy.ndarray or
-            torch.Tensor.
+        mat: Input matrix, which can be real or complex, and data type can be numpy.ndarray or torch.Tensor.
         shape: If not None, reshape the `mat` shape.
     """
     if isinstance(mat, (Tuple, List)):

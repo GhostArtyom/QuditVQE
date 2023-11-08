@@ -311,9 +311,13 @@ class WithParamGate(GateBase):
         """Set the value of the parameter. Note: this function won't check if the shape
         of input is reasonable."""
         assert self.param is not None, "`param` is None."
-        # if isinstance(value, float):
-        #     value = [value]
-        self.param.data = Tensor([value])
+        if isinstance(value, float):
+            value = [value]
+        elif isinstance(value, (np.float32, np.float64)):
+            value = [value.item()]
+        elif isinstance(value, Tensor) and value.dim() == 0:
+            value = [float(value.item())]
+        self.param.data = Tensor(value)
 
 
 class PauliNoneParamGate(NoneParamGate):

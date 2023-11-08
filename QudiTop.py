@@ -4,11 +4,12 @@ import numpy as np
 import torch.nn as nn
 from torch import optim
 from utils import fidelity
-from .circuit import Circuit
 from numpy.linalg import norm
-from .expectation import Expectation
-from .gates import X, RY, RZ, GP, UMG
+from QudiTop.circuit import Circuit
+from QudiTop.expectation import Expectation
+from QudiTop.gates import X, RY, RZ, GP, UMG
 from scipy.stats import unitary_group
+
 
 np.set_printoptions(linewidth=200)
 

@@ -25,7 +25,7 @@ def fun(p0, sim_grad, args=None):
         if i % 10 == 0:
             global start
             t = time.perf_counter() - start
-            print('Optimal Gap: %.20f, %d, %.4f' % (f, i, t))
+            print('Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (f, 1 - f, i, t))
     return f, g
 
 
@@ -102,7 +102,7 @@ fun(p0, sim_grad)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
 
 print(res.message)
-print('Optimal Value: %.20f' % res.fun)
+print('Optimal: %.20f' % res.fun)
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))

@@ -26,8 +26,8 @@ class Circuit(nn.Module):
         self.dim = dim
         self.n_qudits = n_qudits
         self.param_name = []
-        self.gates = nn.ModuleList()  # Quantum gates
-        self.qs = None  # Quantum state
+        self.gates = nn.ModuleList()
+        self.qs = None
         self._set_initial_state()
 
         if gates is not None:

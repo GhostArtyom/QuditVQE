@@ -25,8 +25,6 @@ class Expectation(nn.Module):
     def _get_item_expectation(self, qs, gates):
         """Calculate expectation based on given gates."""
         qs2 = qs
-        # print(qs2)
-        # print(qs)
         if isinstance(gates, GateBase):
             qs2 = gates(qs)
         elif isinstance(gates, Iterable):

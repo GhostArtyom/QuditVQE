@@ -7,8 +7,8 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn import Parameter
 from typing import List, Tuple, Union, Iterable
-from .utils import ket, bra, get_complex_tuple, check_unitary
 from .global_var import DTYPE, DEFAULT_VALUE, DEFAULT_PARAM_NAME
+from .utils import ket, bra, get_complex_tuple, check_unitary, str_special
 from .evolution import evolution_complex, get_general_controlled_gate_cmatrix
 
 
@@ -245,8 +245,8 @@ class NoneParamGate(GateBase):
 
     def __repr__(self):
         """Return a string representation of the object."""
-        assert self.obj_qudits is not None, "There's no object qudit."
-
+        if self.obj_qudits is None:
+            return f"{self.name}({self.dim})"
         str_obj = " ".join(str(i) for i in self.obj_qudits)
         str_ctrl = " ".join(str(i) for i in self.ctrl_qudits)
         str_ctrl_state = " ".join(str(i) for i in self.ctrl_states)
@@ -279,17 +279,20 @@ class WithParamGate(GateBase):
             name = pr
         elif isinstance(pr, (int, float, Tensor)):
             value = pr
+            name = str_special(pr)
         else:
-            raise TypeError(f"Parameter `pr` should be str of Tensor(float32), but get {pr}")
+            raise TypeError(f"Parameter `pr` should be str of str/int/float/Tensor, but get {type(pr)}")
         self.param = Parameter(Tensor([value]))
         self.param_name = name
 
     def __repr__(self):
         """Return a string representation of the object."""
+        str_pr = self.param_name
+        if self.obj_qudits is None:
+            return f"{self.name}({self.dim} {str_pr})"
         str_obj = " ".join(str(i) for i in self.obj_qudits)
         str_ctrl = " ".join(str(i) for i in self.ctrl_qudits)
         str_ctrl_state = " ".join(str(i) for i in self.ctrl_states)
-        str_pr = self.param_name
         if str_ctrl:
             return f"{self.name}({self.dim} {str_pr}|{str_obj} <-: {str_ctrl} - {str_ctrl_state})"
         else:
@@ -331,7 +334,10 @@ class PauliNoneParamGate(NoneParamGate):
         self.ind = list(ind)
 
     def __repr__(self):
+        """Return a string representation of the object."""
         str_ind = " ".join(str(i) for i in self.ind)
+        if self.obj_qudits is None:
+            return f"{self.name}({self.dim} [{str_ind}])"
         str_obj = " ".join(str(i) for i in self.obj_qudits)
         str_ctrl = " ".join(str(i) for i in self.ctrl_qudits)
         str_ctrl_state = " ".join(str(i) for i in self.ctrl_states)
@@ -394,13 +400,17 @@ class PauliWithParamGate(WithParamGate):
         self.ind = list(ind)
 
     def __repr__(self):
+        """Return a string representation of the object."""
+        str_pr = self.param_name
         str_ind = " ".join(str(i) for i in self.ind)
+        if self.obj_qudits is None:
+            return f"{self.name}({self.dim} [{str_ind}] {str_pr})"
         str_obj = " ".join(str(i) for i in self.obj_qudits)
         str_ctrl = " ".join(str(i) for i in self.ctrl_qudits)
         if str_ctrl:
-            return f"{self.name}({self.dim} [{str_ind}] {self.param_name}|{str_obj} <-: {str_ctrl})"
+            return f"{self.name}({self.dim} [{str_ind}] {str_pr}|{str_obj} <-: {str_ctrl})"
         else:
-            return f"{self.name}({self.dim} [{str_ind}] {self.param_name}|{str_obj})"
+            return f"{self.name}({self.dim} [{str_ind}] {str_pr}|{str_obj})"
 
 
 class RX(PauliWithParamGate):

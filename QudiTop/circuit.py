@@ -121,11 +121,9 @@ class Circuit(nn.Module):
             for gate in self.gates:
                 if isinstance(gate, WithParamGate) and (trainable == gate.trainable):
                     param_gates.append(gate)
-            assert len(pr) == len(param_gates), (f"Circuit have {len(param_gates)} parameters, "
-                                                 f"but giving {len(pr)} parameters.")
+            assert len(pr) == len(param_gates), (f"Circuit have {len(param_gates)} parameters, but giving {len(pr)} parameters.")
             for value, gate in zip(pr, param_gates):
                 gate.assign_param(value)
-
         elif isinstance(pr, dict):
             assert set(pr.keys()).issubset(set(self.param_name)), f"The circuit parameters are {self.param_name}, while got {pr.keys()}."
             for gate in self.gates:

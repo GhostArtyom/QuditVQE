@@ -46,25 +46,53 @@ def qutrit_ansatz(gate: UMG, with_phase: bool = False):
             circ += RY(d, ind, f'{name}RY{str_pr}').on(obj[0])
             circ += RZ(d, ind, f'{name}Rz{str_pr}').on(obj[0])
     elif len(obj) == 2:
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U1').on(obj[1]))
-        circ += Cd(d, f'{name}Cd1', 1, obj[1], obj[0])
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U2').on(obj[1]))
-        circ += Cd(d, f'{name}Cd2', 2, obj[1], obj[0])
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U3').on(obj[1]))
-        circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1], 0)
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U4').on(obj[1]))
-        circ += Cd(d, f'{name}Cd3', 2, obj[1], obj[0])
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U5').on(obj[1]))
-        circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1], 1)
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U6').on(obj[1]))
-        circ += Cd(d, f'{name}Cd4', 0, obj[1], obj[0])
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U7').on(obj[1]))
-        circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1], 2)
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U8').on(obj[1]))
-        circ += Cd(d, f'{name}Cd5', 2, obj[1], obj[0])
-        circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U9').on(obj[1]))
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            circ += RZ(d, ind, f'{name}ARZ{str_pr}').on(obj[1], obj[0], 1)
+            circ += RY(d, ind, f'{name}ARY{str_pr}').on(obj[1], obj[0], 1)
+            circ += RZ(d, ind, f'{name}ARz{str_pr}').on(obj[1], obj[0], 1)
+        for i, ind in enumerate(index):
+            circ += RZ(d, ind, f'{name}BRZ{str_pr}').on(obj[1], obj[0], 2)
+            circ += RY(d, ind, f'{name}BRY{str_pr}').on(obj[1], obj[0], 2)
+            circ += RZ(d, ind, f'{name}BRz{str_pr}').on(obj[1], obj[0], 2)
+        circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1])
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            circ += RZ(d, ind, f'{name}CRZ{str_pr}').on(obj[1], obj[0], 2)
+            circ += RY(d, ind, f'{name}CRY{str_pr}').on(obj[1], obj[0], 2)
+            circ += RZ(d, ind, f'{name}CRz{str_pr}').on(obj[1], obj[0], 2)
+        circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1])
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            circ += RZ(d, ind, f'{name}DRZ{str_pr}').on(obj[1], obj[0], 0)
+            circ += RY(d, ind, f'{name}DRY{str_pr}').on(obj[1], obj[0], 0)
+            circ += RZ(d, ind, f'{name}DRz{str_pr}').on(obj[1], obj[0], 0)
+        circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1])
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            circ += RZ(d, ind, f'{name}ERZ{str_pr}').on(obj[1], obj[0], 2)
+            circ += RY(d, ind, f'{name}ERY{str_pr}').on(obj[1], obj[0], 2)
+            circ += RZ(d, ind, f'{name}ERz{str_pr}').on(obj[1], obj[0], 2)
+
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U1').on(obj[1]))
+        # circ += Cd(d, f'{name}Cd1', 1, obj[1], obj[0])
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U2').on(obj[1]))
+        # circ += Cd(d, f'{name}Cd2', 2, obj[1], obj[0])
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U3').on(obj[1]))
+        # circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1], 2)
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U4').on(obj[1]))
+        # circ += Cd(d, f'{name}Cd3', 2, obj[1], obj[0])
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U5').on(obj[1]))
+        # circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1], 2)
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U6').on(obj[1]))
+        # circ += Cd(d, f'{name}Cd4', 0, obj[1], obj[0])
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U7').on(obj[1]))
+        # circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1], 2)
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U8').on(obj[1]))
+        # circ += Cd(d, f'{name}Cd5', 2, obj[1], obj[0])
+        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U9').on(obj[1]))
     else:
-        raise ValueError('Only works when nq = 2')
+        raise ValueError('Only works when nq <= 2')
     if with_phase:
         circ += [GP(d, 'phase').on(i) for i in obj]
     return circ
@@ -77,8 +105,7 @@ mat = unitary_group.rvs(d**nq, random_state=42)
 obj = list(range(nq))
 gate = UMG(d, mat, name=f'mat').on(obj)
 circ += gate
-ansatz += qutrit_ansatz(gate)
-ansatz += [GP(d, 'phase').on(i) for i in obj]
+ansatz += qutrit_ansatz(gate, True)
 print(ansatz)
 
 pr = ansatz.get_parameters()
@@ -98,7 +125,7 @@ start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
 target = torch.tensor([1], dtype=DTYPE)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
-optimizer = optim.Adam(ansatz.parameters(), lr=1e-1)
+optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
 for i in range(1000):
     out = expect(ansatz())
     loss = nn.L1Loss()(out, target)

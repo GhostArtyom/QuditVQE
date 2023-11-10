@@ -407,8 +407,9 @@ class PauliWithParamGate(WithParamGate):
             return f"{self.name}({self.dim} [{str_ind}] {str_pr})"
         str_obj = " ".join(str(i) for i in self.obj_qudits)
         str_ctrl = " ".join(str(i) for i in self.ctrl_qudits)
+        str_ctrl_state = " ".join(str(i) for i in self.ctrl_states)
         if str_ctrl:
-            return f"{self.name}({self.dim} [{str_ind}] {str_pr}|{str_obj} <-: {str_ctrl})"
+            return f"{self.name}({self.dim} [{str_ind}] {str_pr}|{str_obj} <-: {str_ctrl} - {str_ctrl_state})"
         else:
             return f"{self.name}({self.dim} [{str_ind}] {str_pr}|{str_obj})"
 

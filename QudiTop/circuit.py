@@ -169,6 +169,14 @@ class Circuit(nn.Module):
         shape = (self.dim, ) * self.n_qudits
         self.qs = get_complex_tuple(qs, shape)
 
+    def matrix(self):
+        mat = np.zeros([self.dim**self.n_qudits, self.dim**self.n_qudits], dtype=np.complex128)
+        for i in range(self.dim**self.n_qudits):
+            self.set_init_qs(np.eye(self.dim**self.n_qudits)[i])
+            ind = int(np.base_repr(i, self.dim).zfill(self.n_qudits)[::-1], self.dim)
+            mat[:, ind] = self.get_qs()
+        return mat
+
     def no_grad_(self):
         """Stop calculating gradient for all the parameterized gates, it's usually used as encoder. This operation is inplace.
         """

@@ -4,93 +4,116 @@ import numpy as np
 import torch.nn as nn
 from torch import optim
 from utils import fidelity
+from QudiTop.gates import *
 from numpy.linalg import norm
 from QudiTop.circuit import Circuit
 from QudiTop.global_var import DTYPE
 from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
-from QudiTop.gates import X, RY, RZ, GP, UMG
 
 np.set_printoptions(linewidth=200)
 torch.set_printoptions(linewidth=200)
 
 
-def Cd(d, pr, state, obj, ctrl):
+def ZYZ(d, name, obj, with_phase: bool = False):
     if d != 3:
         raise ValueError('Only works when d = 3')
-    if state < 0 or state >= d:
-        raise ValueError(f'¦{state}⟩ control state should in 0 to {d-1}')
     circ = Circuit(d, nq)
-    circ += RZ(d, [0, 1], f'{pr}RZ01').on(obj)
-    circ += X(d, [0, 1]).on(obj, ctrl, state)
-    circ += RZ(d, [0, 1], f'{pr}-RZ01').on(obj)
-    circ += X(d, [0, 1]).on(obj, ctrl, state)
-    circ += RZ(d, [0, 2], f'{pr}RZ02').on(obj)
-    circ += X(d, [0, 2]).on(obj, ctrl, state)
-    circ += RZ(d, [0, 2], f'{pr}-RZ02').on(obj)
-    circ += X(d, [0, 2]).on(obj, ctrl, state)
-    circ += GP(d, f'{pr}phase_obj').on(obj)
-    circ += GP(d, f'{pr}phase_ctrl').on(ctrl)
+    index = [[1, 2], [0, 2], [1, 2]]
+    for i, ind in enumerate(index):
+        str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+        circ += RZ(d, ind, f'{name}RZ{str_pr}').on(obj)
+        circ += RY(d, ind, f'{name}RY{str_pr}').on(obj)
+        circ += RZ(d, ind, f'{name}Rz{str_pr}').on(obj)
+        if with_phase:
+            circ += GP(d, f'{name}phase_{i}').on(obj)
     return circ
 
 
-def qutrit_ansatz(gate: UMG, with_phase: bool = False):
+def Cd(d, name, obj, ctrl, state):
+    if d != 3:
+        raise ValueError('Only works when d = 3')
+    circ = Circuit(d, nq)
+    # circ += RZ(d, [0, 1], f'{name}RZ01').on(obj)
+    # circ += X(d, [0, 1]).on(obj, ctrl, state)
+    # circ += RZ(d, [0, 1], f'{name}-RZ01').on(obj)
+    # circ += X(d, [0, 1]).on(obj, ctrl, state)
+    # circ += RZ(d, [0, 2], f'{name}RZ02').on(obj)
+    # circ += X(d, [0, 2]).on(obj, ctrl, state)
+    # circ += RZ(d, [0, 2], f'{name}-RZ02').on(obj)
+    # circ += X(d, [0, 2]).on(obj, ctrl, state)
+
+    circ += RZ(d, [0, 1], f'{name}RZ01').on(obj, ctrl, state)
+    circ += RZ(d, [0, 2], f'{name}RZ02').on(obj, ctrl, state)
+    circ += GP(d, f'{name}phase').on(obj, ctrl, state)
+
+    # index = [[1, 2], [0, 2], [1, 2]]
+    # for i, ind in enumerate(index):
+    #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+    #     circ += RZ(d, ind, f'{name}RZ{str_pr}').on(obj, ctrl, state)
+    #     circ += RY(d, ind, f'{name}RY{str_pr}').on(obj, ctrl, state)
+    #     circ += RZ(d, ind, f'{name}Rz{str_pr}').on(obj, ctrl, state)
+    return circ
+
+
+def qutrit_ansatz(gate: UMG, with_phase: bool = True):
     obj = gate.obj_qudits
     name = f'{gate.name}_'
     circ = Circuit(d, nq)
-    index = [[0, 2], [1, 2], [0, 2]]
     if len(obj) == 1:
-        for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            circ += RZ(d, ind, f'{name}RZ{str_pr}').on(obj[0])
-            circ += RY(d, ind, f'{name}RY{str_pr}').on(obj[0])
-            circ += RZ(d, ind, f'{name}Rz{str_pr}').on(obj[0])
+        circ += ZYZ(d, f'{name}', obj[0])
     elif len(obj) == 2:
-        for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            circ += RZ(d, ind, f'{name}ARZ{str_pr}').on(obj[1], obj[0], 1)
-            circ += RY(d, ind, f'{name}ARY{str_pr}').on(obj[1], obj[0], 1)
-            circ += RZ(d, ind, f'{name}ARz{str_pr}').on(obj[1], obj[0], 1)
-        for i, ind in enumerate(index):
-            circ += RZ(d, ind, f'{name}BRZ{str_pr}').on(obj[1], obj[0], 2)
-            circ += RY(d, ind, f'{name}BRY{str_pr}').on(obj[1], obj[0], 2)
-            circ += RZ(d, ind, f'{name}BRz{str_pr}').on(obj[1], obj[0], 2)
-        circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1])
-        for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            circ += RZ(d, ind, f'{name}CRZ{str_pr}').on(obj[1], obj[0], 2)
-            circ += RY(d, ind, f'{name}CRY{str_pr}').on(obj[1], obj[0], 2)
-            circ += RZ(d, ind, f'{name}CRz{str_pr}').on(obj[1], obj[0], 2)
-        circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1])
-        for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            circ += RZ(d, ind, f'{name}DRZ{str_pr}').on(obj[1], obj[0], 0)
-            circ += RY(d, ind, f'{name}DRY{str_pr}').on(obj[1], obj[0], 0)
-            circ += RZ(d, ind, f'{name}DRz{str_pr}').on(obj[1], obj[0], 0)
-        circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1])
-        for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            circ += RZ(d, ind, f'{name}ERZ{str_pr}').on(obj[1], obj[0], 2)
-            circ += RY(d, ind, f'{name}ERY{str_pr}').on(obj[1], obj[0], 2)
-            circ += RZ(d, ind, f'{name}ERz{str_pr}').on(obj[1], obj[0], 2)
+        circ += ZYZ(d, f'{name}U1_', obj[0])
+        circ += Cd(d, f'{name}Cd1_', obj[0], obj[1], 1)
+        circ += ZYZ(d, f'{name}U2_', obj[0])
+        circ += Cd(d, f'{name}Cd2_', obj[0], obj[1], 2)
+        circ += ZYZ(d, f'{name}U3_', obj[0])
+        circ += RY(d, [1, 2], f'{name}RY1').on(obj[1], obj[0], 2)
+        circ += RY(d, [1, 2], f'{name}RY1').on(obj[1], obj[0], 1)
+        circ += RY(d, [1, 2], f'{name}RY1').on(obj[1], obj[0], 0)
+        circ += ZYZ(d, f'{name}U4_', obj[0])
+        circ += Cd(d, f'{name}Cd3_', obj[0], obj[1], 2)
+        circ += ZYZ(d, f'{name}U5_', obj[0])
+        circ += RY(d, [0, 1], f'{name}RY2').on(obj[1], obj[0], 2)
+        circ += RY(d, [0, 1], f'{name}RY2').on(obj[1], obj[0], 1)
+        circ += RY(d, [0, 1], f'{name}RY2').on(obj[1], obj[0], 0)
+        circ += ZYZ(d, f'{name}U6_', obj[0])
+        circ += Cd(d, f'{name}Cd4_', obj[0], obj[1], 0)
+        circ += ZYZ(d, f'{name}U7_', obj[0])
+        circ += RY(d, [1, 2], f'{name}RY3').on(obj[1], obj[0], 2)
+        circ += RY(d, [1, 2], f'{name}RY3').on(obj[1], obj[0], 1)
+        circ += RY(d, [1, 2], f'{name}RY3').on(obj[1], obj[0], 0)
+        circ += ZYZ(d, f'{name}U8_', obj[0])
+        circ += Cd(d, f'{name}Cd5_', obj[0], obj[1], 2)
+        circ += ZYZ(d, f'{name}U9_', obj[0])
 
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U1').on(obj[1]))
-        # circ += Cd(d, f'{name}Cd1', 1, obj[1], obj[0])
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U2').on(obj[1]))
-        # circ += Cd(d, f'{name}Cd2', 2, obj[1], obj[0])
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U3').on(obj[1]))
-        # circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1], 2)
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U4').on(obj[1]))
-        # circ += Cd(d, f'{name}Cd3', 2, obj[1], obj[0])
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U5').on(obj[1]))
-        # circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1], 2)
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U6').on(obj[1]))
-        # circ += Cd(d, f'{name}Cd4', 0, obj[1], obj[0])
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U7').on(obj[1]))
-        # circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1], 2)
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U8').on(obj[1]))
-        # circ += Cd(d, f'{name}Cd5', 2, obj[1], obj[0])
-        # circ += qutrit_ansatz(UMG(d, np.eye(d), name=f'{name}U9').on(obj[1]))
+        # for i, ind in enumerate(index):
+        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+        #     circ += RZ(d, ind, f'{name}ARZ{str_pr}').on(obj[1], obj[0], 1)
+        #     circ += RY(d, ind, f'{name}ARY{str_pr}').on(obj[1], obj[0], 1)
+        #     circ += RZ(d, ind, f'{name}ARz{str_pr}').on(obj[1], obj[0], 1)
+        # for i, ind in enumerate(index):
+        #     circ += RZ(d, ind, f'{name}BRZ{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RY(d, ind, f'{name}BRY{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RZ(d, ind, f'{name}BRz{str_pr}').on(obj[1], obj[0], 2)
+        # circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1])
+        # for i, ind in enumerate(index):
+        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+        #     circ += RZ(d, ind, f'{name}CRZ{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RY(d, ind, f'{name}CRY{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RZ(d, ind, f'{name}CRz{str_pr}').on(obj[1], obj[0], 2)
+        # circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1])
+        # for i, ind in enumerate(index):
+        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+        #     circ += RZ(d, ind, f'{name}DRZ{str_pr}').on(obj[1], obj[0], 0)
+        #     circ += RY(d, ind, f'{name}DRY{str_pr}').on(obj[1], obj[0], 0)
+        #     circ += RZ(d, ind, f'{name}DRz{str_pr}').on(obj[1], obj[0], 0)
+        # circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1])
+        # for i, ind in enumerate(index):
+        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+        #     circ += RZ(d, ind, f'{name}ERZ{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RY(d, ind, f'{name}ERY{str_pr}').on(obj[1], obj[0], 2)
+        #     circ += RZ(d, ind, f'{name}ERz{str_pr}').on(obj[1], obj[0], 2)
     else:
         raise ValueError('Only works when nq <= 2')
     if with_phase:
@@ -106,7 +129,8 @@ obj = list(range(nq))
 gate = UMG(d, mat, name=f'mat').on(obj)
 circ += gate
 ansatz += qutrit_ansatz(gate, True)
-print(ansatz)
+for i, g in enumerate(ansatz.gates):
+    print('{:3d}'.format(i), g)
 
 pr = ansatz.get_parameters()
 g_num = len(ansatz.gates)
@@ -126,7 +150,7 @@ p0 = np.random.uniform(-1, 1, p_num)
 target = torch.tensor([1], dtype=DTYPE)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
 optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
-for i in range(1000):
+for i in range(200):
     out = expect(ansatz())
     loss = nn.L1Loss()(out, target)
     optimizer.zero_grad()

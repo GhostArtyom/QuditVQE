@@ -97,7 +97,7 @@ class Circuit(nn.Module):
 
     def reset(self):
         """Reset the initial state as the default one."""
-        self.qs = self._get_initial_state()
+        self._set_initial_state()
 
     def _detach_flatten_merge_qs(self, qs: Tuple[Tensor], endian_reverse: bool = False):
         """A tool function that convert the representation format of quantum state."""
@@ -159,7 +159,7 @@ class Circuit(nn.Module):
         self.assign_ansatz_parameters(pr)
         qs = self.get_qs_tuple()
         if grad_tensor:
-            return qs
+            return torch.complex(qs[0], qs[1])
         qs = self._detach_flatten_merge_qs(qs, endian_reverse).numpy()
         return str_ket(self.dim, qs) if ket else qs
 
@@ -172,16 +172,14 @@ class Circuit(nn.Module):
 
     def matrix(self, grad_tensor: bool = False, endian_reverse: bool = False):
         n = self.dim**self.n_qudits
-        re, im = [], []
+        mat = []
         for i in range(n):
             self.set_init_qs(torch.eye(n, dtype=DTYPE)[i])
             qs = self.get_qs(grad_tensor=True)
-            re.append(qs[0])
-            im.append(qs[1])
-        re = torch.stack(re).flatten(start_dim=1)
-        im = torch.stack(im).flatten(start_dim=1)
-        mat = torch.complex(re, im)
-        return mat if grad_tensor else mat.detach().numpy()
+            mat.append(qs)
+        mat = torch.stack(mat)
+        self._set_initial_state()
+        return mat if grad_tensor else mat.detach().numpy().T
         
 
     def no_grad_(self):
@@ -221,7 +219,7 @@ class Circuit(nn.Module):
 
     def qs_probability_distribution(self, endian_reverse: bool = False) -> Dict:
         """Get the probability of each quantum state."""
-        qs = self.get_qs(endian_reverse)
+        qs = self.get_qs(endian_reverse=endian_reverse)
         p = (qs.conj() * qs).real
         p /= p.sum()
         state_str = [np.base_repr(ind, self.dim).zfill(self.n_qudits) for ind in range(self.dim**self.n_qudits)]

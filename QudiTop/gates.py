@@ -218,9 +218,11 @@ class GateBase(nn.Module):
         """Get the gate matrix that in Tuple format."""
         return NotImplemented
 
-    def matrix(self):
+    def matrix(self, grad_tensor: bool = False):
         """Get the matrix of gate."""
         cmat = self._cmatrix()
+        if grad_tensor:
+            return cmat
         return torch.complex(cmat[0].detach(), cmat[1].detach()).numpy()
 
     def is_unitary(self):

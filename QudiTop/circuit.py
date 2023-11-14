@@ -6,7 +6,7 @@ import collections
 import numpy as np
 import torch.nn as nn
 from torch import Tensor
-from .global_var import DTYPE
+from .global_var import DTYPE, CDTYPE
 from .gates import GateBase, WithParamGate
 from .utils import bprint, str_ket, get_complex_tuple
 from typing import List, Tuple, Union, Iterable, Optional, Dict
@@ -99,7 +99,7 @@ class Circuit(nn.Module):
         """Reset the initial state as the default one."""
         self.qs = self._get_initial_state()
 
-    def _detach_flatten_merge_qs(self, qs: Tuple[Tensor], endian_reverse=False):
+    def _detach_flatten_merge_qs(self, qs: Tuple[Tensor], endian_reverse: bool = False):
         """A tool function that convert the representation format of quantum state."""
         re, im = qs[0].detach(), qs[1].detach()
         if endian_reverse:
@@ -108,7 +108,7 @@ class Circuit(nn.Module):
             im = im.permute(*indices)
         return torch.complex(re.flatten(), im.flatten())
 
-    def _assign_parameters(self, pr, trainable=False):
+    def _assign_parameters(self, pr, trainable: bool = False):
         """Assign parameter to circuit.
         Args:
             pr: The input parameters.
@@ -148,7 +148,7 @@ class Circuit(nn.Module):
         """
         return self.forward(self.qs)
 
-    def get_qs(self, pr=None, ket: bool = False, endian_reverse=True):
+    def get_qs(self, pr=None, ket: bool = False, grad_tensor: bool = False, endian_reverse: bool = False):
         """Get quantum state.
         Args:
             pr: The given parameters. If None, use the current value of parameters. Otherwise assign
@@ -157,10 +157,11 @@ class Circuit(nn.Module):
         """
         self.assign_encoder_parameters(pr)
         self.assign_ansatz_parameters(pr)
-        qs = self._detach_flatten_merge_qs(self.forward(self.qs), endian_reverse).numpy()
-        if ket:
-            return str_ket(self.dim, qs)
-        return qs
+        qs = self.get_qs_tuple()
+        if grad_tensor:
+            return qs
+        qs = self._detach_flatten_merge_qs(qs, endian_reverse).numpy()
+        return str_ket(self.dim, qs) if ket else qs
 
     def set_init_qs(self, qs):
         """Set the initial state of circuit, initial state means the state that on the most left state of circuit.
@@ -169,13 +170,19 @@ class Circuit(nn.Module):
         shape = (self.dim, ) * self.n_qudits
         self.qs = get_complex_tuple(qs, shape)
 
-    def matrix(self):
-        mat = np.zeros([self.dim**self.n_qudits, self.dim**self.n_qudits], dtype=np.complex128)
-        for i in range(self.dim**self.n_qudits):
-            self.set_init_qs(np.eye(self.dim**self.n_qudits)[i])
-            ind = int(np.base_repr(i, self.dim).zfill(self.n_qudits)[::-1], self.dim)
-            mat[:, ind] = self.get_qs()
-        return mat
+    def matrix(self, grad_tensor: bool = False, endian_reverse: bool = False):
+        n = self.dim**self.n_qudits
+        re, im = [], []
+        for i in range(n):
+            self.set_init_qs(torch.eye(n, dtype=DTYPE)[i])
+            qs = self.get_qs(grad_tensor=True)
+            re.append(qs[0])
+            im.append(qs[1])
+        re = torch.stack(re).flatten(start_dim=1)
+        im = torch.stack(im).flatten(start_dim=1)
+        mat = torch.complex(re, im)
+        return mat if grad_tensor else mat.detach().numpy()
+        
 
     def no_grad_(self):
         """Stop calculating gradient for all the parameterized gates, it's usually used as encoder. This operation is inplace.
@@ -212,7 +219,7 @@ class Circuit(nn.Module):
                     res[gate.param_name] = param.tolist()
         return res
 
-    def qs_probability_distribution(self, endian_reverse=True) -> Dict:
+    def qs_probability_distribution(self, endian_reverse: bool = False) -> Dict:
         """Get the probability of each quantum state."""
         qs = self.get_qs(endian_reverse)
         p = (qs.conj() * qs).real
@@ -220,7 +227,7 @@ class Circuit(nn.Module):
         state_str = [np.base_repr(ind, self.dim).zfill(self.n_qudits) for ind in range(self.dim**self.n_qudits)]
         return dict(zip(state_str, p))
 
-    def sampling(self, shots: int = 1000, endian_reverse=True) -> None:
+    def sampling(self, shots: int = 1000, endian_reverse: bool = False) -> None:
         """Measure the circuit `shots` times and calculate the result.
         Args:
             shots: The number of sampling.

@@ -16,8 +16,8 @@ def get_multi_value_controlled_gate_cmatrix(u_list: List[Tensor], ctrl_states: L
     """Get the matrix of multi-value controlled gate by given matrix list."""
     assert len(u_list) == u_list[0].shape[0] == u_list[0].shape[1]
     dim = len(u_list)
-    re = torch.zeros((dim**2, dim**2))
-    im = torch.zeros((dim**2, dim**2))
+    re = torch.zeros((dim**2, dim**2), dtype=DTYPE)
+    im = torch.zeros((dim**2, dim**2), dtype=DTYPE)
     for i, u in enumerate(u_list):
         if isinstance(u, np.ndarray):
             u = torch.tensor(u)
@@ -127,7 +127,7 @@ def get_increment_gate_cmatrix(dim: int, ctrl_states: List = None) -> Tuple:
     """Get the matrix of increment gate. Read the documents of this package for more information."""
     re = torch.tensor(np.eye(dim, k=-1), dtype=DTYPE)
     re[dim - 1, dim - 1] = 1
-    im = torch.zeros((dim, dim))
+    im = torch.zeros((dim, dim), dtype=DTYPE)
     if ctrl_states:
         re, im = get_general_controlled_gate_cmatrix((re, im), dim, ctrl_states)
     return re, im
@@ -136,7 +136,7 @@ def get_increment_gate_cmatrix(dim: int, ctrl_states: List = None) -> Tuple:
 def get_hadamard_gate_cmatrix(dim: int, ctrl_states: List = None) -> Tuple:
     """Get the matrix of Hadamard gate. Read the documents of this package for more information."""
     re = torch.zeros((dim, dim), dtype=DTYPE)
-    im = torch.zeros_like(re)
+    im = torch.zeros_like(re, dtype=DTYPE)
     for i in range(dim):
         for j in range(dim):
             re[i, j] = torch.cos(torch.tensor(2.0 * torch.pi * i * j / dim))
@@ -152,7 +152,7 @@ def get_swap_gate_cmatrix(dim: int, ctrl_states: List = None) -> Tuple:
     """Get the matrix of SWAP gate."""
     n = dim**2
     re = torch.zeros((n, n), dtype=DTYPE)
-    im = torch.zeros_like(re)
+    im = torch.zeros_like(re, dtype=DTYPE)
     for i in range(n):
         for j in range(n):
             if j == (i * dim + i // dim) % n:
@@ -221,7 +221,7 @@ class GateBase(nn.Module):
     def matrix(self):
         """Get the matrix of gate."""
         cmat = self._cmatrix()
-        return torch.complex(cmat[0].detach(), cmat[1].detach())
+        return torch.complex(cmat[0].detach(), cmat[1].detach()).numpy()
 
     def is_unitary(self):
         """Check if this gate is unitary."""

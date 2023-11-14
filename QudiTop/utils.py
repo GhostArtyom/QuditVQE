@@ -76,14 +76,14 @@ def get_complex_tuple(mat, shape=None):
             im = torch.tensor(mat.imag, dtype=DTYPE)
         else:
             re = torch.tensor(mat, dtype=DTYPE)
-            im = torch.zeros_like(re)
+            im = torch.zeros_like(re, dtype=DTYPE)
     elif isinstance(mat, Tensor):
         if torch.is_complex(mat):
             re = mat.real.clone().detach().type(DTYPE)
             im = mat.imag.clone().detach().type(DTYPE)
         else:
             re = mat.clone().detach().type(DTYPE)
-            im = torch.zeros_like(re)
+            im = torch.zeros_like(re, dtype=DTYPE)
     else:
         raise TypeError(f"The type of input `mat` should be numpy.array, torch.tensor or Tuple[re, im] where "\
                         f"re and im are both numpy.array or tensor.tensor, but got type {type(mat)}.")

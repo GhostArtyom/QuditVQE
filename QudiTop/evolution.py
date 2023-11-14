@@ -4,6 +4,7 @@ Refer: https://gitee.com/forcekeng/quditop
 import math
 import torch
 from torch import Tensor
+from .global_var import DTYPE
 from typing import List, Tuple
 from .utils import get_complex_tuple
 
@@ -27,8 +28,8 @@ def get_general_controlled_gate_cmatrix(u, dim: int, ctrl_states: List):
     k_obj_qudits = round(math.log(r, dim))
     k_ctrl_qudits = len(ctrl_states)
     k_qudits = k_obj_qudits + k_ctrl_qudits
-    re = torch.eye(dim**k_qudits)
-    im = torch.zeros((dim**k_qudits, dim**k_qudits))
+    re = torch.eye(dim**k_qudits, dtype=DTYPE)
+    im = torch.zeros((dim**k_qudits, dim**k_qudits), dtype=DTYPE)
     idx = dim**k_obj_qudits * int("".join(str(c) for c in ctrl_states), dim)
     re[idx:idx + r, idx:idx + r] = u_re
     im[idx:idx + r, idx:idx + r] = u_im

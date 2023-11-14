@@ -11,15 +11,14 @@ from QudiTop.global_var import DTYPE
 from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
 
-np.set_printoptions(linewidth=200)
-torch.set_printoptions(linewidth=200)
-
+np.set_printoptions(linewidth=250)
+torch.set_printoptions(linewidth=250)
 
 def ZYZ(d, name, obj, with_phase: bool = False):
     if d != 3:
         raise ValueError('Only works when d = 3')
-    circ = Circuit(d, nq)
-    index = [[1, 2], [0, 2], [1, 2]]
+    circ = Circuit(d, 1)
+    index = [[1, 2], [0, 1], [1, 2]]
     for i, ind in enumerate(index):
         str_pr = f'{"".join(str(i) for i in ind)}_{i}'
         circ += RZ(d, ind, f'{name}RZ{str_pr}').on(obj)
@@ -33,33 +32,18 @@ def ZYZ(d, name, obj, with_phase: bool = False):
 def Cd(d, name, obj, ctrl, state):
     if d != 3:
         raise ValueError('Only works when d = 3')
-    circ = Circuit(d, nq)
-    # circ += RZ(d, [0, 1], f'{name}RZ01').on(obj)
-    # circ += X(d, [0, 1]).on(obj, ctrl, state)
-    # circ += RZ(d, [0, 1], f'{name}-RZ01').on(obj)
-    # circ += X(d, [0, 1]).on(obj, ctrl, state)
-    # circ += RZ(d, [0, 2], f'{name}RZ02').on(obj)
-    # circ += X(d, [0, 2]).on(obj, ctrl, state)
-    # circ += RZ(d, [0, 2], f'{name}-RZ02').on(obj)
-    # circ += X(d, [0, 2]).on(obj, ctrl, state)
-
+    circ = Circuit(d, 2)
     circ += RZ(d, [0, 1], f'{name}RZ01').on(obj, ctrl, state)
     circ += RZ(d, [0, 2], f'{name}RZ02').on(obj, ctrl, state)
     circ += GP(d, f'{name}phase').on(obj, ctrl, state)
-
-    # index = [[1, 2], [0, 2], [1, 2]]
-    # for i, ind in enumerate(index):
-    #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-    #     circ += RZ(d, ind, f'{name}RZ{str_pr}').on(obj, ctrl, state)
-    #     circ += RY(d, ind, f'{name}RY{str_pr}').on(obj, ctrl, state)
-    #     circ += RZ(d, ind, f'{name}Rz{str_pr}').on(obj, ctrl, state)
     return circ
 
 
 def qutrit_ansatz(gate: UMG, with_phase: bool = True):
+    d = gate.dim
     obj = gate.obj_qudits
     name = f'{gate.name}_'
-    circ = Circuit(d, nq)
+    circ = Circuit(d, 2)
     if len(obj) == 1:
         circ += ZYZ(d, f'{name}', obj[0])
     elif len(obj) == 2:
@@ -86,34 +70,6 @@ def qutrit_ansatz(gate: UMG, with_phase: bool = True):
         circ += ZYZ(d, f'{name}U8_', obj[0])
         circ += Cd(d, f'{name}Cd5_', obj[0], obj[1], 2)
         circ += ZYZ(d, f'{name}U9_', obj[0])
-
-        # for i, ind in enumerate(index):
-        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-        #     circ += RZ(d, ind, f'{name}ARZ{str_pr}').on(obj[1], obj[0], 1)
-        #     circ += RY(d, ind, f'{name}ARY{str_pr}').on(obj[1], obj[0], 1)
-        #     circ += RZ(d, ind, f'{name}ARz{str_pr}').on(obj[1], obj[0], 1)
-        # for i, ind in enumerate(index):
-        #     circ += RZ(d, ind, f'{name}BRZ{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RY(d, ind, f'{name}BRY{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RZ(d, ind, f'{name}BRz{str_pr}').on(obj[1], obj[0], 2)
-        # circ += RY(d, [1, 2], f'{name}RY1').on(obj[0], obj[1])
-        # for i, ind in enumerate(index):
-        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-        #     circ += RZ(d, ind, f'{name}CRZ{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RY(d, ind, f'{name}CRY{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RZ(d, ind, f'{name}CRz{str_pr}').on(obj[1], obj[0], 2)
-        # circ += RY(d, [0, 1], f'{name}RY2').on(obj[0], obj[1])
-        # for i, ind in enumerate(index):
-        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-        #     circ += RZ(d, ind, f'{name}DRZ{str_pr}').on(obj[1], obj[0], 0)
-        #     circ += RY(d, ind, f'{name}DRY{str_pr}').on(obj[1], obj[0], 0)
-        #     circ += RZ(d, ind, f'{name}DRz{str_pr}').on(obj[1], obj[0], 0)
-        # circ += RY(d, [1, 2], f'{name}RY3').on(obj[0], obj[1])
-        # for i, ind in enumerate(index):
-        #     str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-        #     circ += RZ(d, ind, f'{name}ERZ{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RY(d, ind, f'{name}ERY{str_pr}').on(obj[1], obj[0], 2)
-        #     circ += RZ(d, ind, f'{name}ERz{str_pr}').on(obj[1], obj[0], 2)
     else:
         raise ValueError('Only works when nq <= 2')
     if with_phase:
@@ -142,7 +98,7 @@ print('Number of gates: %d' % g_num)
 psi = circ.get_qs()
 rho = np.outer(psi, psi.conj())
 print('Hamiltonian Dimension:', rho.shape)
-Ham = [(1, UMG(d, rho).on(obj[::-1]))]
+Ham = [(1, UMG(d, rho).on(obj))]
 expect = Expectation(Ham)
 
 start = time.perf_counter()
@@ -150,7 +106,7 @@ p0 = np.random.uniform(-1, 1, p_num)
 target = torch.tensor([1], dtype=DTYPE)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
 optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
-for i in range(200):
+for i in range(500):
     out = expect(ansatz())
     loss = nn.L1Loss()(out, target)
     optimizer.zero_grad()
@@ -167,7 +123,7 @@ print('Loss: %.15f, Fidelity: %.15f, %3d, %.4f' % (loss, out, i, t))
 pr_res = ansatz.get_parameters()
 psi_res = ansatz.get_qs(pr_res)
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
-print('psi fidelity: %.20f' % fidelity(psi, psi_res)**2)
+print('psi fidelity: %.20f' % fidelity(psi, psi_res))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

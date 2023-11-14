@@ -112,7 +112,10 @@ def decompose_u3(mat: np.ndarray):
     return phase, theta, phi, lam
 
 
-def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True) -> Circuit:
+def one_qubit_decompose(gate: UnivMathGate,
+                        basis: str = 'zyz',
+                        with_phase: bool = True,
+                        with_params: bool = True) -> Circuit:
     name_phase = gate.name + '_phase'
     name_theta = gate.name + '_theta'
     name_phi = gate.name + '_phi'
@@ -190,7 +193,10 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     return f1, f2
 
 
-def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True) -> Circuit:
+def two_qubit_decompose(gate: UnivMathGate,
+                        basis: str = 'zyz',
+                        with_phase: bool = True,
+                        with_params: bool = True) -> Circuit:
     name_rxx = gate.name + '_Rxx'
     name_ryy = gate.name + '_Ryy'
     name_rzz = gate.name + '_Rzz'

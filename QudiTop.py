@@ -39,7 +39,7 @@ def Cd(d, name, obj, ctrl, state):
     return circ
 
 
-def qutrit_ansatz(gate: UMG, with_phase: bool = True):
+def qutrit_ansatz(gate: UMG, with_phase: bool = False):
     d = gate.dim
     obj = gate.obj_qudits
     name = f'{gate.name}_'
@@ -86,7 +86,7 @@ gate = UMG(d, mat, name=f'mat').on(obj)
 circ += gate
 ansatz += qutrit_ansatz(gate, True)
 for i, g in enumerate(ansatz.gates):
-    print('{:3d}'.format(i), g)
+    print('{:3d} '.format(i), g)
 
 pr = ansatz.get_parameters()
 g_num = len(ansatz.gates)

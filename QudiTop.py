@@ -121,9 +121,10 @@ t = time.perf_counter() - start
 print('Loss: %.15f, Fidelity: %.15f, %3d, %.4f' % (loss, out, i, t))
 
 pr_res = ansatz.get_parameters()
-psi_res = ansatz.get_qs(pr_res)
+psi_res = ansatz.get_qs()
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
+print('psi fidelity: %.20f' % fidelity(psi, psi_res)**2)
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

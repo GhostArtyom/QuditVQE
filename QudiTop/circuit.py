@@ -6,7 +6,7 @@ import collections
 import numpy as np
 import torch.nn as nn
 from torch import Tensor
-from .global_var import DTYPE, CDTYPE
+from .global_var import DTYPE
 from .gates import GateBase, WithParamGate
 from .utils import bprint, str_ket, get_complex_tuple
 from typing import List, Tuple, Union, Iterable, Optional, Dict
@@ -179,11 +179,11 @@ class Circuit(nn.Module):
         mat = []
         for i in range(n):
             self.set_init_qs(torch.eye(n, dtype=DTYPE)[i])
-            qs = self.get_qs(grad_tensor=True)
-            mat.append(qs)
-        mat = torch.stack(mat)
+            qs = self.get_qs(grad_tensor=True, endian_reverse=endian_reverse)
+            mat.append(qs.flatten())
+        mat = torch.stack(mat).T
         self._set_initial_state()
-        return mat if grad_tensor else mat.detach().numpy().T
+        return mat if grad_tensor else mat.detach().numpy()
 
     def no_grad_(self):
         """Stop calculating gradient for all the parameterized gates, it's usually used as encoder. This operation is inplace.

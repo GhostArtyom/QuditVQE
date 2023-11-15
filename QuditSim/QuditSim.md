@@ -23,7 +23,7 @@
 > 有些函数可以套用 MindQuantum 的同名函数，但是需将判断是否为 2 次幂 `is_power_of_two` 换成判断是否为 d 次幂
 
 - 通用数学门 `UnivMathGate` 
-- 单 qudit 门 $H_d,\,\mathrm{INC}_d$ 
+- 单 qudit 门 $H_d,\,\mathrm{INC}_d,\,\mathrm{GP}_d$ 
 - 多 qudit 门 $\mathrm{SWAP}_d,\,\mathrm{MVCG}_d$ 
 - 受控 qudit 门 $\mathrm{CINC}_d,\,\mathrm{GCX}_d$ 
 - 已有 qudit 门的控制位与受控态
@@ -40,7 +40,7 @@
   - `X(dim, ind).on(obj_qudits, ctrl_qudits, ctrl_states)` 
   - `RX(dim, pr, ind).on(obj_qudits, ctrl_qudits, ctrl_states)` 
 ```math
-\begin{align}
+\begin{aligned}
 \sigma_x^{(i,j)}&=\ket{i}\bra{j}+\ket{j}\bra{i},
 &X_d^{(i,j)}=\sigma_x^{(i,j)}+\sum_{k\ne i,j}\ket{k}\bra{k},\qquad
 &RX_d^{(i,j)}=\exp\{-\mathrm{i}\theta \sigma_x^{(i,j)}/2\} \\
@@ -50,7 +50,7 @@
 \sigma_z^{(i,j)}&=\ket{i}\bra{i}-\ket{j}\bra{j},
 &Z_d^{(i,j)}=\sigma_z^{(i,j)}+\sum_{k\ne i,j}\ket{k}\bra{k},\qquad
 &RZ_d^{(i,j)}=\exp\{-\mathrm{i}\theta \sigma_z^{(i,j)}/2\}
-\end{align}
+\end{aligned}
 ```
 - 举例说明，此处设 $d=3$ 即 qutrit 体系
 ```math
@@ -110,6 +110,18 @@ H_3=\frac{1}{\sqrt{3}}
 \end{pmatrix},\quad
 \mathrm{INC}_3=\begin{pmatrix}
 0 & 0 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0
+\end{pmatrix}
+```
+
+- 全局相位门 Global Phase Gate
+  - `GP(dim).on(obj_qudits, ctrl_qudits, ctrl_states)` 
+```math
+\mathrm{GP}_d=\mathrm{diag}\big\{\mathrm{e}^{-i\theta},\mathrm{e}^{-i\theta},\dots,\mathrm{e}^{-i\theta}\big\},\quad
+\mathrm{GP}_3=
+\begin{pmatrix}
+\mathrm{e}^{-i\theta}\! & 0 & 0 \\
+0 & \!\mathrm{e}^{-i\theta}\! & 0 \\
+0 & 0 & \!\mathrm{e}^{-i\theta}\!
 \end{pmatrix}
 ```
 
@@ -208,9 +220,16 @@ C^m[U_d]\ket{i,j}=\left\{\begin{array}{c}
 \end{array}\right.
 ```
 ```math
-C^m[U_d]=\ket{m}\bra{m}\otimes U_d+\sum_{i\ne m}\ket{i}\bra{i}\otimes\mathbb{I}_{d^2-d}
+C^m[U_d]=\ket{m}\bra{m}\otimes U_d+\sum_{i\ne m}\ket{i}\bra{i}\otimes\mathbb{I}_{d}
 =\begin{pmatrix}
 \mathbb{I}_{dm} & \\ & U_d \\ && \mathbb{I}_{d(d-m-1)}
+\end{pmatrix}
+```
+```math
+C^m[U_{d^2}]=
+ \ket{m}\bra{m}\otimes U_{d^2}+\sum_{i\ne m}\ket{i}\bra{i}\otimes\mathbb{I}_{d^2}
+=\begin{pmatrix}
+\mathbb{I}_{d^2m} & \\ & U_{d^2} \\ && \mathbb{I}_{d^2(d-m-1)}
 \end{pmatrix}
 ```
 

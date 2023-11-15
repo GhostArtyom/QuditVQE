@@ -1,5 +1,5 @@
 """Quantum circuit for qudit.
-Refer: https://gitee.com/forcekeng/quditop
+Refer: https://github.com/forcekeng/QudiTop
 """
 import torch
 import collections

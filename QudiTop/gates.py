@@ -1,5 +1,5 @@
 """Qudits gates.
-Refer: https://gitee.com/forcekeng/quditop
+Refer: https://github.com/forcekeng/QudiTop
 """
 import torch
 import numpy as np

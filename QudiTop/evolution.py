@@ -1,5 +1,5 @@
 """Time evolution of quantum state.
-Refer: https://gitee.com/forcekeng/quditop
+Refer: https://github.com/forcekeng/QudiTop
 """
 import math
 import torch

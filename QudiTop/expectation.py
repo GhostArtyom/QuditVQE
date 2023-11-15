@@ -1,5 +1,5 @@
 """Calculate expectation of given hamiltonian.
-Refer: https://gitee.com/forcekeng/quditop
+Refer: https://github.com/forcekeng/QudiTop
 """
 import torch
 import torch.nn as nn

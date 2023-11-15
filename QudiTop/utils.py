@@ -1,5 +1,5 @@
 """Utility functions.
-Refer: https://gitee.com/forcekeng/quditop
+Refer: https://github.com/forcekeng/QudiTop
 """
 import math
 import torch

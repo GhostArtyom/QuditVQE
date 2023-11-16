@@ -1,18 +1,21 @@
+import re
 import time
 import torch
 import numpy as np
 import torch.nn as nn
+from h5py import File
 from torch import optim
-from utils import fidelity
 from QudiTop.gates import *
 from numpy.linalg import norm
 from QudiTop.circuit import Circuit
 from QudiTop.global_var import DTYPE
 from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
+from utils import fidelity, reduced_density_matrix
 
 np.set_printoptions(linewidth=250)
 torch.set_printoptions(linewidth=250)
+
 
 def ZYZ(d, name, obj, with_phase: bool = False):
     if d != 3:
@@ -73,20 +76,38 @@ def qutrit_ansatz(gate: UMG, with_phase: bool = False):
     else:
         raise ValueError('Only works when nq <= 2')
     if with_phase:
-        circ += [GP(d, 'phase').on(i) for i in obj]
+        circ += [GP(d, f'{name}phase').on(i) for i in obj]
     return circ
 
 
-d, nq = 3, 2
+g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7_variational.mat', 'r')
+position = g['RDM_site'][:] - 1  # subtract index of matlab to python
+l = list(g.keys())  # list of HDF5 gates file keys
+d = int(g['d'][0])  # dimension of qudit state
+g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
+key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
+g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
+# print(position, g_name)
+k = g[g_name[0]].shape[0]  # number of gates in one layer
+gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
+g.close()
+
+r = File('./mat/322_d3_num1_model957_RDM_v7.3.mat', 'r')
+l = list(r.keys())  # list of HDF5 rdm file keys
+rdm = [r[i][:].view('complex').T for i in l]
+rdm.insert(0, [])
+r.close()
+
+d, nq = 3, 7
 circ = Circuit(d, nq)
 ansatz = Circuit(d, nq)
-mat = unitary_group.rvs(d**nq, random_state=42)
-obj = list(range(nq))
-gate = UMG(d, mat, name=f'mat').on(obj)
-circ += gate
-ansatz += qutrit_ansatz(gate, True)
-for i, g in enumerate(ansatz.gates):
-    print('{:3d} '.format(i), g)
+for i in range(len(g_name)):
+    for j in range(k):
+        mat = gates[i][j]
+        name = f'G{j + 1}_L{i + 1}'
+        gate = UMG(d, mat, name=name).on([j, j + 1])
+        circ += gate
+        ansatz += qutrit_ansatz(gate, True)
 
 pr = ansatz.get_parameters()
 g_num = len(ansatz.gates)
@@ -98,15 +119,19 @@ print('Number of gates: %d' % g_num)
 psi = circ.get_qs()
 rho = np.outer(psi, psi.conj())
 print('Hamiltonian Dimension:', rho.shape)
-Ham = [(1, UMG(d, rho).on(obj))]
+Ham = [(1, UMG(d, rho).on(list(range(nq))))]
 expect = Expectation(Ham)
+
+rho_rdm = reduced_density_matrix(psi, d, position)
+print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
 target = torch.tensor([1], dtype=DTYPE)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
-optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
-for i in range(500):
+optimizer = optim.Adam(ansatz.parameters(), lr=1e-1)
+for i in range(1000):
     out = expect(ansatz())
     loss = nn.L1Loss()(out, target)
     optimizer.zero_grad()

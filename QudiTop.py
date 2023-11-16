@@ -15,6 +15,7 @@ from utils import fidelity, reduced_density_matrix
 
 np.set_printoptions(linewidth=250)
 torch.set_printoptions(linewidth=250)
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 def ZYZ(d, name, obj, with_phase: bool = False):
@@ -87,7 +88,6 @@ d = int(g['d'][0])  # dimension of qudit state
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
-# print(position, g_name)
 k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()

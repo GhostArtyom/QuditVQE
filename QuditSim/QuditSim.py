@@ -3,7 +3,7 @@ from math import log
 from numpy.linalg import norm
 from scipy.linalg import expm
 
-np.set_printoptions(linewidth=200)
+np.set_printoptions(linewidth=300)
 qubit_gates = {
     'X': np.array([[0, 1], [1, 0]], dtype=np.complex128),
     'Y': np.array([[0, -1j], [1j, 0]], dtype=np.complex128),

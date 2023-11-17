@@ -20,7 +20,7 @@ from mindquantum.algorithm.nisq import *
 from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
 
-np.set_printoptions(linewidth=200)
+np.set_printoptions(linewidth=300)
 
 # su2_encoding
 d, m = 3, 2

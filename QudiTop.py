@@ -13,8 +13,8 @@ from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
 from utils import fidelity, reduced_density_matrix
 
-np.set_printoptions(linewidth=250)
-torch.set_printoptions(linewidth=250)
+np.set_printoptions(linewidth=300)
+torch.set_printoptions(linewidth=300)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 

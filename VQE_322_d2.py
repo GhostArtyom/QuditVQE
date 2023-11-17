@@ -12,7 +12,7 @@ from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator import Simulator, get_supported_simulator
 
 start = time.perf_counter()
-np.set_printoptions(linewidth=200)
+np.set_printoptions(linewidth=300)
 
 
 def fun(p0, sim_grad, args=None):

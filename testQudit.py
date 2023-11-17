@@ -10,8 +10,8 @@ from QudiTop.global_var import DTYPE
 from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
 
-np.set_printoptions(linewidth=250)
-torch.set_printoptions(linewidth=250)
+np.set_printoptions(linewidth=300)
+torch.set_printoptions(linewidth=300)
 
 
 def ZYZ(d, name, obj, with_phase: bool = False):

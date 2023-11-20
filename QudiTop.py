@@ -16,6 +16,8 @@ from utils import fidelity, reduced_density_matrix
 np.set_printoptions(linewidth=300)
 torch.set_printoptions(linewidth=300)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cpu')
+print('Torch Device:', device)
 
 
 def ZYZ(d, name, obj, with_phase: bool = False):

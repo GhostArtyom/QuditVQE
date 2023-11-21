@@ -87,6 +87,7 @@ g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7_variational.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state
+f = g['fidelity'][0][0]  # fidelity of gates
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -130,7 +131,7 @@ print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
-target = torch.tensor([1], dtype=DTYPE).to(device)
+target = torch.tensor([f], dtype=DTYPE).to(device)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
 optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
 for i in range(1000):
@@ -139,7 +140,7 @@ for i in range(1000):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-    if i % 10 == 0:
+    if i % 1 == 0:
         t = time.perf_counter() - start
         print('Loss: %.15f, Fidelity: %.15f, %3d, %.4f' % (loss, out, i, t))
     if loss < 1e-8:
@@ -151,7 +152,9 @@ pr_res = ansatz.get_parameters()
 psi_res = ansatz.get_qs()
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('psi fidelity: %.20f' % fidelity(psi, psi_res)**2)
+
+rho_res = reduced_density_matrix(psi_res, d, position)
+print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

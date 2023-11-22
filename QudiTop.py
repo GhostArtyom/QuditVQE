@@ -131,10 +131,10 @@ print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
-target = torch.tensor([f], dtype=DTYPE).to(device)
+target = torch.tensor([1], dtype=DTYPE).to(device)
 ansatz.assign_ansatz_parameters(dict(zip(pr, p0)))
 optimizer = optim.Adam(ansatz.parameters(), lr=1e-2)
-for i in range(1000):
+for i in range(10000):
     out = expect(ansatz()).to(device)
     loss = nn.L1Loss()(out, target)
     optimizer.zero_grad()

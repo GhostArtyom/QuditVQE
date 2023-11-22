@@ -19,10 +19,13 @@ Qudit variational quantum eigensolver
 - [ ] Qudit gates generate by qubits
   - [x] Qubit gates which preserve symmetry
   - [x] `p = np.eye(2^nq) - su2_encoding(np.eye(d))` 
-  - [x] one-qutrit unitary -> symmetric $2$-qubit unitary
-  - [ ] two-qutrit unitary -> symmetric $4$-qubit unitary
-  - [ ] one-qudit unitary -> symmetric $(d-1)$-qubit unitary
-  - [ ] two-qudit unitary -> symmetric $(d-1)^2$-qubit unitary
+  - [x] one-qutrit unitary $\to$ symmetric $2$-qubit unitary
+  - [x] two-qutrit unitary $\to$ symmetric $4$-qubit unitary
+  - [ ] one-qudit unitary $\to$ symmetric $(d-1)$-qubit unitary
+  - [ ] two-qudit unitary $\to$ symmetric $(d-1)^2$-qubit unitary
+- [ ] Qudit Simulator
+  - [x] Universal qutrit decompose / synthesis
+  - [ ] Universal qudit decompose / synthesis
 - [x] Feature `sym_ind()` & `su2_decoding()` 
 - [x] Feature `partial_trace()` for qudit
 - [x] Feature `partial_trace()` for `psi` 

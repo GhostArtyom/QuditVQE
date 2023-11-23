@@ -13,10 +13,7 @@ from scipy.stats import unitary_group
 from QudiTop.expectation import Expectation
 from utils import fidelity, reduced_density_matrix
 
-np.set_printoptions(linewidth=300)
-torch.set_printoptions(linewidth=300)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-# device = torch.device('cpu')
 print('Torch Device:', device)
 
 
@@ -143,7 +140,7 @@ for i in range(10000):
     if i % 1 == 0:
         t = time.perf_counter() - start
         print('Loss: %.15f, Fidelity: %.15f, %3d, %.4f' % (loss, out, i, t))
-    if loss < 1e-8:
+    if loss < 1e-4:
         break
 t = time.perf_counter() - start
 print('Loss: %.15f, Fidelity: %.15f, %3d, %.4f' % (loss, out, i, t))

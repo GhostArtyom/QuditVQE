@@ -19,7 +19,7 @@ def fun(p0, sim_grad, args=None):
     if args is not None:
         args.append(f)
         i = len(args)
-        if i % 10 == 0:
+        if i % 1 == 0:
             global start
             t = time.perf_counter() - start
             print('Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (f, 1 - f, i, t))
@@ -74,10 +74,6 @@ rho = csc.T.dot(csc.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
-rho = rho.toarray()
-rho1 = np.outer(psi, psi.conj())
-print(np.allclose(rho1, rho))
-
 psi = su2_decoding(psi, k + 1)
 rho_rdm = reduced_density_matrix(psi, d, position)
 print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
@@ -96,7 +92,7 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-4)
 print(res.message)
 print('Optimal: %.20f' % res.fun)
 

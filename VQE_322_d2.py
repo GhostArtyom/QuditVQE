@@ -11,9 +11,6 @@ from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator import Simulator, get_supported_simulator
 
-start = time.perf_counter()
-np.set_printoptions(linewidth=300)
-
 
 def fun(p0, sim_grad, args=None):
     f, g = sim_grad(p0)
@@ -92,6 +89,7 @@ else:
     print(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
+start = time.perf_counter()
 # p0 = np.array(list(pr.values()))
 p0 = np.random.uniform(-1, 1, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)

@@ -4,15 +4,12 @@ import numpy as np
 from utils import *
 from h5py import File
 from numpy.linalg import norm
-from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
 from scipy.optimize import minimize
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator import Simulator, get_supported_simulator
-
-start = time.perf_counter()
-np.set_printoptions(linewidth=300)
 
 
 def fun(p0, sim_grad, args=None):
@@ -47,7 +44,6 @@ rdm = [r[i][:].view('complex').T for i in l]
 rdm.insert(0, [])
 r.close()
 
-pr = {}
 circ = Circuit()
 ansatz = Circuit()
 nq = (k + 1) * (d - 1)
@@ -59,13 +55,11 @@ for i in range(len(g_name)):
         mat = su2_encoding(gates[i][j], 2) + p
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)
-        # gate_d, para = two_qubit_decompose(gate_u)
-        # pr.update(para)
+        gate_d = qutrit_symmetric_ansatz(gate_u)
         circ += gate_u
-        # ansatz += gate_d
+        ansatz += gate_d
 
 p_name = ansatz.ansatz_params_name
-pr = {i: pr[i] for i in p_name}
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
 print('Number of qubits: %d' % nq)
@@ -75,10 +69,14 @@ print('Number of gates: %d' % g_num)
 sim = Simulator('mqvector', nq)
 sim.apply_circuit(circ)
 psi = sim.get_qs()
-
-rho = np.outer(psi, psi.conj())
-Ham = Hamiltonian(csr_matrix(rho))
+csc = csc_matrix(psi)
+rho = csc.T.dot(csc.conj())
+Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
+
+rho = rho.toarray()
+rho1 = np.outer(psi, psi.conj())
+print(np.allclose(rho1, rho))
 
 psi = su2_decoding(psi, k + 1)
 rho_rdm = reduced_density_matrix(psi, d, position)
@@ -96,7 +94,7 @@ else:
     print(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
-# p0 = np.array(list(pr.values()))
+start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
 print(res.message)

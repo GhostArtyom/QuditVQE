@@ -5,7 +5,7 @@ from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from numpy.linalg import det, eigh, svd
 from mindquantum.core.circuit import Circuit
-from mindquantum.core.gates import RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
+from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
 opt_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
@@ -239,6 +239,168 @@ def two_qubit_decompose(gate: UnivMathGate,
         else:
             circ_d += g
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
+
+
+def Uind(basis, d, ind, pr, obj):
+    if d != 3:
+        raise ValueError('Only works when d = 3')
+    if len(ind) != 2:
+        raise ValueError(f'U3 index length {len(ind)} should be 2')
+    if len(set(ind)) != len(ind):
+        raise ValueError(f'U3 index {ind} cannot be repeated')
+    if min(ind) < 0 or max(ind) >= d:
+        raise ValueError(f'U3 index {ind} should in 0 to {d-1}')
+    if len(pr) != 3:
+        raise ValueError(f'U3 params length {len(pr)} should be 3')
+    circ = Circuit()
+    if ind == [0, 1]:
+        corr = Circuit() + X(obj[1], obj[0]) + RY(np.pi / 2).on(obj[0], obj[1]) + X(obj[1], obj[0]) + X(obj[1])
+    elif ind == [0, 2]:
+        corr = Circuit() + X(obj[0]) + X(obj[1], obj[0]) + X(obj[0])
+    elif ind == [1, 2]:
+        corr = Circuit() + X(obj[1], obj[0]) + RY(-np.pi / 2).on(obj[0], obj[1]) + X(obj[1], obj[0])
+    circ += corr
+    if basis == 'zyz':
+        circ += RZ(pr[0]).on(obj[0], obj[1])
+        circ += RY(pr[1]).on(obj[0], obj[1])
+        circ += RZ(pr[2]).on(obj[0], obj[1])
+    elif basis == 'u3':
+        theta, phi, lam = pr
+        circ += U3(theta, phi, lam).on(obj[0], obj[1])
+    else:
+        raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
+    circ += corr.hermitian()
+    return circ
+
+
+def Ub(basis, d, name, obj):
+    circ = Circuit()
+    index = [[0, 2], [1, 2], [0, 2]]
+    if basis == 'zyz':
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            pr = [f'{name}RZ{str_pr}', f'{name}RY{str_pr}', f'{name}Rz{str_pr}']
+            circ += Uind(basis, d, ind, pr, obj)
+    elif basis == 'u3':
+        for i, ind in enumerate(index):
+            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
+            pr = [f'{name}𝜃{str_pr}', f'{name}𝜑{str_pr}', f'{name}𝜆{str_pr}']
+            circ += Uind(basis, d, ind, pr, obj)
+    else:
+        raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
+    return circ
+
+
+def GCRb(d, ind, name, obj, ctrl, state):
+    if d != 3:
+        raise ValueError('Only works when d = 3')
+    circ = Circuit()
+    if state == 0:
+        if ind == [0, 1]:
+            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
+                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+        elif ind == [0, 2]:
+            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(
+                obj, ctrl[1:])
+        elif ind == [1, 2]:
+            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(
+                obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+    elif state == 1:
+        if ind == [0, 1]:
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
+                np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+        elif ind == [0, 2]:
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(obj, ctrl[1:]) + X(
+                ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
+        elif ind == [1, 2]:
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
+                -np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+    elif state == 2:
+        if ind == [0, 1]:
+            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
+                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+        elif ind == [0, 2]:
+            corr = Circuit() + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
+        elif ind == [1, 2]:
+            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(
+                ctrl[0], ctrl[1:] + [obj])
+    circ += corr
+    if 'RX' in name:
+        circ = circ + RX(name).on(obj, ctrl)
+    elif 'RY' in name:
+        circ = circ + RY(name).on(obj, ctrl)
+    elif 'RZ' in name:
+        circ = circ + RZ(name).on(obj, ctrl)
+    elif 'GP' in name:
+        circ = circ + GlobalPhase(name).on(obj, ctrl)
+    circ += corr.hermitian()
+    return circ
+
+
+def GCPb(d, name, obj, ctrl, state):
+    if d != 3:
+        raise ValueError('Only works when d = 3')
+    circ = Circuit()
+    if state == 0:
+        corr = Circuit()
+    elif state == 1:
+        corr = Circuit()
+    elif state == 2:
+        corr = Circuit()
+    circ += corr
+    circ = circ + GlobalPhase(name).on(obj, ctrl)
+    circ += corr.hermitian()
+    return circ
+
+
+def Cb(d, name, obj, ctrl, state):
+    if d != 3:
+        raise ValueError('Only works when d = 3')
+    circ = Circuit()
+    circ += GCRb(d, [0, 1], f'{name}RZ01', obj, ctrl, state)
+    circ += GCRb(d, [0, 2], f'{name}RZ02', obj, ctrl, state)
+    circ += GCRb(d, [0, 1], f'{name}GP', obj, ctrl, state)
+    circ += GCRb(d, [0, 2], f'{name}GP', obj, ctrl, state)
+    circ += GCRb(d, [1, 2], f'{name}GP', obj, ctrl, state)
+    return circ
+
+
+def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False):
+    name = f'{gate.name}_'
+    obj = gate.obj_qubits
+    circ = Circuit()
+    if len(obj) == 2:
+        circ += Ub(basis, 3, f'{name}', obj)
+    elif len(obj) == 4:
+        circ += Ub(basis, 3, f'{name}U1_', obj[:2])
+        circ += Cb(3, f'{name}C1_', obj[0], obj[1:], 1)
+        circ += Ub(basis, 3, f'{name}U2_', obj[:2])
+        circ += Cb(3, f'{name}C2_', obj[0], obj[1:], 2)
+        circ += Ub(basis, 3, f'{name}U3_', obj[:2])
+        circ += GCRb(3, [1, 2], f'{name}RY12', obj[-1], obj[::-1][1:], 2)
+        circ += GCRb(3, [1, 2], f'{name}RY11', obj[-1], obj[::-1][1:], 1)
+        circ += GCRb(3, [1, 2], f'{name}RY10', obj[-1], obj[::-1][1:], 0)
+        circ += Ub(basis, 3, f'{name}U4_', obj[:2])
+        circ += Cb(3, f'{name}C3_', obj[0], obj[1:], 2)
+        circ += Ub(basis, 3, f'{name}U5_', obj[:2])
+        circ += GCRb(3, [0, 1], f'{name}RY22', obj[-1], obj[::-1][1:], 2)
+        circ += GCRb(3, [0, 1], f'{name}RY21', obj[-1], obj[::-1][1:], 1)
+        circ += GCRb(3, [0, 1], f'{name}RY20', obj[-1], obj[::-1][1:], 0)
+        circ += Ub(basis, 3, f'{name}U6_', obj[:2])
+        circ += Cb(3, f'{name}C4_', obj[0], obj[1:], 0)
+        circ += Ub(basis, 3, f'{name}U7_', obj[:2])
+        circ += GCRb(3, [1, 2], f'{name}RY32', obj[-1], obj[::-1][1:], 2)
+        circ += GCRb(3, [1, 2], f'{name}RY31', obj[-1], obj[::-1][1:], 1)
+        circ += GCRb(3, [1, 2], f'{name}RY30', obj[-1], obj[::-1][1:], 0)
+        circ += Ub(basis, 3, f'{name}U8_', obj[:2])
+        circ += Cb(3, f'{name}C5_', obj[0], obj[1:], 2)
+        circ += Ub(basis, 3, f'{name}U9_', obj[:2])
+    else:
+        raise ValueError('Only works when number of qutrits <= 2')
+    if with_phase:
+        for i in obj:
+            circ += GlobalPhase(f'{name}phase').on(i)
+    return circ
 
 
 def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:

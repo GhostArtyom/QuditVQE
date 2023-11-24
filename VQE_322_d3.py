@@ -19,7 +19,7 @@ def fun(p0, sim_grad, args=None):
     if args is not None:
         args.append(f)
         i = len(args)
-        if i % 1 == 0:
+        if i % 10 == 0:
             global start
             t = time.perf_counter() - start
             print('Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (f, 1 - f, i, t))
@@ -54,14 +54,21 @@ for i in range(len(g_name)):
         name = f'G{j + 1}_L{i + 1}'
         mat = su2_encoding(gates[i][j], 2) + p
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
+        circ += UnivMathGate(name, mat).on(obj)
+
+layer = len(g_name)
+for i in range(layer):
+    for j in range(k):
+        name = f'G{j + 1}_L{i + 1}'
+        mat = su2_encoding(gates[i][j], 2) + p
+        obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)
-        gate_d = qutrit_symmetric_ansatz(gate_u)
-        circ += gate_u
-        ansatz += gate_d
+        ansatz += qutrit_symmetric_ansatz(gate_u)
 
 p_name = ansatz.ansatz_params_name
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
+print('Number of layers:', layer)
 print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
@@ -92,7 +99,7 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-4)
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
 print(res.message)
 print('Optimal: %.20f' % res.fun)
 

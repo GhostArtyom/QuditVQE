@@ -20,9 +20,9 @@ def fun(p0, sim_grad, args=None):
         args.append(f)
         i = len(args)
         if i % 10 == 0:
-            global start
+            global start, layers
             t = time.perf_counter() - start
-            print('Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (f, 1 - f, i, t))
+            print('Layers: %d, Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (layers, f, 1 - f, i, t))
     return f, g
 
 
@@ -56,8 +56,8 @@ for i in range(len(g_name)):
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         circ += UnivMathGate(name, mat).on(obj)
 
-layer = len(g_name)
-for i in range(layer):
+layers = int(input('Number of layers: '))
+for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
         mat = su2_encoding(gates[i][j], 2) + p
@@ -68,7 +68,6 @@ for i in range(layer):
 p_name = ansatz.ansatz_params_name
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
-print('Number of layers:', layer)
 print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
@@ -115,5 +114,5 @@ print('psi fidelity: %.20f' % fidelity(psi, psi_res))
 print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
 print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
 
-end = time.perf_counter()
-print('Runtime: %f' % (end - start))
+total = time.perf_counter() - start
+print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')

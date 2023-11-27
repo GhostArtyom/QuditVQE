@@ -482,7 +482,7 @@ def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.n
     return rho
 
 
-def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
+def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
     state = {'rho': rho, 'sigma': sigma}
     for i, mat in state.items():
         if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
@@ -497,13 +497,18 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = True) -> float:
         raise ValueError(f'Mismatch state shape: rho {rho.shape}, sigma {sigma.shape}')
     if rho.ndim == 1 and sigma.ndim == 1:
         f = np.abs(rho.conj() @ sigma)
+        return f if sqrt else f**2
     elif rho.ndim == 1 and sigma.ndim == 2:
-        f = np.sqrt(np.real(rho.conj() @ sigma @ rho))
+        f = np.real(rho.conj() @ sigma @ rho)
+        return np.sqrt(f) if sqrt else f
     elif rho.ndim == 2 and sigma.ndim == 1:
-        f = np.sqrt(np.real(sigma.conj() @ rho @ sigma))
+        f = np.real(sigma.conj() @ rho @ sigma)
+        return np.sqrt(f) if sqrt else f
     elif rho.ndim == 2 and sigma.ndim == 2:
         f = np.real(np.trace(sqrtm(sqrtm(rho) @ sigma @ sqrtm(rho))))
-    return f if sqrt else f**2
+        return f if sqrt else f**2
+    else:
+        raise ValueError(f'Wrong state ndim: rho {rho.ndim}, sigma {sigma.ndim}')
 
 
 def sym_ind(d: int, m: int) -> dict:

@@ -25,6 +25,8 @@ def fun(p0, sim_grad, args=None):
             print('Layers: %d, Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (layers, f, 1 - f, i, t))
     return f, g
 
+gtol = 10**(-int(input('gtol: 1e-')))
+layers = int(input('Number of layers: '))
 
 g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7_variational.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
@@ -55,7 +57,6 @@ for i in range(len(g_name)):
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         circ += UnivMathGate(name, mat).on(obj)
 
-layers = int(input('Number of layers: '))
 for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
@@ -91,13 +92,13 @@ if 'mqvector_gpu' in sim_list and nq > 10:
     print(f'Simulator: mqvector_gpu, Method: {method}')
 else:
     sim = Simulator('mqvector', nq)
-    method = 'TNC'
+    method = 'BFGS'  # TNC CG
     print(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': gtol, 'maxiter': 10000})
 print(res.message)
 print('Optimal: %.20f' % res.fun)
 

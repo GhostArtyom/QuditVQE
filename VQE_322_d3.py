@@ -20,13 +20,27 @@ def fun(p0, sim_grad, args=None):
         args.append(f)
         i = len(args)
         if i % 10 == 0:
-            global start, layers
+            global start, gtol, num, layers
             t = time.perf_counter() - start
-            print('Layers: %d, Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (layers, f, 1 - f, i, t))
+            print('gtol: 1e%d, num%s, Layers: %d, ' % (np.log10(gtol), num, layers), end='')
+            print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
     return f, g
 
-name = input('File name: ')
-g = File(f'./mat/{name}.mat', 'r')
+
+name = {
+    '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.6_nsweep30',
+    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
+    '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
+    '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
+    '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
+    '7': '322_d3_num7_model164_RDM3_gates_L10_N9_r0.8',
+    '8': '322_d3_num8_model138_RDM3_gates_L10_N9_r0.8',
+    '9': '322_d3_num9_model36_RDM3_gates_L10_N9_r0.8',
+    '10': '322_d3_num10_model317_RDM3_gates_L10_N9_r0.8'
+}
+
+num = input('File name: num')
+g = File(f'./mat/{name[num]}.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state

@@ -25,13 +25,13 @@ def fun(p0, sim_grad, args=None):
             print('Layers: %d, Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (layers, f, 1 - f, i, t))
     return f, g
 
-gtol = 10**(-int(input('gtol: 1e-')))
-layers = int(input('Number of layers: '))
-
-g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7.mat', 'r')
+name = input('File name: ')
+g = File(f'./mat/{name}.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state
+f = g['fidelity'][0][0]  # fidelity of gates
+print('rdm fidelity: %.20f' % f)
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -39,11 +39,11 @@ k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
 
-r = File('./mat/322_d3_num1_model957_RDM_v7.3.mat', 'r')
-l = list(r.keys())  # list of HDF5 rdm file keys
-rdm = [r[i][:].view('complex').T for i in l]
-rdm.insert(0, [])
-r.close()
+# r = File('./mat/322_d3_num1_model957_RDM_v7.3.mat', 'r')
+# l = list(r.keys())  # list of HDF5 rdm file keys
+# rdm = [r[i][:].view('complex').T for i in l]
+# rdm.insert(0, [])
+# r.close()
 
 circ = Circuit()
 ansatz = Circuit()
@@ -57,6 +57,8 @@ for i in range(len(g_name)):
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         circ += UnivMathGate(name, mat).on(obj)
 
+gtol = 10**(-int(input('gtol: 1e-')))
+layers = int(input('Number of layers: '))
 for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
@@ -80,10 +82,10 @@ rho = csc.T.dot(csc.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
-psi = su2_decoding(psi, k + 1)
-rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
+# psi = su2_decoding(psi, k + 1)
+# rho_rdm = reduced_density_matrix(psi, d, position)
+# print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
+# print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -97,7 +99,7 @@ else:
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
-p0 = np.random.uniform(-1, 1, p_num)
+p0 = np.random.uniform(-np.pi, np.pi, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': gtol, 'maxiter': 10000})
 print(res.message)
 print('Optimal: %.20f' % res.fun)
@@ -111,8 +113,8 @@ rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
+# print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
+# print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
 
 total = time.perf_counter() - start
 print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')

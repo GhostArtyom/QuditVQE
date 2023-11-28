@@ -75,7 +75,7 @@ RY_3^{(0,2)}(\theta)=\begin{pmatrix}
 \end{pmatrix},\;\;
 RZ_3^{(1,2)}(\theta)=\begin{pmatrix}
 1 & 0 & 0 \\ 0 & \mathrm{e}^{-i\theta/2} & 0 \\ 0 & 0 & \mathrm{e}^{i\theta/2}
-\end{pmatrix} \\
+\end{pmatrix}
 ```
 
 

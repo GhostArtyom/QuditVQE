@@ -1,0 +1,13 @@
+GATESIZE 14
+q0 W
+q1 W
+
+q0 +q1
+q0 G $R_y\big(\frac{\pi}{2}\big)$ q1 width=32
+q0 +q1
+
+q0 G $U$ q1
+
+q0 +q1
+q0 G $R_y\big({\small -}\frac{\pi}{2}\big)$ q1 width=40
+q0 +q1

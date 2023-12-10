@@ -1,0 +1,40 @@
+GATESIZE 14
+DEPTHPAD 3
+WIREPAD 8
+q0 W
+q1 W
+q1 /
+
+q1 G $U_1$
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$1$
+
+q1 G $U_2$
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$2$
+
+q1 G $U_3$
+
+q0 G $R_y^{12}$ width=18 q1 G:width=4 :height=4 {}
+
+q1 G $U_4$
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$2$
+
+q1 G $U_5$
+
+q0 G $R_y^{01}$ width=18 q1 G:width=4 :height=4 {}
+
+q1 G $U_6$
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$0$
+
+q1 G $U_7$
+
+q0 G $R_y^{12}$ width=18 q1 G:width=4 :height=4 {}
+
+q1 G $U_8$
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$2$
+
+q1 G $U_9$

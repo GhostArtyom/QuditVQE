@@ -1,0 +1,10 @@
+GATESIZE 14
+q0 W
+q1 W
+
+q1 G $U^{ij}$ q0 width=20 P:width=8 \scriptsize$m$
+=
+
+q1 G $V$
+q1 G $\Delta$ q0 P:width=8 \scriptsize$m$
+q1 G $V^\dag$ width=16

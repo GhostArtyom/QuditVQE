@@ -2,6 +2,9 @@ GATESIZE 14
 q0 W
 q1 W
 
+q0 q1 G $U_e^{02}$ width=20
+=
+
 q0 G $X$
 q0 +q1
 q0 G $X$

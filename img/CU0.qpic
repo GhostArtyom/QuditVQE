@@ -4,10 +4,13 @@ q1 W
 q2 W
 q3 W
 
-q2 G $X$
-q3 G $X$
+q2 G $U^{ij}$ q1 width=20 P:width=8 \scriptsize$0$
+=
 
-q0 q1 G $U^{ij}$ q2 q3 width=20
+q0 G $X$
+q1 G $X$
 
-q2 G $X$
-q3 G $X$
+q2 q3 G $U_e^{ij}$ q0 q1 width=20
+
+q0 G $X$
+q1 G $X$

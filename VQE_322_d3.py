@@ -28,8 +28,9 @@ def fun(p0, sim_grad, args=None):
 
 
 mat_gates = {
-    '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.6_nsweep30',
-    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
+    '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
+    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
+    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
     '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
     '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
     '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
@@ -39,7 +40,18 @@ mat_gates = {
     '10': '322_d3_num10_model317_RDM3_gates_L10_N9_r0.8'
 }
 mat_rdm = {
-    '1': '322_d3_num1_model957_RDM_v7.3',
+    '1a': '322_d3_num1_model957_RDM_new_v7.3',
+    '1b': '322_d3_num1_model957_RDM_contextual_level0_v7.3',
+    '1c': '322_d3_num1_model957_RDM_contextual_level3_v7.3',
+    '2': '322_d3_num2_model394_RDM_v7.3',
+    '3': '322_d3_num3_model371_RDM_v7.3',
+    '4': '322_d3_num4_model123_RDM_v7.3',
+    '5': '322_d3_num5_model523_RDM_v7.3',
+    '6': '322_d3_num6_model165_RDM_v7.3',
+    '7': '322_d3_num7_model164_RDM_v7.3',
+    '8': '322_d3_num8_model138_RDM_v7.3',
+    '9': '322_d3_num9_model36_RDM_v7.3',
+    '10': '322_d3_num10_model317_RDM_v7.3',
 }
 
 num = input('File name: num')
@@ -48,7 +60,7 @@ position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state
 f = g['fidelity'][0][0]  # fidelity of gates
-print('rdm fidelity: %.20f' % f)
+print('gates fidelity: %.20f' % f)
 g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
 key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
 g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -58,8 +70,7 @@ g.close()
 
 r = File(f'./mat/{mat_rdm[num]}.mat', 'r')
 l = list(r.keys())  # list of HDF5 rdm file keys
-rdm = [r[i][:].view('complex').T for i in l]
-rdm.insert(0, [])
+rdm3 = r['RDM_3'][:].view('complex').T
 r.close()
 
 circ = Circuit()
@@ -102,8 +113,8 @@ print('Hamiltonian Dimension:', rho.shape)
 
 psi = su2_decoding(psi, k + 1)
 rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
+print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -131,8 +142,8 @@ rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
+print('rho norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
 
 total = time.perf_counter() - start
 print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')

@@ -22,7 +22,7 @@ def fun(p0, sim_grad, args=None):
         if i % 10 == 0:
             global start, gtol, num, layers
             t = time.perf_counter() - start
-            print('gtol: 1e%d, num%s, Layers: %d, ' % (np.log10(gtol), num, layers), end='')
+            print('num%s, Layers: %d, ' % (num, layers), end='')
             print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
     return f, g
 
@@ -78,12 +78,6 @@ s = File(f'./mat/{mat_states["1"]}.mat', 'r')
 state = s['target_state_vec'][:].view('complex')
 s.close()
 
-rho_rdm = reduced_density_matrix(state, d, position)
-print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
-
-gtol = 1e-8
-# gtol = 10**(-int(input('gtol: 1e-')))
 layers = int(input('Number of layers: '))
 nq = (k + 1) * (d - 1)
 ansatz = Circuit()
@@ -108,6 +102,10 @@ rho = csc.T.dot(csc.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
+rho_rdm = reduced_density_matrix(state, d, position)
+print('rdm3 & rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rdm3 & rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
+
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
     sim = Simulator('mqvector_gpu', nq)
@@ -121,7 +119,7 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': gtol, 'maxiter': 10000})
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
 print(res.message)
 print('Optimal: %.20f' % res.fun)
 
@@ -132,10 +130,10 @@ psi_res = sim.get_qs()
 psi_res = su2_decoding(psi_res, k + 1)
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-print('psi norm: %.20f' % norm(psi - psi_res, 2))
-print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
+print('state & psi_res norm: %.20f' % norm(state - psi_res, 2))
+print('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
+print('rdm3 & rho_res norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
+print('rdm3 & rho_res fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
 
 total = time.perf_counter() - start
 print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')

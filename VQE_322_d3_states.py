@@ -27,8 +27,18 @@ def fun(p0, sim_grad, args=None):
     return f, g
 
 
-mat_states = {
-    '1': '322_d3_num1_model957_RDM3_target_state_vector'
+mat_states = {'1': '322_d3_num1_model957_RDM3_target_state_vector'}
+mat_gates = {
+    '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
+    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
+    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
+    '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
+    '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
+    '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
+    '7': '322_d3_num7_model164_RDM3_gates_L10_N9_r0.8',
+    '8': '322_d3_num8_model138_RDM3_gates_L10_N9_r0.8',
+    '9': '322_d3_num9_model36_RDM3_gates_L10_N9_r0.8',
+    '10': '322_d3_num10_model317_RDM3_gates_L10_N9_r0.8'
 }
 mat_rdm = {
     '1a': '322_d3_num1_model957_RDM_new_v7.3',
@@ -46,7 +56,7 @@ mat_rdm = {
 }
 
 num = input('File name: num')
-g = File(f'./mat/{mat_states[num]}.mat', 'r')
+g = File(f'./mat/{mat_gates[num]}.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state
@@ -64,25 +74,23 @@ l = list(r.keys())  # list of HDF5 rdm file keys
 rdm3 = r['RDM_3'][:].view('complex').T
 r.close()
 
-circ = Circuit()
-ansatz = Circuit()
-nq = (k + 1) * (d - 1)
-Id = su2_encoding(np.eye(d**2), 2)
-p = np.eye(Id.shape[0]) - Id
-for i in range(len(g_name)):
-    for j in range(k):
-        name = f'G{j + 1}_L{i + 1}'
-        mat = su2_encoding(gates[i][j], 2) + p
-        obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
-        circ += UnivMathGate(name, mat).on(obj)
+s = File(f'./mat/{mat_states["1"]}.mat', 'r')
+state = s['target_state_vec'][:].view('complex')
+s.close()
+
+rho_rdm = reduced_density_matrix(state, d, position)
+print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 gtol = 1e-8
 # gtol = 10**(-int(input('gtol: 1e-')))
 layers = int(input('Number of layers: '))
+nq = (k + 1) * (d - 1)
+ansatz = Circuit()
 for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
-        mat = su2_encoding(gates[i][j], 2) + p
+        mat = np.eye(2**(2 * (d - 1)))
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)
         ansatz += qutrit_symmetric_ansatz(gate_u)
@@ -94,18 +102,11 @@ print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
 
-sim = Simulator('mqvector', nq)
-sim.apply_circuit(circ)
-psi = sim.get_qs()
+psi = su2_encoding(state, k + 1)
 csc = csc_matrix(psi)
 rho = csc.T.dot(csc.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
-
-psi = su2_decoding(psi, k + 1)
-rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:

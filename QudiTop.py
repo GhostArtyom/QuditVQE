@@ -6,6 +6,7 @@ import torch.nn as nn
 from h5py import File
 from torch import optim
 from QudiTop.gates import *
+from scipy.io import loadmat
 from numpy.linalg import norm
 from QudiTop.circuit import Circuit
 from QudiTop.global_var import DTYPE
@@ -80,6 +81,7 @@ def qutrit_ansatz(gate: UMG, with_phase: bool = False):
     return circ
 
 
+rdm3 = loadmat('./mat/322_d3_num1_model957_RDM.mat')['RDM_3']
 g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
@@ -91,12 +93,6 @@ g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
 k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
-
-r = File('./mat/322_d3_num1_model957_RDM_v7.3.mat', 'r')
-l = list(r.keys())  # list of HDF5 rdm file keys
-rdm = [r[i][:].view('complex').T for i in l]
-rdm.insert(0, [])
-r.close()
 
 d, nq = 3, 7
 circ = Circuit(d, nq)

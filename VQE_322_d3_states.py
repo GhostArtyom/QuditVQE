@@ -3,6 +3,7 @@ import time
 import numpy as np
 from utils import *
 from h5py import File
+from scipy.io import loadmat
 from numpy.linalg import norm
 from scipy.sparse import csc_matrix
 from scipy.optimize import minimize
@@ -30,54 +31,28 @@ def fun(p0, sim_grad, args=None):
 mat_states = {
     '1a': '322_d3_num1_model957_RDM3_target_state_vector',
     '1b': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level3',
-    '1c': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0'
-}
-mat_gates = {
-    '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
-    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
-    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
-    '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
-    '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
-    '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
-    '7': '322_d3_num7_model164_RDM3_gates_L10_N9_r0.8',
-    '8': '322_d3_num8_model138_RDM3_gates_L10_N9_r0.8',
-    '9': '322_d3_num9_model36_RDM3_gates_L10_N9_r0.8',
-    '10': '322_d3_num10_model317_RDM3_gates_L10_N9_r0.8'
+    '1c': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0_new'
 }
 mat_rdm = {
-    '1a': '322_d3_num1_model957_RDM_new_v7.3',
-    '1b': '322_d3_num1_model957_RDM_contextual_level3_v7.3',
-    '1c': '322_d3_num1_model957_RDM_contextual_level0_v7.3',
-    '2': '322_d3_num2_model394_RDM_v7.3',
-    '3': '322_d3_num3_model371_RDM_v7.3',
-    '4': '322_d3_num4_model123_RDM_v7.3',
-    '5': '322_d3_num5_model523_RDM_v7.3',
-    '6': '322_d3_num6_model165_RDM_v7.3',
-    '7': '322_d3_num7_model164_RDM_v7.3',
-    '8': '322_d3_num8_model138_RDM_v7.3',
-    '9': '322_d3_num9_model36_RDM_v7.3',
-    '10': '322_d3_num10_model317_RDM_v7.3'
+    '1a': '322_d3_num1_model957_RDM_new',
+    '1b': '322_d3_num1_model957_RDM_contextual_level3',
+    '1c': '322_d3_num1_model957_RDM_contextual_level0_new',
+    '2': '322_d3_num2_model394_RDM',
+    '3': '322_d3_num3_model371_RDM',
+    '4': '322_d3_num4_model123_RDM',
+    '5': '322_d3_num5_model523_RDM',
+    '6': '322_d3_num6_model165_RDM',
+    '7': '322_d3_num7_model164_RDM',
+    '8': '322_d3_num8_model138_RDM',
+    '9': '322_d3_num9_model36_RDM',
+    '10': '322_d3_num10_model317_RDM'
 }
 
+d, k = 3, 6
 num = input('File name: num')
-g = File(f'./mat/{mat_gates[num]}.mat', 'r')
-position = g['RDM_site'][:] - 1  # subtract index of matlab to python
-l = list(g.keys())  # list of HDF5 gates file keys
-d = int(g['d'][0])  # dimension of qudit state
-f = g['fidelity'][0][0]  # fidelity of gates
-print('gates fidelity: %.20f' % f)
-g_name = [x for x in l if 'gates' in x]  # list of Q_gates_?
-key = lambda x: [int(s) if s.isdigit() else s for s in re.split('(\d+)', x)]
-g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
-k = g[g_name[0]].shape[0]  # number of gates in one layer
-gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
-g.close()
+position = np.array([2, 3, 4])
 
-r = File(f'./mat/{mat_rdm[num]}.mat', 'r')
-l = list(r.keys())  # list of HDF5 rdm file keys
-rdm3 = r['RDM_3'][:].view('complex').T
-r.close()
-
+rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
 s = File(f'./mat/{mat_states[num]}.mat', 'r')
 state = s['target_state_vec'][:].view('complex')
 s.close()

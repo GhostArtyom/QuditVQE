@@ -3,6 +3,7 @@ import time
 import numpy as np
 from utils import *
 from h5py import File
+from scipy.io import loadmat
 from numpy.linalg import norm
 from scipy.sparse import csr_matrix
 from scipy.optimize import minimize
@@ -26,6 +27,7 @@ def fun(p0, sim_grad, args=None):
     return f, g
 
 
+rdm3 = loadmat('./mat/322_d2_num1_model957_RDM.mat')['RDM_3']
 g = File('./mat/322_d2_num1_model957_RDM3_gates_L10_N9.mat', 'r')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
@@ -36,12 +38,6 @@ g_name = sorted(g_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
 k = g[g_name[0]].shape[0]  # number of gates in one layer
 gates = [[g[g[i][j]][:].view('complex').T for j in range(k)] for i in g_name]
 g.close()
-
-r = File('./mat/322_d2_num1_model957_RDM_v7.3.mat', 'r')
-l = list(r.keys())  # list of HDF5 rdm file keys
-rdm = [r[i][:].view('complex').T for i in l]
-rdm.insert(0, [])
-r.close()
 
 pr = {}
 circ = Circuit()
@@ -74,8 +70,8 @@ Ham = Hamiltonian(csr_matrix(rho))
 print('Hamiltonian Dimension:', rho.shape)
 
 rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
+print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -103,8 +99,8 @@ rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm[3] - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res_rdm))
+print('rho norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

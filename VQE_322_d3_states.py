@@ -27,7 +27,11 @@ def fun(p0, sim_grad, args=None):
     return f, g
 
 
-mat_states = {'1': '322_d3_num1_model957_RDM3_target_state_vector'}
+mat_states = {
+    '1a': '322_d3_num1_model957_RDM3_target_state_vector',
+    '1b': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0',
+    '1c': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level3'
+}
 mat_gates = {
     '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
     '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
@@ -74,7 +78,7 @@ l = list(r.keys())  # list of HDF5 rdm file keys
 rdm3 = r['RDM_3'][:].view('complex').T
 r.close()
 
-s = File(f'./mat/{mat_states["1"]}.mat', 'r')
+s = File(f'./mat/{mat_states[num]}.mat', 'r')
 state = s['target_state_vec'][:].view('complex')
 s.close()
 

@@ -119,8 +119,8 @@ Ham = [(1, UMG(d, rho).on(list(range(nq))))]
 expect = Expectation(Ham)
 
 rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm[3] - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_rdm))
+print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
@@ -147,7 +147,7 @@ print('psi norm: %.20f' % norm(psi - psi_res, 2))
 print('psi fidelity: %.20f' % fidelity(psi, psi_res))
 
 rho_res = reduced_density_matrix(psi_res, d, position)
-print('rho fidelity: %.20f' % fidelity(rdm[3], rho_res))
+print('rho fidelity: %.20f' % fidelity(rdm3, rho_res))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

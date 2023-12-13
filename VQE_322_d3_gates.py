@@ -21,7 +21,7 @@ def fun(p0, sim_grad, args=None):
         args.append(f)
         i = len(args)
         if i % 10 == 0:
-            global start, gtol, num, layers
+            global start, num, layers
             t = time.perf_counter() - start
             print('num%s, Layers: %d, ' % (num, layers), end='')
             print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
@@ -30,8 +30,8 @@ def fun(p0, sim_grad, args=None):
 
 mat_gates = {
     '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
-    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
-    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
+    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
+    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
     '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
     '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
     '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
@@ -127,7 +127,7 @@ start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
 print(res.message)
-print('Optimal: %.20f' % res.fun)
+print('Optimal: %.20f, %s' % (res.fun, res.fun))
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))

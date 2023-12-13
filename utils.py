@@ -275,7 +275,7 @@ def Uind(basis, d, ind, pr, obj):
 
 def Ub(basis, d, name, obj):
     circ = Circuit()
-    index = [[0, 2], [1, 2], [0, 2]]
+    index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
         for i, ind in enumerate(index):
             str_pr = f'{"".join(str(i) for i in ind)}_{i}'

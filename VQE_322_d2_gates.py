@@ -23,7 +23,7 @@ def fun(p0, sim_grad, args=None):
         if i % 10 == 0:
             global start
             t = time.perf_counter() - start
-            print('Loss: %.15f, Fidelity: %.15f, %4d, %.4f' % (f, 1 - f, i, t))
+            print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
     return f, g
 
 
@@ -89,7 +89,7 @@ start = time.perf_counter()
 p0 = np.random.uniform(-1, 1, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
 print(res.message)
-print('Optimal: %.20f' % res.fun)
+print('Optimal: %.20f, %s' % (res.fun, res.fun))
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))

@@ -21,7 +21,7 @@ def fun(p0, sim_grad, args=None):
         args.append(f)
         i = len(args)
         if i % 10 == 0:
-            global start, gtol, num, layers
+            global start, num, layers
             t = time.perf_counter() - start
             print('num%s, Layers: %d, ' % (num, layers), end='')
             print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
@@ -100,7 +100,7 @@ start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
 print(res.message)
-print('Optimal: %.20f' % res.fun)
+print('Optimal: %.20f, %s' % (res.fun, res.fun))
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))

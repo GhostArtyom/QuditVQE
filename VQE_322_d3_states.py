@@ -29,13 +29,13 @@ def fun(p0, sim_grad, args=None):
 
 mat_states = {
     '1a': '322_d3_num1_model957_RDM3_target_state_vector',
-    '1b': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0',
-    '1c': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level3'
+    '1b': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level3',
+    '1c': '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0'
 }
 mat_gates = {
     '1a': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_nsweep20',
-    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
-    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
+    '1b': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level3',
+    '1c': '322_d3_num1_model957_RDM3_gates_L10_N7_r0.9_contextual_level0',
     '2': '322_d3_num2_model394_RDM3_gates_L10_N7_r0.8',
     '4': '322_d3_num4_model123_RDM3_gates_L10_N7_r0.8',
     '5': '322_d3_num5_model523_RDM3_gates_L10_N7_r0.8',
@@ -46,8 +46,8 @@ mat_gates = {
 }
 mat_rdm = {
     '1a': '322_d3_num1_model957_RDM_new_v7.3',
-    '1b': '322_d3_num1_model957_RDM_contextual_level0_v7.3',
-    '1c': '322_d3_num1_model957_RDM_contextual_level3_v7.3',
+    '1b': '322_d3_num1_model957_RDM_contextual_level3_v7.3',
+    '1c': '322_d3_num1_model957_RDM_contextual_level0_v7.3',
     '2': '322_d3_num2_model394_RDM_v7.3',
     '3': '322_d3_num3_model371_RDM_v7.3',
     '4': '322_d3_num4_model123_RDM_v7.3',

@@ -424,16 +424,14 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
     pt = np.zeros([n, n], dtype=np.complex128)
     if rho.ndim == 1:
-        rho = np.outer(rho, rho.conj())
-        for i in range(n):
-            ii = np.base_repr(i, d).zfill(nq)
-            i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
-            for j in range(i, n):
-                jj = np.base_repr(j, d).zfill(nq)
-                j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
-                for k in range(d):
-                    pt[i, j] += rho[i_[k], j_[k]]
-        pt += np.triu(pt, k=1).conj().T
+        for k in range(d):
+            psi = np.zeros([n, n * d], dtype=np.complex128)
+            for i in range(n):
+                ii = np.base_repr(i, d).zfill(nq)
+                i_ = int(ii[:ind] + str(k) + ii[ind:], d)
+                psi[i, i_] = 1
+            temp = psi @ rho
+            pt += np.outer(temp, temp.conj())
     elif rho.ndim == 2:
         if is_hermitian(rho):
             for i in range(n):

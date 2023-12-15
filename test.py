@@ -20,7 +20,7 @@ from mindquantum.algorithm.nisq import *
 from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
 
-np.set_printoptions(linewidth=300)
+np.set_printoptions(linewidth=1000)
 
 # su2_encoding
 d, m = 3, 2
@@ -40,18 +40,21 @@ decode = su2_decoding(qubit, m)
 print(np.allclose(qudit, decode))
 
 # partial_trace
-d, m = 3, 3
+d, m = 3, 8
 a, b = {}, 1
-# np.random.seed(42)
+np.random.seed(42)
 for i in range(m):
     psi = np.random.rand(d) + 1j * np.random.rand(d)
     psi /= norm(psi)
-    a[i] = np.outer(psi, psi.conj())
-    print(a[i])
+    # a[i] = np.outer(psi, psi.conj())
+    a[i] = psi
+    # print(a[i])
     rho = a[i] if i == 0 else np.kron(rho, a[i])
-print(rho.shape, np.trace(rho))
+# print(rho.shape, np.trace(rho))
 ind = 2
+t1 = time.perf_counter()
 pt = partial_trace(rho, d, ind)
+t2 = time.perf_counter()
 for i in range(m):
     if i == ind:
         b *= 1
@@ -59,13 +62,17 @@ for i in range(m):
         b = a[i]
     else:
         b = np.kron(b, a[i])
-print(np.allclose(b, pt))
+b = np.outer(b, b.conj())
+print(np.allclose(b, pt), t2 - t1)
 # reduced_density_matrix
 position = [0, 1]
 for ind, i in enumerate(position):
     b = a[i] if ind == 0 else np.kron(b, a[i])
+t1 = time.perf_counter()
 rdm = reduced_density_matrix(rho, d, position)
-print(np.allclose(b, rdm))
+t2 = time.perf_counter()
+b = np.outer(b, b.conj())
+print(np.allclose(b, rdm), t2 - t1)
 
 # one_qubit_decompose
 d = 2

@@ -5,7 +5,6 @@ from utils import *
 from h5py import File
 from scipy.io import loadmat
 from numpy.linalg import norm
-from scipy.sparse import csc_matrix
 from scipy.optimize import minimize
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate

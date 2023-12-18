@@ -9,16 +9,18 @@ from math import log
 from h5py import File
 from numpy.linalg import *
 from scipy.linalg import *
-from scipy.sparse import csr_matrix
+from scipy.io import loadmat
 from scipy.optimize import minimize
 from mindquantum.framework import *
 from mindquantum.core.gates import *
 from scipy.stats import unitary_group
 from mindquantum.core.circuit import *
+from IPython.display import display_svg
 from mindquantum.core.operators import *
 from mindquantum.algorithm.nisq import *
 from mindquantum.simulator import Simulator
 from mindquantum.algorithm.compiler import *
+from scipy.sparse import csc_matrix, csr_matrix
 
 np.set_printoptions(linewidth=1000)
 

@@ -51,14 +51,16 @@ mat_rdm = {
 d = 3  # dimension of qudit state
 k = 6  # number of gates in one layer
 position = np.array([2, 3, 4])  # position of rdm3
-num = input('File name: num')
+# num = input('File name: num')
+num = '1c'
 
 rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
 s = File(f'./mat/{mat_states[num]}.mat', 'r')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 
-layers = int(input('Number of layers: '))
+# layers = int(input('Number of layers: '))
+layers = 1
 nq = (k + 1) * (d - 1)
 ansatz = Circuit()
 for i in range(layers):
@@ -76,9 +78,8 @@ print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
 
-psi = su2_encoding(state, k + 1)
-csc = csc_matrix(psi)
-rho = csc.T.dot(csc.conj())
+psi = su2_encoding(state, k + 1, is_csc=True)
+rho = psi.T.dot(psi.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 

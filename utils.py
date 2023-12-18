@@ -2,11 +2,13 @@ import numpy as np
 from math import log
 from typing import List
 from scipy.linalg import sqrtm
-from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
 from numpy.linalg import det, eigh, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
+DTYPE = np.float64
+CDTYPE = np.complex128
 opt_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
@@ -173,8 +175,8 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     # Use the entry with the largest magnitude as a reference point.
     a, b = max(((i, j) for i in range(4) for j in range(4)), key=lambda t: abs(mat[t]))
     # Extract sub-factors touching the reference cell.
-    f1 = np.zeros((2, 2), dtype=np.complex128)
-    f2 = np.zeros((2, 2), dtype=np.complex128)
+    f1 = np.zeros((2, 2), dtype=CDTYPE)
+    f2 = np.zeros((2, 2), dtype=CDTYPE)
     for i in range(2):
         for j in range(2):
             f1[(a >> 1) ^ i, (b >> 1) ^ j] = mat[a ^ (i << 1), b ^ (j << 1)]
@@ -422,10 +424,10 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
     nq = int(nq)
     if ind < 0 or ind > nq:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
-    pt = np.zeros([n, n], dtype=np.complex128)
+    pt = np.zeros([n, n], dtype=CDTYPE)
     if rho.ndim == 1:
         for k in range(d):
-            psi = np.zeros([n, n * d], dtype=np.complex128)
+            psi = np.zeros([n, n * d], dtype=CDTYPE)
             for i in range(n):
                 ii = np.base_repr(i, d).zfill(nq)
                 i_ = int(ii[:ind] + str(k) + ii[ind:], d)
@@ -588,7 +590,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
     else:
         raise ValueError(f'Wrong matrix shape {qubit.shape} or multi {m}')
     if qubit.ndim == 1:
-        qudit = np.zeros(d**m, dtype=np.complex128)
+        qudit = np.zeros(d**m, dtype=CDTYPE)
         for i in range(d**m):
             i_ = ind[i]
             qubit_i = qubit[i_]
@@ -597,7 +599,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
             else:
                 raise ValueError('Qubit matrix is not symmetric')
     elif qubit.ndim == 2:
-        qudit = np.zeros([d**m, d**m], dtype=np.complex128)
+        qudit = np.zeros([d**m, d**m], dtype=CDTYPE)
         for i in range(d**m):
             i_ = ind[i]
             for j in range(d**m):
@@ -611,7 +613,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
     return qudit
 
 
-def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
+def su2_encoding(qudit: np.ndarray, m: int = 1, is_csc: bool = False) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
@@ -626,16 +628,17 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
     else:
         raise ValueError(f'Wrong qudit shape {qudit.shape} or multi {m}')
     if qudit.ndim == 1:
-        qubit = csr_matrix((1, n), dtype=np.complex128)
+        qubit = csc_matrix((1, n), dtype=CDTYPE)
         for i in range(d**m):
             ind_i = ind[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
             i_ = (np.zeros(num_i), ind_i)
-            qubit += csr_matrix((data, i_), shape=(1, n))
-        qubit = qubit.toarray().flatten()
+            qubit += csc_matrix((data, i_), shape=(1, n))
+        if not is_csc:
+            qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
-        qubit = csr_matrix((n, n), dtype=np.complex128)
+        qubit = csc_matrix((n, n), dtype=CDTYPE)
         for i in range(d**m):
             ind_i = ind[i]
             num_i = len(ind_i)
@@ -646,6 +649,7 @@ def su2_encoding(qudit: np.ndarray, m: int = 1) -> np.ndarray:
                 j_ = np.tile(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
-                qubit += csr_matrix((data, (i_, j_)), shape=(n, n))
-        qubit = qubit.toarray()
+                qubit += csc_matrix((data, (i_, j_)), shape=(n, n))
+        if not is_csc:
+            qubit = qubit.toarray()
     return qubit

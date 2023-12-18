@@ -48,13 +48,14 @@ mat_rdm = {
     '10': '322_d3_num10_model317_RDM'
 }
 
-d, k = 3, 6
+d = 3  # dimension of qudit state
+k = 6  # number of gates in one layer
+position = np.array([2, 3, 4])  # position of rdm3
 num = input('File name: num')
-position = np.array([2, 3, 4])
 
 rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
 s = File(f'./mat/{mat_states[num]}.mat', 'r')
-state = s['target_state_vec'][:].view('complex')
+state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 
 layers = int(input('Number of layers: '))

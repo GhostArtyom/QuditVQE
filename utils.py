@@ -413,48 +413,31 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
         raise ValueError(f'Wrong dimension type {d} {type(d)}')
     if not isinstance(ind, int):
         raise ValueError(f'Wrong index type {ind} {type(ind)}')
-    n = rho.shape[0] // d
-    if n == 1 and rho.ndim == 1:
+    n = rho.shape[0]
+    m = n // d
+    if n == d and rho.ndim == 1:
         return rho.conj() @ rho
-    elif n == 1 and rho.ndim == 2:
+    elif n == d and rho.ndim == 2:
         return np.trace(rho)
-    nq = round(log(n, d), 12)
+    nq = round(log(m, d), 12)
     if nq % 1 != 0:
         raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
     nq = int(nq)
     if ind < 0 or ind > nq:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
-    pt = np.zeros([n, n], dtype=CDTYPE)
-    if rho.ndim == 1:
-        for k in range(d):
-            psi = np.zeros([n, n * d], dtype=CDTYPE)
-            for i in range(n):
-                ii = np.base_repr(i, d).zfill(nq)
-                i_ = int(ii[:ind] + str(k) + ii[ind:], d)
-                psi[i, i_] = 1
-            temp = psi @ rho
-            pt += np.outer(temp, temp.conj())
-    elif rho.ndim == 2:
-        if is_hermitian(rho):
-            for i in range(n):
-                ii = np.base_repr(i, d).zfill(nq)
-                i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
-                for j in range(i, n):
-                    jj = np.base_repr(j, d).zfill(nq)
-                    j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
-                    for k in range(d):
-                        pt[i, j] += rho[i_[k], j_[k]]
-            pt += np.triu(pt, k=1).conj().T
-        else:
-            for i in range(n):
-                ii = np.base_repr(i, d).zfill(nq)
-                i_ = [int(ii[:ind] + str(k) + ii[ind:], d) for k in range(d)]
-                for j in range(n):
-                    jj = np.base_repr(j, d).zfill(nq)
-                    j_ = [int(jj[:ind] + str(k) + jj[ind:], d) for k in range(d)]
-                    for k in range(d):
-                        pt[i, j] += rho[i_[k], j_[k]]
-    return pt
+    pt = csr_matrix((m, m), dtype=CDTYPE)
+    for k in range(d):
+        i_ = np.zeros(m, dtype=np.int64)
+        for i in range(m):
+            ii = np.base_repr(i, d).zfill(nq)
+            i_[i] = int(ii[:ind] + str(k) + ii[ind:], d)
+        psi = csr_matrix((np.ones(m), (np.arange(m), i_)), shape=(m, n))
+        if rho.ndim == 1:
+            temp = psi.dot(csr_matrix(rho).T)
+            pt += temp.dot(temp.conj().T)
+        elif rho.ndim == 2:
+            pt += psi.dot(csr_matrix(rho)).dot(psi.conj().T)
+    return pt.toarray()
 
 
 def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.ndarray:

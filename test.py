@@ -42,17 +42,17 @@ decode = su2_decoding(qubit, m)
 print(np.allclose(qudit, decode))
 
 # partial_trace
-d, m = 3, 8
+ndim = 2
+d, m = 3, 7
 a, b = {}, 1
 np.random.seed(42)
 for i in range(m):
     psi = np.random.rand(d) + 1j * np.random.rand(d)
     psi /= norm(psi)
-    # a[i] = np.outer(psi, psi.conj())
-    a[i] = psi
-    # print(a[i])
+    a[i] = psi if ndim == 1 else np.outer(psi, psi.conj())
     rho = a[i] if i == 0 else np.kron(rho, a[i])
-# print(rho.shape, np.trace(rho))
+    # print(a[i])
+print(rho.shape)
 ind = 2
 t1 = time.perf_counter()
 pt = partial_trace(rho, d, ind)
@@ -64,8 +64,9 @@ for i in range(m):
         b = a[i]
     else:
         b = np.kron(b, a[i])
-b = np.outer(b, b.conj())
-print(np.allclose(b, pt), t2 - t1)
+b = np.outer(b, b.conj()) if ndim == 1 else b
+print(np.allclose(b, pt), pt.shape, t2 - t1)
+
 # reduced_density_matrix
 position = [0, 1]
 for ind, i in enumerate(position):
@@ -73,8 +74,8 @@ for ind, i in enumerate(position):
 t1 = time.perf_counter()
 rdm = reduced_density_matrix(rho, d, position)
 t2 = time.perf_counter()
-b = np.outer(b, b.conj())
-print(np.allclose(b, rdm), t2 - t1)
+b = np.outer(b, b.conj()) if ndim == 1 else b
+print(np.allclose(b, rdm), rdm.shape, t2 - t1)
 
 # one_qubit_decompose
 d = 2

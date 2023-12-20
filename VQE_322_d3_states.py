@@ -77,8 +77,8 @@ print('Number of qubits: %d' % nq)
 print('Number of params: %d' % p_num)
 print('Number of gates: %d' % g_num)
 
-psi = su2_encoding(state, k + 1, is_csc=True)
-rho = psi.T.dot(psi.conj())
+psi = su2_encoding(state, k + 1, is_csr=True)
+rho = psi.dot(psi.conj().T)
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 

@@ -2,7 +2,7 @@ import numpy as np
 from math import log
 from typing import List
 from scipy.linalg import sqrtm
-from scipy.sparse import csc_matrix
+from scipy.sparse import csr_matrix
 from numpy.linalg import det, eigh, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
@@ -613,7 +613,7 @@ def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
     return qudit
 
 
-def su2_encoding(qudit: np.ndarray, m: int = 1, is_csc: bool = False) -> np.ndarray:
+def su2_encoding(qudit: np.ndarray, m: int = 1, is_csr: bool = False) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
@@ -628,17 +628,17 @@ def su2_encoding(qudit: np.ndarray, m: int = 1, is_csc: bool = False) -> np.ndar
     else:
         raise ValueError(f'Wrong qudit shape {qudit.shape} or multi {m}')
     if qudit.ndim == 1:
-        qubit = csc_matrix((1, n), dtype=CDTYPE)
+        qubit = csr_matrix((n, 1), dtype=CDTYPE)
         for i in range(d**m):
             ind_i = ind[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
-            i_ = (np.zeros(num_i), ind_i)
-            qubit += csc_matrix((data, i_), shape=(1, n))
-        if not is_csc:
+            i_ = (ind_i, np.zeros(num_i))
+            qubit += csr_matrix((data, i_), shape=(n, 1))
+        if not is_csr:
             qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
-        qubit = csc_matrix((n, n), dtype=CDTYPE)
+        qubit = csr_matrix((n, n), dtype=CDTYPE)
         for i in range(d**m):
             ind_i = ind[i]
             num_i = len(ind_i)
@@ -649,7 +649,7 @@ def su2_encoding(qudit: np.ndarray, m: int = 1, is_csc: bool = False) -> np.ndar
                 j_ = np.tile(ind_j, num_i)
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
-                qubit += csc_matrix((data, (i_, j_)), shape=(n, n))
-        if not is_csc:
+                qubit += csr_matrix((data, (i_, j_)), shape=(n, n))
+        if not is_csr:
             qubit = qubit.toarray()
     return qubit

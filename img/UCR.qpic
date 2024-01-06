@@ -5,6 +5,8 @@ q1 W
 q1 G $R_y^{ij}$ width=18 q0 G:width=4 :height=4 {}
 =
 
-q1 G $R_y^{ij}$ width=18 q0 P:width=8 \scriptsize$0$
 q1 G $R_y^{ij}$ width=18 q0 P:width=8 \scriptsize$1$
 q1 G $R_y^{ij}$ width=18 q0 P:width=8 \scriptsize$2$
+q0 LABEL \cdots
+q1 LABEL \cdots
+q1 G $R_y^{ij}$ width=18 q0 P:width=10 \tiny$d$-1

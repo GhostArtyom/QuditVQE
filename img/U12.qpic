@@ -5,12 +5,12 @@ q1 W
 q0 q1 G $U_e^{12}$ width=20
 =
 
-q0 +q1
-q0 G $R_y\big({\small -}\frac{\pi}{2}\big)$ q1 width=40
-q0 +q1
+q1 +q0
+q1 G $R_y\big({\small -}\frac{\pi}{2}\big)$ q0 width=40
+q1 +q0
 
-q0 G $U$ q1
+q1 G $U$ q0
 
-q0 +q1
-q0 G $R_y\big(\frac{\pi}{2}\big)$ q1 width=32
-q0 +q1
+q1 +q0
+q1 G $R_y\big(\frac{\pi}{2}\big)$ q0 width=32
+q1 +q0

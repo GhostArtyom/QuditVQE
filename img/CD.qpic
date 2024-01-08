@@ -1,0 +1,17 @@
+GATESIZE 14
+q0 W
+q1 W
+
+q1 G $\Delta$ q0 P:width=8 \scriptsize$m$
+=
+
+q1 G \scriptsize$R_z^{01}\!(\alpha_1)$ width=30 q0 P:width=8 \scriptsize$m$
+
+q1 G \scriptsize$R_z^{02}\!(\alpha_2)$ width=30 q0 P:width=8 \scriptsize$m$
+
+q0 LABEL \cdots
+q1 LABEL \cdots
+
+q1 G \scriptsize$R_z^{0d\mbox{-}1}\!(\alpha_{d\mbox{-}1})$ width=42 q0 P:width=8 \scriptsize$m$
+
+q0 G \footnotesize$S_m$

@@ -5,12 +5,12 @@ q1 W
 q0 q1 G $U_e^{02}$ width=20
 =
 
-q0 G $X$
-q0 +q1
-q0 G $X$
+q1 G $X$
+q1 +q0
+q1 G $X$
 
-q0 G $U$ q1
+q1 G $U$ q0
 
-q0 G $X$
-q0 +q1
-q0 G $X$
+q1 G $X$
+q1 +q0
+q1 G $X$

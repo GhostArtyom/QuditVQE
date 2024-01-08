@@ -1,0 +1,22 @@
+GATESIZE 14
+DEPTHPAD 3
+WIREPAD 8
+q0 W
+q1 W
+
+q0 q1 G $U(2)$ width=24
+=
+
+q1 G $U_1$
+
+q0 G $R_z$ width=15 q1 G:width=4 :height=4 {}
+
+q1 G $U_2$
+
+q0 G $R_y$ width=15 q1 G:width=4 :height=4 {}
+
+q1 G $U_3$
+
+q0 G $R_z$ width=15 q1 G:width=4 :height=4 {}
+
+q1 G $U_4$

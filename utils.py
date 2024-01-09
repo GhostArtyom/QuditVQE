@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from math import log
 from typing import List
@@ -13,6 +14,16 @@ opt_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
+
+def file_dict(path):
+    file_dict = {}
+    for root, dirs, files in os.walk(path):
+        i = 1
+        for name in files:
+            subfolder = root.split('\\')[-1]
+            file_dict[f'{subfolder}_{i}'] = name
+            i += 1
+    return file_dict
 
 def is_power_of_two(num: int) -> bool:
     if not isinstance(num, int):

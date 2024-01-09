@@ -70,8 +70,8 @@ Ham = Hamiltonian(csr_matrix(rho))
 print('Hamiltonian Dimension:', rho.shape)
 
 rho_rdm = reduced_density_matrix(psi, d, position)
-print('rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
+print('rdm3 & rho norm L2:  %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rdm3 & rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq > 10:
@@ -97,10 +97,10 @@ sim.apply_circuit(ansatz.apply_value(pr_res))
 psi_res = sim.get_qs()
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-print('psi norm: %.20f' % norm(psi - psi_res, 2))
-print('psi fidelity: %.20f' % fidelity(psi, psi_res))
-print('rho norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
-print('rho fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
+print('psi & psi_res norm L2:  %.20f' % norm(psi - psi_res, 2))
+print('psi & psi_res fidelity: %.20f' % fidelity(psi, psi_res))
+print('rdm3 & rho_res norm L2:  %.20f' % norm(rdm3 - rho_res_rdm, 2))
+print('rdm3 & rho_res fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
 
 end = time.perf_counter()
 print('Runtime: %f' % (end - start))

@@ -40,7 +40,7 @@ RDM_name = mat_dict[f'RDM_{num}']
 model = re.search('model\d+', RDM_name).group(0)
 
 rdm2 = loadmat(f'{path}/RDM/{RDM_name}')['RDM_2']
-print('Matrix Rank:', matrix_rank(rdm2))
+print('RDM2 Rank:', matrix_rank(rdm2))
 s = File(f'{path}/target_state/{mat_dict[f"target_state_{num}"]}', 'r')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
@@ -73,7 +73,7 @@ Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
 rho_rdm = reduced_density_matrix(state, d, position)
-print('rdm2 & rho norm: %.20f' % norm(rdm2 - rho_rdm, 2))
+print('rdm2 & rho norm L2:  %.20f' % norm(rdm2 - rho_rdm, 2))
 print('rdm2 & rho fidelity: %.20f' % fidelity(rdm2, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
@@ -100,9 +100,9 @@ psi_res = sim.get_qs()
 psi_res = su2_decoding(psi_res, k + 1)
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-print('state & psi_res norm: %.20f' % norm(state - psi_res, 2))
+print('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
 print('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
-print('rdm2 & rho_res norm: %.20f' % norm(rdm2 - rho_res_rdm, 2))
+print('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
 print('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
 
 total = time.perf_counter() - start

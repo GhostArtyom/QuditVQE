@@ -83,7 +83,7 @@ Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
 rho_rdm = reduced_density_matrix(state, d, position)
-print('rdm3 & rho norm: %.20f' % norm(rdm3 - rho_rdm, 2))
+print('rdm3 & rho norm L2:  %.20f' % norm(rdm3 - rho_rdm, 2))
 print('rdm3 & rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
@@ -110,9 +110,9 @@ psi_res = sim.get_qs()
 psi_res = su2_decoding(psi_res, k + 1)
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-print('state & psi_res norm: %.20f' % norm(state - psi_res, 2))
+print('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
 print('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
-print('rdm3 & rho_res norm: %.20f' % norm(rdm3 - rho_res_rdm, 2))
+print('rdm3 & rho_res norm L2:  %.20f' % norm(rdm3 - rho_res_rdm, 2))
 print('rdm3 & rho_res fidelity: %.20f' % fidelity(rdm3, rho_res_rdm))
 
 total = time.perf_counter() - start

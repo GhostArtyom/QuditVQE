@@ -87,7 +87,8 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 start = time.perf_counter()
 # p0 = np.array(list(pr.values()))
 p0 = np.random.uniform(-1, 1, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, tol=1e-8)
+res = minimize(fun, p0, args=(sim_grad, []), method=method,
+    jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
 print(res.message)
 print('Optimal: %.20f, %s' % (res.fun, res.fun))
 

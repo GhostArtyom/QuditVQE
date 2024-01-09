@@ -19,8 +19,8 @@ def file_dict(path):
     file_dict = {}
     for root, dirs, files in os.walk(path):
         i = 1
-        for name in files:
-            subfolder = root.split('\\')[-1]
+        for name in sorted(files):
+            subfolder = os.path.split(root)[-1]
             file_dict[f'{subfolder}_{i}'] = name
             i += 1
     return file_dict

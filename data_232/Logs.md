@@ -4,6 +4,42 @@
 RDM2 Rank: 9
 rdm2 & rho norm:     0.00000000000000012508
 rdm2 & rho fidelity: 0.99999999960283458833
+Number of layers: 4
+state & psi_res norm L2:  1.86990140848822705699
+state & psi_res fidelity: 0.99944522883775710476
+rdm2 & rho_res norm L2:  0.00113889759989566726
+rdm2 & rho_res fidelity: 0.99987481856244009304
+Runtime: 2494.7996s, 41.5800m, 0.6930h, iter 1e5
+Number of layers: 5
+state & psi_res norm L2:  1.30493434581034772890
+state & psi_res fidelity: 0.99978235605426712951
+rdm2 & rho_res norm L2:  0.00041827835126865355
+rdm2 & rho_res fidelity: 0.99994092012417112869
+Runtime: 3658.0550s, 60.9676m, 1.0161h, iter 1e5
+Number of layers: 5
+state & psi_res norm L2:  1.95550957481276355132
+state & psi_res fidelity: 0.99981664846784934486
+rdm2 & rho_res norm L2:  0.00040424027809764376
+rdm2 & rho_res fidelity: 0.99995115788690858150
+Runtime: 3856.4220s, 64.2737m, 1.0712h, iter 1e5
+Number of layers: 6
+state & psi_res norm L2:  1.77578300557810497828
+state & psi_res fidelity: 0.99999999990818166928
+rdm2 & rho_res norm L2:  0.00000037797915632396
+rdm2 & rho_res fidelity: 0.99999999968802977257
+Runtime: 3463.0175s, 57.7170m, 0.9619h
+Number of layers: 6
+state & psi_res norm L2:  1.38914631850259850943
+state & psi_res fidelity: 0.99999999972923214742
+rdm2 & rho_res norm L2:  0.00000068477719215119
+rdm2 & rho_res fidelity: 1.00000000019865264989
+Runtime: 3816.2068s, 63.6034m, 1.0601h
+Number of layers: 7
+state & psi_res norm L2:  1.58961058519827003188
+state & psi_res fidelity: 0.99999999999606603573
+rdm2 & rho_res norm L2:  0.00000011980959631078
+rdm2 & rho_res fidelity: 1.00000000032548586049
+Runtime: 1747.6850s, 29.1281m, 0.4855h
 Number of layers: 7
 state & psi_res norm L2:  1.48006771535840608855
 state & psi_res fidelity: 0.99999999999957345231

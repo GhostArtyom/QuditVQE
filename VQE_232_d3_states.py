@@ -77,7 +77,7 @@ print('rdm2 & rho norm L2:  %.20f' % norm(rdm2 - rho_rdm, 2))
 print('rdm2 & rho fidelity: %.20f' % fidelity(rdm2, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq > 10:
+if 'mqvector_gpu' in sim_list and nq > 12:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
     print(f'Simulator: mqvector_gpu, Method: {method}')
@@ -89,10 +89,10 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method,
-    jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
 print(res.message)
 print('Optimal: %.20f, %s' % (res.fun, res.fun))
+print(f'Number of layers: {layers}')
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))

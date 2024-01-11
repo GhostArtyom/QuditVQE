@@ -89,7 +89,7 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 10000})
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 1e6})
 print(res.message)
 print('Optimal: %.20f, %s' % (res.fun, res.fun))
 print(f'Number of layers: {layers}')
@@ -107,4 +107,4 @@ print('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
 print('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
 
 total = time.perf_counter() - start
-print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')
+print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')

@@ -9,19 +9,19 @@ state & psi_res norm L2:  1.86990140848822705699
 state & psi_res fidelity: 0.99944522883775710476
 rdm2 & rho_res norm L2:  0.00113889759989566726
 rdm2 & rho_res fidelity: 0.99987481856244009304
-Runtime: 2494.7996s, 41.5800m, 0.6930h, iter 1e5
+Runtime: 2494.7996s, 41.5800m, 0.6930h, Iter: 1e5
 Number of layers: 5
 state & psi_res norm L2:  1.30493434581034772890
 state & psi_res fidelity: 0.99978235605426712951
 rdm2 & rho_res norm L2:  0.00041827835126865355
 rdm2 & rho_res fidelity: 0.99994092012417112869
-Runtime: 3658.0550s, 60.9676m, 1.0161h, iter 1e5
+Runtime: 3658.0550s, 60.9676m, 1.0161h, Iter: 1e5
 Number of layers: 5
 state & psi_res norm L2:  1.95550957481276355132
 state & psi_res fidelity: 0.99981664846784934486
 rdm2 & rho_res norm L2:  0.00040424027809764376
 rdm2 & rho_res fidelity: 0.99995115788690858150
-Runtime: 3856.4220s, 64.2737m, 1.0712h, iter 1e5
+Runtime: 3856.4220s, 64.2737m, 1.0712h, Iter: 1e5
 Number of layers: 6
 state & psi_res norm L2:  1.77578300557810497828
 state & psi_res fidelity: 0.99999999990818166928
@@ -292,7 +292,24 @@ state & psi_res norm L2:  1.84824760308692193078
 state & psi_res fidelity: 0.99814434099139959233
 rdm2 & rho_res norm L2:  0.00348732692267352115
 rdm2 & rho_res fidelity: 0.99960186229893321919
-
+Number of layers: 1
+state & psi_res norm L2:  0.08491887082752529181
+state & psi_res fidelity: 0.99814434065241219862
+rdm2 & rho_res norm L2:  0.00348732227135975558
+rdm2 & rho_res fidelity: 0.99930504173466283557
+Runtime: 117.9374s, 1.9656m, 0.0328h
+Number of layers: 2
+state & psi_res norm L2:  1.33626702616373349564
+state & psi_res fidelity: 0.99999964236639837800
+rdm2 & rho_res norm L2:  0.00001253792282679963
+rdm2 & rho_res fidelity: 0.99999998827061897799
+Runtime: 14078.8233s, 234.6471m, 3.9108h, Iter: 1e6
+Number of layers: 3
+state & psi_res norm L2:  1.98748203968066294856
+state & psi_res fidelity: 0.99999997309938692958
+rdm2 & rho_res norm L2:  0.00000088239878885723
+rdm2 & rho_res fidelity: 0.99999999994562993599
+Runtime: 19958.4237s, 332.6404m, 5.5440h, Iter: 1e6
 
 ## num2 model1410
 RDM2 Rank: 9
@@ -303,7 +320,24 @@ state & psi_res norm L2:  1.89306311864739829076
 state & psi_res fidelity: 0.99724638520423825039
 rdm2 & rho_res norm L2:  0.00364480603851782825
 rdm2 & rho_res fidelity: 0.99869572166890396847
-
+Number of layers: 1
+state & psi_res norm L2:  1.61754733212669199460
+state & psi_res fidelity: 0.99724638381393382325
+rdm2 & rho_res norm L2:  0.00364480804697065461
+rdm2 & rho_res fidelity: 0.99862928926743976810
+Runtime: 74.8237s, 1.2471m, 0.0208h
+Number of layers: 2
+state & psi_res norm L2:  1.66996972545453203907
+state & psi_res fidelity: 0.99999434825688404693
+rdm2 & rho_res norm L2:  0.00003823360149574958
+rdm2 & rho_res fidelity: 0.99999986707258381458
+Runtime: 14074.1969s, 234.5699m, 3.9095h, Iter: 1e6
+Number of layers: 3
+state & psi_res norm L2:  1.97377703999484488406
+state & psi_res fidelity: 0.99999958457758075792
+rdm2 & rho_res norm L2:  0.00000422661857574796
+rdm2 & rho_res fidelity: 0.99999999929230365403
+Runtime: 20029.6527s, 333.8275m, 5.5638h, Iter: 1e6
 
 ## num3 model1705
 RDM2 Rank: 9
@@ -314,7 +348,24 @@ state & psi_res norm L2:  1.91699965269644612142
 state & psi_res fidelity: 0.99948337669403641836
 rdm2 & rho_res norm L2:  0.00799166651833343664
 rdm2 & rho_res fidelity: 0.99964680414368967121
-
+Number of layers: 1
+state & psi_res norm L2:  1.94340937164393134928
+state & psi_res fidelity: 0.99948337657347952057
+rdm2 & rho_res norm L2:  0.00799172113372679897
+rdm2 & rho_res fidelity: 0.99975491826858264854
+Runtime: 53.4109s, 0.8902m, 0.0148h
+Number of layers: 2
+state & psi_res norm L2:  1.35028349799084357308
+state & psi_res fidelity: 0.99999728292253875495
+rdm2 & rho_res norm L2:  0.00004284934251794782
+rdm2 & rho_res fidelity: 0.99999992417600347405
+Runtime: 13816.8018s, 230.2800m, 3.8380h, Iter: 1e6
+Number of layers: 3
+state & psi_res norm L2:  0.65726934620274102272
+state & psi_res fidelity: 0.99999970889874278956
+rdm2 & rho_res norm L2:  0.00000465179884502359
+rdm2 & rho_res fidelity: 0.99999999823026541890
+Runtime: 19986.7086s, 333.1118m, 5.5519h, Iter: 1e6
 
 # type4_Q4_violation 7
 

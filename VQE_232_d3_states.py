@@ -6,52 +6,63 @@ from h5py import File
 from scipy.io import loadmat
 from scipy.optimize import minimize
 from numpy.linalg import norm, matrix_rank
+from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator import Simulator, get_supported_simulator
 
 
-def fun(p0, sim_grad, args=None):
+def fun(p0, sim_grad, loss_list=None):
+    '''Optimize function of fidelity
+    p0: initial parameters
+    sim_grad: simulator forward with gradient
+    loss_list: list of loss values for loss function
+    '''
     f, g = sim_grad(p0)
     f = 1 - np.real(f)[0][0]
     g = -np.real(g)[0][0]
-    if args is not None:
-        args.append(f)
-        i = len(args)
+    if loss_list is not None:
+        loss_list.append(f)
+        i = len(loss_list)
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
             print('num%s, %s, Layers: %d, ' % (num, model, layers), end='')
             print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
+            info('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
     return f, g
 
 
-folder_dict = {
+# dict of folders
+dict_folder = {
     1: 'type1_no_violation',
     2: 'type2_Q3_Q4_different_violation',
     3: 'type3_Q3_Q4_same_violation',
     4: 'type4_Q4_violation'
 }
-path = f'./data_232/{folder_dict[1]}'
-mat_dict = file_dict(path)
-num = input('File name: num')
-RDM_name = mat_dict[f'RDM_{num}']
-model = re.search('model\d+', RDM_name).group(0)
+t = 1  # which type of folder
+path = f'./data_232/{dict_folder[t]}'  # path of folder
+dict_mat = file_dict(path)  # dict of mat files
+num = input('File name: num')  # input num of file index
+RDM_name = dict_mat[f'RDM_{num}']  # RDM mat file name
+model = re.search('model\d+', RDM_name).group(0)  # model number
+layers = int(input('Number of layers: '))  # input number of layers
+
+log = f'./data_232/Logs/type{t}_num{num}_{model}_L{layers}.log'
+basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
 rdm2 = loadmat(f'{path}/RDM/{RDM_name}')['RDM_2']
-print('RDM2 Rank:', matrix_rank(rdm2))
-s = File(f'{path}/target_state/{mat_dict[f"target_state_{num}"]}', 'r')
+info(f'RDM2 Rank: {matrix_rank(rdm2)}')
+s = File(f'{path}/target_state/{dict_mat[f"target_state_{num}"]}', 'r')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 
 d = 3  # dimension of qudit state
 k = 5  # number of gates in one layer
 position = np.array([2, 3])  # position of rdm2
-
-layers = int(input('Number of layers: '))
-nq = (k + 1) * (d - 1)
-ansatz = Circuit()
+nq = (k + 1) * (d - 1)  # number of qubits
+ansatz = Circuit()  # qutrit symmetric ansatz
 for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
@@ -63,48 +74,48 @@ for i in range(layers):
 p_name = ansatz.ansatz_params_name
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
-print('Number of qubits: %d' % nq)
-print('Number of params: %d' % p_num)
-print('Number of gates: %d' % g_num)
+info('Number of qubits: %d' % nq)
+info('Number of params: %d' % p_num)
+info('Number of gates: %d' % g_num)
 
-psi = su2_encoding(state, k + 1, is_csr=True)
-rho = psi.dot(psi.conj().T)
-Ham = Hamiltonian(rho)
-print('Hamiltonian Dimension:', rho.shape)
+psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit target state to qubit
+rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
+Ham = Hamiltonian(rho)  # set target state as Hamiltonian
+info(f'Hamiltonian Dimension: {rho.shape}')
 
 rho_rdm = reduced_density_matrix(state, d, position)
-print('rdm2 & rho norm L2:  %.20f' % norm(rdm2 - rho_rdm, 2))
-print('rdm2 & rho fidelity: %.20f' % fidelity(rdm2, rho_rdm))
+info('rdm2 & rho norm L2:  %.20f' % norm(rdm2 - rho_rdm, 2))
+info('rdm2 & rho fidelity: %.20f' % fidelity(rdm2, rho_rdm))
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq > 12:
+if 'mqvector_gpu' in sim_list and nq >= 12:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
-    print(f'Simulator: mqvector_gpu, Method: {method}')
+    info(f'Simulator: mqvector_gpu, Method: {method}')
 else:
     sim = Simulator('mqvector', nq)
     method = 'BFGS'  # TNC CG
-    print(f'Simulator: mqvector, Method: {method}')
+    info(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
-p0 = np.random.uniform(-np.pi, np.pi, p_num)
+p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 1e6})
-print(res.message)
-print('Optimal: %.20f, %s' % (res.fun, res.fun))
-print(f'Number of layers: {layers}')
+info(res.message)
+info('Optimal: %.20f, %s' % (res.fun, res.fun))
+info(f'Number of layers: {layers}')
 
 sim.reset()
-pr_res = dict(zip(p_name, res.x))
-sim.apply_circuit(ansatz.apply_value(pr_res))
-psi_res = sim.get_qs()
-psi_res = su2_decoding(psi_res, k + 1)
+pr_res = dict(zip(p_name, res.x))  # optimal result parameters
+sim.apply_circuit(ansatz.apply_value(pr_res))  # apply result params to circuit
+psi_res = sim.get_qs()  # get result pure state
+psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-print('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
-print('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
-print('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
-print('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
+info('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
+info('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
+info('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
+info('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
 
 total = time.perf_counter() - start
-print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
+info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')

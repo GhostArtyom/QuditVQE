@@ -28,16 +28,19 @@ def fun(p0, sim_grad, loss_list=None):
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
-            print('num%s, %s, Layers: %d, ' % (num, model, layers), end='')
-            print('Loss: %.15f, Fidelity: %.15f, %d, %.2f' % (f, 1 - f, i, t))
-            info('Loss: %.15f, Fidelity: %.15f, %d, %.2f' % (f, 1 - f, i, t))
+            print(f'num{num}, {model}, Layers: {layers}, ', end='')
+            print(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
+            info(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g
 
 
-def callback(x):
-    f, _ = sim_grad(x)
+def callback(xk):
+    '''Callback when loss < tol
+    xk: current parameter vector
+    '''
+    f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
-    if loss < 1e-8:
+    if loss < 1e-8: # tolerance
         raise StopIteration
 
 
@@ -81,9 +84,9 @@ for i in range(layers):
 p_name = ansatz.ansatz_params_name
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
-info('Number of qubits: %d' % nq)
-info('Number of params: %d' % p_num)
-info('Number of gates: %d' % g_num)
+info(f'Number of qubits: {nq}')
+info(f'Number of params: {p_num}')
+info(f'Number of gates: {g_num}')
 
 psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit target state to qubit
 rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
@@ -91,8 +94,8 @@ Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 info(f'Hamiltonian Dimension: {rho.shape}')
 
 rho_rdm = reduced_density_matrix(state, d, position)
-info('rdm2 & rho norm L2:  %.20f' % norm(rdm2 - rho_rdm, 2))
-info('rdm2 & rho fidelity: %.20f' % fidelity(rdm2, rho_rdm))
+info(f'rdm2 & rho norm L2:  {norm(rdm2 - rho_rdm, 2):.20f}')
+info(f'rdm2 & rho fidelity: {fidelity(rdm2, rho_rdm):.20f}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq >= 12:
@@ -106,11 +109,13 @@ else:
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
+options = {'gtol': 1e-8, 'maxiter': 1e6}  # solver options
 p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options={'maxiter': 1e6})
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
 info(res.message)
-info('Optimal: %.20f, %s' % (res.fun, res.fun))
-print('Optimal: %.20f, %s' % (res.fun, res.fun))
+info(f'Number of layers: {layers}')
+info(f'Optimal: {res.fun:.20f}, {res.fun}')
+print(f'Optimal: {res.fun:.20f}, {res.fun}')
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))  # optimal result parameters
@@ -119,11 +124,10 @@ psi_res = sim.get_qs()  # get result pure state
 psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-info(f'Number of layers: {layers}')
-info('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
-info('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
-info('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
-info('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
+info(f'state & psi_res norm L2:  {norm(state - psi_res, 2):.20f}')
+info(f'state & psi_res fidelity: {fidelity(state, psi_res):.20f}')
+info(f'rdm2 & rho_res norm L2:  {norm(rdm2 - rho_res_rdm, 2):.20f}')
+info(f'rdm2 & rho_res fidelity: {fidelity(rdm2, rho_res_rdm):.20f}')
 
 total = time.perf_counter() - start
 print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')

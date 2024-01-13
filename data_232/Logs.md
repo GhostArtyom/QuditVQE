@@ -372,12 +372,11 @@ state & psi_res fidelity: 0.99999997309938692958
 rdm2 & rho_res norm L2:  0.00000088239878885723
 rdm2 & rho_res fidelity: 0.99999999994562993599
 Runtime: 19958.4237s, 332.6404m, 5.5440h, Iter: 1e6
-Number of layers: 4
-Loss: 5e-8, 4h
-Number of layers: 5
-Loss: 2.8e-8, 4h
-Number of layers: 6
-Loss: 0.000000029656817, Fidelity: 0.999999970343183, 20000, 13128.4715, 3.65h
+Number of layers: 4, Loss: 5e-8, 4h
+Number of layers: 5, Loss: 2.8e-8, 4h
+Number of layers: 6, Loss: 2.97e-08, 3.65h
+Fidelity: 0.999999970343183, 20000, 13128.4715
+
 
 ## num2 model1410
 RDM2 Rank: 9
@@ -406,12 +405,11 @@ state & psi_res fidelity: 0.99999958457758075792
 rdm2 & rho_res norm L2:  0.00000422661857574796
 rdm2 & rho_res fidelity: 0.99999999929230365403
 Runtime: 20029.6527s, 333.8275m, 5.5638h, Iter: 1e6
-Number of layers: 4
-Loss: 4e-7, 4h
-Number of layers: 5
-Loss: 3.3e-8, 4h
-Number of layers: 6
-Loss: 0.000000183792812, Fidelity: 0.999999816207188, 20000, 12634.1322, 3.51h
+Number of layers: 4, Loss: 4e-7, 4h
+Number of layers: 5, Loss: 3.3e-8, 4h
+Number of layers: 6, Loss: 1.84e-07, 3.51h
+Fidelity: 0.999999816207188, 20000, 12634.1322
+
 
 ## num3 model1705
 RDM2 Rank: 9
@@ -440,12 +438,10 @@ state & psi_res fidelity: 0.99999970889874278956
 rdm2 & rho_res norm L2:  0.00000465179884502359
 rdm2 & rho_res fidelity: 0.99999999823026541890
 Runtime: 19986.7086s, 333.1118m, 5.5519h, Iter: 1e6
-Number of layers: 4
-Loss: 2e-7, 4h
-Number of layers: 5
-Loss: 1.5e-7, 4h
-Number of layers: 6
-Loss: 0.000000109600784, Fidelity: 0.999999890399216, 20000, 13038.0641, 3.62h
+Number of layers: 4, Loss: 2e-7, 4h
+Number of layers: 5, Loss: 1.5e-7, 4h
+Number of layers: 6, Loss: 1.10e-07, 3.62h
+Fidelity: 0.999999890399216, 20000, 13038.0641
 
 
 # type4_Q4_violation 7

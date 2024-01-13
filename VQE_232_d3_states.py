@@ -29,9 +29,16 @@ def fun(p0, sim_grad, loss_list=None):
             global start, num, layers
             t = time.perf_counter() - start
             print('num%s, %s, Layers: %d, ' % (num, model, layers), end='')
-            print('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
-            info('Loss: %.15f, Fidelity: %.15f, %d, %.4f' % (f, 1 - f, i, t))
+            print('Loss: %.15f, Fidelity: %.15f, %d, %.2f' % (f, 1 - f, i, t))
+            info('Loss: %.15f, Fidelity: %.15f, %d, %.2f' % (f, 1 - f, i, t))
     return f, g
+
+
+def callback(x):
+    f, _ = sim_grad(x)
+    loss = 1 - np.real(f)[0][0]
+    if loss < 1e-8:
+        raise StopIteration
 
 
 # dict of folders
@@ -100,10 +107,10 @@ sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
 p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
-res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, options={'gtol': 1e-8, 'maxiter': 1e6})
+res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options={'maxiter': 1e6})
 info(res.message)
 info('Optimal: %.20f, %s' % (res.fun, res.fun))
-info(f'Number of layers: {layers}')
+print('Optimal: %.20f, %s' % (res.fun, res.fun))
 
 sim.reset()
 pr_res = dict(zip(p_name, res.x))  # optimal result parameters
@@ -112,6 +119,7 @@ psi_res = sim.get_qs()  # get result pure state
 psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
+info(f'Number of layers: {layers}')
 info('state & psi_res norm L2:  %.20f' % norm(state - psi_res, 2))
 info('state & psi_res fidelity: %.20f' % fidelity(state, psi_res))
 info('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))

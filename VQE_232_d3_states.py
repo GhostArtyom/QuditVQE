@@ -118,4 +118,5 @@ info('rdm2 & rho_res norm L2:  %.20f' % norm(rdm2 - rho_res_rdm, 2))
 info('rdm2 & rho_res fidelity: %.20f' % fidelity(rdm2, rho_res_rdm))
 
 total = time.perf_counter() - start
+print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
 info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')

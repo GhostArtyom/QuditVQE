@@ -181,12 +181,25 @@ state & psi_res fidelity: 0.99975019255469488311
 rdm2 & rho_res norm L2:  0.00081202091458962755
 rdm2 & rho_res fidelity: 0.99996601401957752042
 Runtime: 45033.2327s, 750.5539m, 12.5092h, Iter: 119224
+Number of layers: 6
+state & psi_res norm L2:  0.91577766560450624134
+state & psi_res fidelity: 0.99999999992663513027
+rdm2 & rho_res norm L2:  0.00000051179051061794
+rdm2 & rho_res fidelity: 1.00000792743384447903
+Runtime: 25135.6597s, 418.9277m, 6.9821h, Iter: 6275
+Number of layers: 7
+state & psi_res norm L2:  1.68707334568263722652
+state & psi_res fidelity: 0.99999999999875388568
+rdm2 & rho_res norm L2:  0.00000006272269230882
+rdm2 & rho_res fidelity: 1.00000723405952762768
+Runtime: 19412.0742s, 323.5346m, 5.3922h, Iter: 1601
 Number of layers: 8
 state & psi_res norm L2:  0.71717502028842250450
 state & psi_res fidelity: 1.00000000000058708594
 rdm2 & rho_res norm L2:  0.00000004360214341003
 rdm2 & rho_res fidelity: 1.00008186937409293549
 Runtime: 2597.8704s, 43.2978m, 0.7216h
+
 
 ## num12 model574
 RDM2 Rank: 9
@@ -259,6 +272,18 @@ state & psi_res fidelity: 0.99990716755070707666
 rdm2 & rho_res norm L2:  0.00032847594949264732
 rdm2 & rho_res fidelity: 0.99995709179186142990
 Runtime: 30616.3834s, 510.2731m, 8.5046h, Iter: 77134
+Number of layers: 6
+state & psi_res norm L2:  1.06239305686619234237
+state & psi_res fidelity: 0.99999999989303711700
+rdm2 & rho_res norm L2:  0.00000037957839385997
+rdm2 & rho_res fidelity: 1.00020761274250613582
+Runtime: 31205.0304s, 520.0838m, 8.6681h, Iter: 7517
+Number of layers: 7
+state & psi_res norm L2:  1.98748373813769041440
+state & psi_res fidelity: 0.99999999999681254970
+rdm2 & rho_res norm L2:  0.00000010243090379585
+rdm2 & rho_res fidelity: 1.00016610382854476136
+Runtime: 24475.3867s, 407.9231m, 6.7987h, Iter: 2068
 
 
 ## num18 model640
@@ -294,13 +319,28 @@ state & psi_res norm L2:  0.52859288779249347101
 state & psi_res fidelity: 0.99956812241615433656
 rdm2 & rho_res norm L2:  0.00760221075922884199
 rdm2 & rho_res fidelity: 0.99993334733310135221
+Number of layers: 2
+Fidelity: 0.999999031800676, 18610, 71618.6703, 19.89h
+Number of layers: 3
+Fidelity: 0.999999598381383, 12210, 71597.9976, 19.89h
+Number of layers: 4
+Fidelity: 0.999999797324875, 10070, 71523.4548, 19.87h
+Number of layers: 5
+Fidelity: 0.999999836542483, 7340, 71503.3933, 19.86h
 
 
 ## num2 model2467
 RDM2 Rank: 9
 rdm2 & rho norm:     0.00000000000000024494
 rdm2 & rho fidelity: 1.00000000000004662937
-
+Number of layers: 2
+Fidelity: 0.999908682606081, 18430, 71509.8031, 19.86h
+Number of layers: 3
+Fidelity: 0.999982656292664, 11960, 71451.7400, 19.85h
+Number of layers: 4
+Fidelity: 0.999991089737277, 10430, 71495.8248, 19.86h
+Number of layers: 5
+Fidelity: 0.999997517498357, 7330, 71434.3021, 19.84h
 
 
 # type3_Q3_Q4_same_violation 3

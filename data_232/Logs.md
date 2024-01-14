@@ -64,6 +64,13 @@ state & psi_res fidelity: 1.00000000000102051700
 rdm2 & rho_res norm L2:  0.00000002563161870862
 rdm2 & rho_res fidelity: 1.00007653622542491689
 Runtime: 1430.6125s, 23.8435m, 0.3974h
+Number of layers: 6
+Optimal: 0.00000000999800719992, 9.99800719991839e-09
+state & psi_res norm L2:  0.98493125994872710027
+state & psi_res fidelity: 0.99999999000199046861
+rdm2 & rho_res norm L2:  0.00000395871231342334
+rdm2 & rho_res fidelity: 0.99999999919932358594
+Runtime: 4919.3292s, 81.9888m, 1.3665h, Iter: 6184
 
 
 ## num2 model281
@@ -199,6 +206,13 @@ state & psi_res fidelity: 1.00000000000058708594
 rdm2 & rho_res norm L2:  0.00000004360214341003
 rdm2 & rho_res fidelity: 1.00008186937409293549
 Runtime: 2597.8704s, 43.2978m, 0.7216h
+Number of layers: 6
+Optimal: 0.00000000992480597706, 9.92480597705736e-09
+state & psi_res norm L2:  1.84964672040269073605
+state & psi_res fidelity: 0.99999999007519702054
+rdm2 & rho_res norm L2:  0.00000615873902404692
+rdm2 & rho_res fidelity: 0.99999999945409800972
+Runtime: 4057.6690s, 67.6278m, 1.1271h, Iter: 4792
 
 
 ## num12 model574
@@ -284,6 +298,13 @@ state & psi_res fidelity: 0.99999999999681254970
 rdm2 & rho_res norm L2:  0.00000010243090379585
 rdm2 & rho_res fidelity: 1.00016610382854476136
 Runtime: 24475.3867s, 407.9231m, 6.7987h, Iter: 2068
+Number of layers: 6
+Optimal: 0.00000000999547078440, 9.995470784396332e-09
+state & psi_res norm L2:  0.31528320489249761494
+state & psi_res fidelity: 0.99999999000452999276
+rdm2 & rho_res norm L2:  0.00000500325572392502
+rdm2 & rho_res fidelity: 0.99999999933143102204
+Runtime: 4544.6688s, 75.7445m, 1.2624h, Iter: 5477
 
 
 ## num18 model640
@@ -327,6 +348,17 @@ Number of layers: 4
 Fidelity: 0.999999797324875, 10070, 71523.4548, 19.87h
 Number of layers: 5
 Fidelity: 0.999999836542483, 7340, 71503.3933, 19.86h
+Number of layers: 6, Loss: 2.49e-8
+Fidelity: 0.999999975108648, 20170, 18017.97, 5h
+Number of layers: 7, Loss: 3.18e-8
+Fidelity: 0.999999968528212, 21300, 20932.37, 5.81h
+Number of layers: 8
+Optimal: 0.00000000999443050542, 9.994430505422258e-09
+state & psi_res norm L2:  1.56937175196719214121
+state & psi_res fidelity: 0.99999999000556649698
+rdm2 & rho_res norm L2:  0.00000069207981882675
+rdm2 & rho_res fidelity: 0.99999999999428967890
+Runtime: 14095.3060s, 234.9218m, 3.9154h, Iter: 9752
 
 
 ## num2 model2467
@@ -341,6 +373,22 @@ Number of layers: 4
 Fidelity: 0.999991089737277, 10430, 71495.8248, 19.86h
 Number of layers: 5
 Fidelity: 0.999997517498357, 7330, 71434.3021, 19.84h
+Number of layers: 6, Loss: 2.84e-7
+Fidelity: 0.999999715581971, 20150, 18009.84, 5h
+Number of layers: 7
+Optimal: 0.00000000998742444303, 9.987424443025361e-09
+state & psi_res norm L2:  0.27391849471152268647
+state & psi_res fidelity: 0.99999999001258021991
+rdm2 & rho_res norm L2:  0.00000122300306775847
+rdm2 & rho_res fidelity: 0.99999999999101696346
+Runtime: 13251.2704s, 220.8545m, 3.6809h, Iter: 11014
+Number of layers: 8
+Optimal: 0.00000000996916194040, 9.969161940404092e-09
+state & psi_res norm L2:  0.99545616428704575274
+state & psi_res fidelity: 0.99999999003084449889
+rdm2 & rho_res norm L2:  0.00000098288924850576
+rdm2 & rho_res fidelity: 0.99999999997818633801
+Runtime: 5206.0873s, 86.7681m, 1.4461h, Iter: 3120
 
 
 # type3_Q3_Q4_same_violation 3

@@ -376,6 +376,13 @@ Number of layers: 4, Loss: 5e-8, 4h
 Number of layers: 5, Loss: 2.8e-8, 4h
 Number of layers: 6, Loss: 2.97e-08, 3.65h
 Fidelity: 0.999999970343183, 20000, 13128.4715
+Number of layers: 7
+Optimal: 0.00000001016816952859, 1.0168169528590454e-08
+state & psi_res norm L2:  1.99720197576486180324
+state & psi_res fidelity: 0.99999998983183147061
+rdm2 & rho_res norm L2:  0.00000011653520310532
+rdm2 & rho_res fidelity: 0.99999999999591770994
+Runtime: 17671.3775s, 294.5230m, 4.9087h, Iter: 16642
 
 
 ## num2 model1410
@@ -409,6 +416,13 @@ Number of layers: 4, Loss: 4e-7, 4h
 Number of layers: 5, Loss: 3.3e-8, 4h
 Number of layers: 6, Loss: 1.84e-07, 3.51h
 Fidelity: 0.999999816207188, 20000, 12634.1322
+Number of layers: 7
+Optimal: 0.00000000999978710947, 9.99978710947147e-09
+state & psi_res norm L2:  1.98256530824390631018
+state & psi_res fidelity: 0.99999999000021611018
+rdm2 & rho_res norm L2:  0.00000023502746860675
+rdm2 & rho_res fidelity: 0.99999999999866173717
+Runtime: 43501.2141s, 725.0202m, 12.0837h, Iter: 40883
 
 
 ## num3 model1705
@@ -442,7 +456,8 @@ Number of layers: 4, Loss: 2e-7, 4h
 Number of layers: 5, Loss: 1.5e-7, 4h
 Number of layers: 6, Loss: 1.10e-07, 3.62h
 Fidelity: 0.999999890399216, 20000, 13038.0641
-
+Number of layers: 7, Loss: 1.28e-8, 12.97h
+Fidelity: 0.999999987161684, 45400, 46704.53
 
 # type4_Q4_violation 7
 

@@ -70,8 +70,8 @@ s.close()
 
 d = 3  # dimension of qudit state
 k = 5  # number of gates in one layer
-position = np.array([2, 3])  # position of rdm2
 nq = (k + 1) * (d - 1)  # number of qubits
+position = np.array([2, 3])  # position of rdm2
 ansatz = Circuit()  # qutrit symmetric ansatz
 for i in range(layers):
     for j in range(k):

@@ -6,7 +6,6 @@ from h5py import File
 from scipy.io import loadmat
 from scipy.optimize import minimize
 from numpy.linalg import norm, matrix_rank
-from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
@@ -28,9 +27,8 @@ def fun(p0, sim_grad, loss_list=None):
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
-            print(f'num{num}, {model}, Layers: {layers}, ', end='')
+            print(f'num{num}, Layers: {layers}, ', end='')
             print(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
-            info(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g
 
 
@@ -44,19 +42,23 @@ def callback(xk):
         raise StopIteration
 
 
-path = f'./data_322'  # path of folder
-dict_mat = file_dict(path)  # dict of mat files
-num = input('File name: num')  # input num of file index
-RDM_name = dict_mat[f'RDM_{num}']  # RDM mat file name
-model = re.search('model\d+', RDM_name).group(0)  # model number
+mat_states = {
+    1: '322_d3_num1_model957_RDM3_target_state_vector',
+    2: '322_d3_num1_model957_RDM3_target_state_vector_contextual_level3',
+    3: '322_d3_num1_model957_RDM3_target_state_vector_contextual_level0_new'
+}
+mat_rdm = {
+    1: '322_d3_num1_model957_RDM_new',
+    2: '322_d3_num1_model957_RDM_contextual_level3',
+    3: '322_d3_num1_model957_RDM_contextual_level0_new',
+}
+
+num = int(input('File name: num'))  # input num of file index
 layers = int(input('Number of layers: '))  # input number of layers
 
-log = f'./data_322/Logs/num{num}_{model}_L{layers}.log'
-basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
-
-rdm3 = loadmat(f'{path}/RDM/{RDM_name}')['RDM_3']
-info(f'RDM3 Rank: {matrix_rank(rdm3)}')
-s = File(f'{path}/target_state/{dict_mat[f"target_state_{num}"]}', 'r')
+rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
+print(f'RDM3 Rank: {matrix_rank(rdm3)}')
+s = File(f'./mat/{mat_states[num]}.mat', 'r')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 
@@ -76,37 +78,36 @@ for i in range(layers):
 p_name = ansatz.ansatz_params_name
 p_num = len(p_name)
 g_num = sum(1 for _ in ansatz)
-info(f'Number of qubits: {nq}')
-info(f'Number of params: {p_num}')
-info(f'Number of gates: {g_num}')
+print(f'Number of qubits: {nq}')
+print(f'Number of params: {p_num}')
+print(f'Number of gates: {g_num}')
 
 psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit target state to qubit
 rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
 Ham = Hamiltonian(rho)  # set target state as Hamiltonian
-info(f'Hamiltonian Dimension: {rho.shape}')
+print(f'Hamiltonian Dimension: {rho.shape}')
 
 rho_rdm = reduced_density_matrix(state, d, position)
-info(f'rdm3 & rho norm L2:  {norm(rdm3 - rho_rdm, 2):.20f}')
-info(f'rdm3 & rho fidelity: {fidelity(rdm3, rho_rdm):.20f}')
+print(f'rdm3 & rho norm L2:  {norm(rdm3 - rho_rdm, 2):.20f}')
+print(f'rdm3 & rho fidelity: {fidelity(rdm3, rho_rdm):.20f}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
 if 'mqvector_gpu' in sim_list and nq >= 12:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
-    info(f'Simulator: mqvector_gpu, Method: {method}')
+    print(f'Simulator: mqvector_gpu, Method: {method}')
 else:
     sim = Simulator('mqvector', nq)
     method = 'BFGS'  # TNC CG
-    info(f'Simulator: mqvector, Method: {method}')
+    print(f'Simulator: mqvector, Method: {method}')
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
-options = {'gtol': 1e-8, 'maxiter': 1e6}  # solver options
+options = {'gtol': 1e-8, 'maxiter': 1e4}  # solver options
 p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
-info(res.message)
-info(f'Number of layers: {layers}')
-info(f'Optimal: {res.fun:.20f}, {res.fun}')
+print(res.message)
+print(f'Number of layers: {layers}')
 print(f'Optimal: {res.fun:.20f}, {res.fun}')
 
 sim.reset()
@@ -116,11 +117,10 @@ psi_res = sim.get_qs()  # get result pure state
 psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
-info(f'state & psi_res norm L2:  {norm(state - psi_res, 2):.20f}')
-info(f'state & psi_res fidelity: {fidelity(state, psi_res):.20f}')
-info(f'rdm3 & rho_res norm L2:  {norm(rdm3 - rho_res_rdm, 2):.20f}')
-info(f'rdm3 & rho_res fidelity: {fidelity(rdm3, rho_res_rdm):.20f}')
+print(f'state & psi_res norm L2:  {norm(state - psi_res, 2):.20f}')
+print(f'state & psi_res fidelity: {fidelity(state, psi_res):.20f}')
+print(f'rdm3 & rho_res norm L2:  {norm(rdm3 - rho_res_rdm, 2):.20f}')
+print(f'rdm3 & rho_res fidelity: {fidelity(rdm3, rho_res_rdm):.20f}')
 
 total = time.perf_counter() - start
-print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
-info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
+print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h')

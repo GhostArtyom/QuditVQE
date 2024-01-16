@@ -117,7 +117,7 @@ info(f'Number of layers: {layers}')
 info(f'Optimal: {res.fun:.20f}, {res.fun}')
 print(f'Optimal: {res.fun:.20f}, {res.fun}')
 
-sim.reset()
+sim.reset()  # reset simulator to zero state
 pr_res = dict(zip(p_name, res.x))  # optimal result parameters
 sim.apply_circuit(ansatz.apply_value(pr_res))  # apply result params to circuit
 psi_res = sim.get_qs()  # get result pure state

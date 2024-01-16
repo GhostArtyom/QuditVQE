@@ -28,9 +28,9 @@ def fun(p0, sim_grad, loss_list=None):
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
-            print(f'num{num}, {model}, vec{vec}, Layers: {layers}, ', end='')
+            print(f'num{num}, {model}, vec{vec}, ', end='')
             print(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
-            info(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
+            info(f'vec{vec}, Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g
 
 
@@ -38,9 +38,17 @@ def callback(xk):
     '''Callback when loss < tol
     xk: current parameter vector
     '''
+    minima = 0.25
     f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
-    if loss < 1e-8:  # tolerance
+    if np.isclose(loss, minima, atol=1e-3) and loss > minima:
+        local_minima.append(loss)
+    if len(local_minima) >= 20:
+        info(f'vec{vec}: {local_minima}')
+        info(f'Reach local minima, restart optimization, vec{vec}')
+        print(f'Reach local minima, restart optimization, vec{vec}')
+        raise StopAsyncIteration
+    if loss < 1e-12:  # tolerance
         raise StopIteration
 
 
@@ -57,14 +65,13 @@ s = File(f'{path}/{name}', 'r')
 s_name = [x for x in s.keys() if 'state' in x]  # list of target_state_vec_?
 key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
-state = {i + 1: s[j][:].view('complex') for i, j in enumerate(s_name)}
+state = {i: s[j][:].view('complex') for i, j in enumerate(s_name)}
 vec_num = len(s_name)  # number of target_state_vec in mat file
 s.close()
 
 d = 3  # dimension of qudit state
 k = 6  # number of gates in one layer
 nq = (k + 1) * (d - 1)  # number of qubits
-position = np.array([2, 3, 4])  # position of rdm3
 ansatz = Circuit()  # qutrit symmetric ansatz
 for i in range(layers):
     for j in range(k):
@@ -82,7 +89,7 @@ info(f'Number of params: {p_num}')
 info(f'Number of gates: {g_num}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq >= 12:
+if 'mqvector_gpu' in sim_list and nq >= 14:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
     info(f'Simulator: mqvector_gpu, Method: {method}')
@@ -92,27 +99,33 @@ else:
     info(f'Simulator: mqvector, Method: {method}')
 
 fidelity_list = []
-for vec in range(1, vec_num + 1):
-    psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
+for vec in range(vec_num):
+    psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit target state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
     Ham = Hamiltonian(rho)  # set target state as Hamiltonian
-    info(f'State name: target_state_vec_{vec}')
-
-    sim.reset()
-    sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
     start = time.perf_counter()
-    options = {'gtol': 1e-8, 'maxiter': 1000}  # solver options
-    p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
-    res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
+    sim.reset()  # reset simulator to zero state
+    sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
+    while True:
+        try:
+            local_minima = []
+            options = {'gtol': 1e-12, 'maxiter': 1000}  # solver options
+            p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
+            res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
+            break
+        except StopIteration:
+            break
+        except StopAsyncIteration:
+            continue
     info(res.message)
     print(res.message)
-    fidelity_list.append(1 - res.fun)
     info(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
     print(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
+    fidelity_list.append(1 - res.fun)
+    info(f'vec{vec}: {fidelity_list}')
+    print(f'vec{vec}: {fidelity_list}')
 
     total = time.perf_counter() - start
     info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
     print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
-info(fidelity_list)
-print(fidelity_list)

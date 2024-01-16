@@ -41,12 +41,12 @@ def callback(xk):
     minima = 0.25
     f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
-    if np.isclose(loss, minima, atol=1e-3) and loss > minima:
-        local_minima.append(loss)
-    if len(local_minima) >= 20:
+    if 0 < loss - minima < 2e-3:
+        local_minima.append(loss - minima)
+    if len(local_minima) >= 50:
         info(f'vec{vec}: {local_minima}')
-        info(f'Reach local minima, restart optimization, vec{vec}')
-        print(f'Reach local minima, restart optimization, vec{vec}')
+        info(f'Reach local minima, restart optimization')
+        print(f'Reach local minima, restart optimization')
         raise StopAsyncIteration
     if loss < 1e-12:  # tolerance
         raise StopIteration
@@ -89,7 +89,7 @@ info(f'Number of params: {p_num}')
 info(f'Number of gates: {g_num}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq >= 14:
+if 'mqvector_gpu' in sim_list and nq > 14:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
     info(f'Simulator: mqvector_gpu, Method: {method}')

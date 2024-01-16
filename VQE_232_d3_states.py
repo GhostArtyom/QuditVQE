@@ -130,5 +130,5 @@ info(f'rdm2 & rho_res norm L2:  {norm(rdm2 - rho_res_rdm, 2):.20f}')
 info(f'rdm2 & rho_res fidelity: {fidelity(rdm2, rho_res_rdm):.20f}')
 
 total = time.perf_counter() - start
-print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
 info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
+print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')

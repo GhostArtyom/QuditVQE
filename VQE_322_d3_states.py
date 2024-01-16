@@ -44,12 +44,11 @@ def callback(xk):
         raise StopIteration
 
 
+num, layers = 1, 2
 path = f'./data_322'  # path of folder
 dict_mat = file_dict(path)  # dict of mat files
-num = input('File name: num')  # input num of file index
 name = dict_mat[f'data_322_{num}']  # mat file name
 model = re.search('model\d+', name).group(0)  # model number
-layers = int(input('Number of layers: '))  # input number of layers
 
 log = f'./data_322/Logs/num{num}_{model}_L{layers}.log'
 basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
@@ -102,27 +101,17 @@ for vec in range(1, 19):
     sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
     start = time.perf_counter()
-    options = {'gtol': 1e-8, 'maxiter': 1e4}  # solver options
+    options = {'gtol': 1e-8, 'maxiter': 1000}  # solver options
     p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
     res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
     info(res.message)
-    info(f'Number of layers: {layers}')
-    info(f'Optimal: {res.fun:.20f}, {res.fun}')
-    print(f'Optimal: {res.fun:.20f}, {res.fun}')
+    print(res.message)
     fidelity_list.append(1 - res.fun)
-
-    sim.reset()
-    pr_res = dict(zip(p_name, res.x))  # optimal result parameters
-    sim.apply_circuit(ansatz.apply_value(pr_res))  # apply result params to circuit
-    psi_res = sim.get_qs()  # get result pure state
-    psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
-    rho_res_rdm = reduced_density_matrix(psi_res, d, position)
-
-    info(f'state & psi_res norm L2:  {norm(state[vec] - psi_res, 2):.20f}')
-    info(f'state & psi_res fidelity: {fidelity(state[vec], psi_res):.20f}')
+    info(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
+    print(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
 
     total = time.perf_counter() - start
-    print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
     info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
-print(fidelity_list)
+    print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
 info(fidelity_list)
+print(fidelity_list)

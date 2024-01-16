@@ -58,6 +58,7 @@ s_name = [x for x in s.keys() if 'state' in x]  # list of target_state_vec_?
 key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
 state = {i + 1: s[j][:].view('complex') for i, j in enumerate(s_name)}
+vec_num = len(s_name)  # number of target_state_vec in mat file
 s.close()
 
 d = 3  # dimension of qudit state
@@ -91,7 +92,7 @@ else:
     info(f'Simulator: mqvector, Method: {method}')
 
 fidelity_list = []
-for vec in range(1, 19):
+for vec in range(1, vec_num + 1):
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
     Ham = Hamiltonian(rho)  # set target state as Hamiltonian

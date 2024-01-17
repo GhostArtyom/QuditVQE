@@ -52,21 +52,26 @@ def callback(xk):
         raise StopIteration
 
 
-num, layers = 1, 2
+layers = 2  # number of layers
 path = f'./data_322'  # path of folder
 dict_mat = file_dict(path)  # dict of mat files
-name = dict_mat[f'data_322_{num}']  # mat file name
+num = input('File name: num')  # input num of file index
+name = dict_mat[f'target_state_{num}']  # state file name
 model = re.search('model\d+', name).group(0)  # model number
 
 log = f'./data_322/Logs/num{num}_{model}_L{layers}.log'
 basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
-s = File(f'{path}/{name}', 'r')
+s = File(f'{path}/target_state/{name}', 'r')
 s_name = [x for x in s.keys() if 'state' in x]  # list of target_state_vec_?
 key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
 state = {i: s[j][:].view('complex') for i, j in enumerate(s_name)}
 vec_num = len(s_name)  # number of target_state_vec in mat file
+uMPS_name = [i for i in file_dict(f'{path}/uMPS').values() if f'num{num}' in i]  # uMPS file name
+uMPS_name = sorted(uMPS_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
+energy_list = [loadmat(f'{path}/uMPS/{uMPS_name[i]}')['energy'][0][0] for i in range(vec_num)]
+info(f'Energy list: {energy_list}')
 s.close()
 
 d = 3  # dimension of qudit state

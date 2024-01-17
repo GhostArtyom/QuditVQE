@@ -103,6 +103,7 @@ else:
     method = 'BFGS'  # TNC CG
     info(f'Simulator: mqvector, Method: {method}')
 
+iter_list = []
 fidelity_list = []
 for vec in range(vec_num):
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit target state to qubit
@@ -127,7 +128,10 @@ for vec in range(vec_num):
     print(res.message)
     info(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
     print(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
+    iter_list.append(res.nfev)
     fidelity_list.append(1 - res.fun)
+    info(f'vec{vec}: {iter_list}')
+    print(f'vec{vec}: {iter_list}')
     info(f'vec{vec}: {fidelity_list}')
     print(f'vec{vec}: {fidelity_list}')
 

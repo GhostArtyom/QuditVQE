@@ -28,7 +28,7 @@ def fun(p0, sim_grad, loss_list=None):
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
-            print(f'num{num}, {model}, vec{vec}, ', end='')
+            print(f'num{num}, {model}, vec{vec}, L{layers}, ', end='')
             print(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
             info(f'vec{vec}, Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g

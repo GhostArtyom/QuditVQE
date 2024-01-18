@@ -43,7 +43,7 @@ def callback(xk):
     loss = 1 - np.real(f)[0][0]
     if 0 < loss - minima < 2e-3:
         local_minima.append(loss - minima)
-    if len(local_minima) >= 50:
+    if len(local_minima) >= 20:
         info(f'vec{vec}: {local_minima}')
         info(f'Reach local minima, restart optimization')
         print(f'Reach local minima, restart optimization')
@@ -54,7 +54,7 @@ def callback(xk):
 
 layers = 2  # number of layers
 num = input('File name: num')  # input num of file index
-sub = os.listdir('./data_322')[int(num)]  # subfolder
+sub = sorted(os.listdir('./data_322'))[int(num)]
 path = f'./data_322/{sub}'  # path of subfolder
 dict_mat = dict_file(path)  # dict of mat files
 name = dict_mat[f'target_state_1']  # state file name
@@ -67,7 +67,7 @@ s = File(f'{path}/target_state/{name}', 'r')
 s_name = [x for x in s.keys() if 'state' in x]  # list of target_state_vec_?
 key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
-state = {i: s[j][:].view('complex') for i, j in enumerate(s_name)}
+state = {i + 1: s[j][:].view('complex') for i, j in enumerate(s_name)}
 vec_num = len(s_name)  # number of target_state_vec in mat file
 uMPS_name = [i for i in dict_file(f'{path}/uMPS').values() if f'num{num}' in i]  # uMPS file name
 uMPS_name = sorted(uMPS_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -106,8 +106,8 @@ else:
 
 iter_list = []
 fidelity_list = []
-for vec in range(vec_num):
-    psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit target state to qubit
+for vec in range(1, vec_num + 1):
+    psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
     Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 
@@ -117,7 +117,7 @@ for vec in range(vec_num):
     while True:
         try:
             local_minima = []
-            options = {'gtol': 1e-12, 'maxiter': 1000}  # solver options
+            options = {'gtol': 1e-12, 'maxiter': 500}  # solver options
             p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
             res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
             break

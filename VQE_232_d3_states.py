@@ -88,7 +88,7 @@ info(f'Number of qubits: {nq}')
 info(f'Number of params: {p_num}')
 info(f'Number of gates: {g_num}')
 
-psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit target state to qubit
+psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit state to qubit
 rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
 Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 info(f'Hamiltonian Dimension: {rho.shape}')

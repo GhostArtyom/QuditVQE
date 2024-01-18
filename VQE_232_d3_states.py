@@ -53,7 +53,7 @@ dict_folder = {
 }
 t = 1  # which type of folder
 path = f'./data_232/{dict_folder[t]}'  # path of folder
-dict_mat = file_dict(path)  # dict of mat files
+dict_mat = dict_file(path)  # dict of mat files
 num = input('File name: num')  # input num of file index
 RDM_name = dict_mat[f'RDM_{num}']  # RDM mat file name
 model = re.search('model\d+', RDM_name).group(0)  # model number

@@ -15,15 +15,15 @@ A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
 
-def file_dict(path):
-    file_dict = {}
+def dict_file(path):
+    dict_file = {}
     for root, dirs, files in os.walk(path):
         i = 1
         for name in sorted(files):
             subfolder = os.path.split(root)[-1]
-            file_dict[f'{subfolder}_{i}'] = name
+            dict_file[f'{subfolder}_{i}'] = name
             i += 1
-    return file_dict
+    return dict_file
 
 def is_power_of_two(num: int) -> bool:
     if not isinstance(num, int):

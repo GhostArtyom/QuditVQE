@@ -98,7 +98,7 @@ info(f'rdm2 & rho norm L2:  {norm(rdm2 - rho_rdm, 2):.20f}')
 info(f'rdm2 & rho fidelity: {fidelity(rdm2, rho_rdm):.20f}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq >= 12:
+if 'mqvector_gpu' in sim_list and nq > 12:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
     info(f'Simulator: mqvector_gpu, Method: {method}')

@@ -38,7 +38,7 @@ def callback(xk):
     '''
     f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
-    if loss < 1e-8:  # tolerance
+    if loss < 1e-12:  # tolerance
         raise StopIteration
 
 
@@ -92,7 +92,7 @@ print(f'rdm3 & rho norm L2:  {norm(rdm3 - rho_rdm, 2):.20f}')
 print(f'rdm3 & rho fidelity: {fidelity(rdm3, rho_rdm):.20f}')
 
 sim_list = set([i[0] for i in get_supported_simulator()])
-if 'mqvector_gpu' in sim_list and nq >= 12:
+if 'mqvector_gpu' in sim_list and nq > 12:
     sim = Simulator('mqvector_gpu', nq)
     method = 'BFGS'
     print(f'Simulator: mqvector_gpu, Method: {method}')
@@ -103,7 +103,7 @@ else:
 sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
 start = time.perf_counter()
-options = {'gtol': 1e-8, 'maxiter': 1e4}  # solver options
+options = {'gtol': 1e-12, 'maxiter': 500}  # solver options
 p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
 res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)
 print(res.message)

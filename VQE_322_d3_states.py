@@ -44,7 +44,7 @@ def callback(xk):
     loss = 1 - np.real(f)[0][0]
     if 0 < loss - minima < 2e-3:
         local_minima.append(loss - minima)
-    if len(local_minima) >= 20:
+    if len(local_minima) >= 30:
         info(f'vec{vec}: {local_minima}')
         info(f'Reach local minima, restart optimization')
         print(f'Reach local minima, restart optimization')

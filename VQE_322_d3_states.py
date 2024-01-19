@@ -1,4 +1,5 @@
 import re
+import os
 import time
 import numpy as np
 from utils import *
@@ -106,7 +107,7 @@ else:
 
 iter_list = []
 fidelity_list = []
-for vec in range(1, vec_num + 1):
+for vec in range(1, vec_num + 1):  # index start from 1
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
     Ham = Hamiltonian(rho)  # set target state as Hamiltonian

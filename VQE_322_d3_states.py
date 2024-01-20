@@ -4,9 +4,8 @@ import time
 import numpy as np
 from utils import *
 from h5py import File
-from scipy.io import loadmat
+from scipy.io import savemat
 from scipy.optimize import minimize
-from numpy.linalg import norm, matrix_rank
 from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
@@ -54,7 +53,7 @@ def callback(xk):
 
 
 layers = 2  # number of layers
-num = input('File name: num')  # input num of file index
+num = ('File name: num')  # input num of file index
 sub = sorted(os.listdir('./data_322'))[int(num)]
 path = f'./data_322/{sub}'  # path of subfolder
 dict_mat = dict_file(path)  # dict of mat files
@@ -70,10 +69,6 @@ key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
 state = {i + 1: s[j][:].view('complex') for i, j in enumerate(s_name)}
 vec_num = len(s_name)  # number of target_state_vec in mat file
-uMPS_name = [i for i in dict_file(f'{path}/uMPS').values() if f'num{num}' in i]  # uMPS file name
-uMPS_name = sorted(uMPS_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
-energy_list = [loadmat(f'{path}/uMPS/{uMPS_name[i]}')['energy'][0][0] for i in range(vec_num)]
-info(f'Energy list: {energy_list}')
 s.close()
 
 d = 3  # dimension of qudit state
@@ -105,8 +100,7 @@ else:
     method = 'BFGS'  # TNC CG
     info(f'Simulator: mqvector, Method: {method}')
 
-iter_list = []
-fidelity_list = []
+eval_list, fidelity_list = [], []
 for vec in range(1, vec_num + 1):  # index start from 1
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
@@ -128,15 +122,15 @@ for vec in range(1, vec_num + 1):  # index start from 1
             continue
     info(res.message)
     print(res.message)
-    info(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
-    print(f'Optimal: {res.fun}, Fidelity: {1 - res.fun:.20f}')
-    iter_list.append(res.nfev)
-    fidelity_list.append(1 - res.fun)
-    info(f'vec{vec}: {iter_list}')
-    print(f'vec{vec}: {iter_list}')
-    info(f'vec{vec}: {fidelity_list}')
-    print(f'vec{vec}: {fidelity_list}')
+    fidelity = 1 - res.fun
+    eval_list.append(res.nfev)
+    fidelity_list.append(fidelity)
+    info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
+    print(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
+    info(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
+    print(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
+    savemat(f'{path}/fidelity_list.mat', {'fidelity': fidelity_list})
 
     total = time.perf_counter() - start
-    info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
-    print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Iter: {res.nfev}')
+    info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Eval: {res.nfev}')
+    print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Eval: {res.nfev}')

@@ -58,7 +58,7 @@ mat_rdm = {
 num = input('File name: num')
 rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
 
-g = File(f'./mat/{mat_gates[num]}.mat', 'r')
+g = File(f'./mat/{mat_gates[num]}.mat')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state

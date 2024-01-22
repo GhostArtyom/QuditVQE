@@ -82,7 +82,7 @@ def qutrit_ansatz(gate: UMG, with_phase: bool = False):
 
 
 rdm3 = loadmat('./mat/322_d3_num1_model957_RDM.mat')['RDM_3']
-g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7.mat', 'r')
+g = File('./mat/322_d3_num1_model957_RDM3_gates_L10_N7.mat')
 position = g['RDM_site'][:] - 1  # subtract index of matlab to python
 l = list(g.keys())  # list of HDF5 gates file keys
 d = int(g['d'][0])  # dimension of qudit state

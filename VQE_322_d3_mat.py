@@ -58,7 +58,7 @@ layers = int(input('Number of layers: '))  # input number of layers
 
 rdm3 = loadmat(f'./mat/{mat_rdm[num]}.mat')['RDM_3']
 print(f'RDM3 Rank: {matrix_rank(rdm3)}')
-s = File(f'./mat/{mat_states[num]}.mat', 'r')
+s = File(f'./mat/{mat_states[num]}.mat')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 

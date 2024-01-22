@@ -28,7 +28,7 @@ def fun(p0, sim_grad, loss_list=None):
         if i % 10 == 0:
             global start, num, layers
             t = time.perf_counter() - start
-            print(f'num{num}, {model}, vec{vec}, L{layers}, ', end='')
+            print(f'{sub}, vec{vec}, D{D}, L{layers}, ', end='')
             print(f'Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
             info(f'vec{vec}, Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g
@@ -53,17 +53,15 @@ def callback(xk):
 
 
 layers = 2  # number of layers
-num = ('File name: num')  # input num of file index
+num = input('File name: num')  # input num of file index
+D = input('Bond dimension: D=')  # input bond dimension D
 sub = sorted(os.listdir('./data_322'))[int(num)]
 path = f'./data_322/{sub}'  # path of subfolder
-dict_mat = dict_file(path)  # dict of mat files
-name = dict_mat[f'target_state_1']  # state file name
-model = re.search('model\d+', name).group(0)  # model number
 
-log = f'./data_322/Logs/num{num}_{model}_L{layers}.log'
+log = f'./data_322/Logs/{sub}_D{D}_L{layers}.log'
 basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
-s = File(f'{path}/target_state/{name}', 'r')
+s = File(f'{path}/target_state/322_violation_d3_D{D}_{sub}_target_state_vector.mat')
 s_name = [x for x in s.keys() if 'state' in x]  # list of target_state_vec_?
 key = lambda x: [int(y) if y.isdigit() else y for y in re.split('(\d+)', x)]
 s_name = sorted(s_name, key=key)  # sort 1,10,11,...,2 into 1,2,...,10,11
@@ -129,7 +127,7 @@ for vec in range(1, vec_num + 1):  # index start from 1
     print(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
     info(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
     print(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
-    savemat(f'{path}/fidelity_list.mat', {'fidelity': fidelity_list})
+    savemat(f'{path}/fidelity_D{D}.mat', {'fidelity': fidelity_list})
 
     total = time.perf_counter() - start
     info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Eval: {res.nfev}')

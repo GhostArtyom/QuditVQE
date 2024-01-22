@@ -64,7 +64,7 @@ basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H
 
 rdm2 = loadmat(f'{path}/RDM/{RDM_name}')['RDM_2']
 info(f'RDM2 Rank: {matrix_rank(rdm2)}')
-s = File(f'{path}/target_state/{dict_mat[f"target_state_{num}"]}', 'r')
+s = File(f'{path}/target_state/{dict_mat[f"target_state_{num}"]}')
 state = s['target_state_vec'][:].view('complex').conj()  # bra -> ket
 s.close()
 

@@ -98,7 +98,7 @@ else:
     method = 'BFGS'  # TNC CG
     info(f'Simulator: mqvector, Method: {method}')
 
-eval_list, fidelity_list = [], []
+time_list, eval_list, fidelity_list = [], [], []
 for vec in range(1, vec_num + 1):  # index start from 1
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
@@ -118,17 +118,14 @@ for vec in range(1, vec_num + 1):  # index start from 1
             break
         except StopAsyncIteration:
             continue
+    minute = round(((time.perf_counter() - start) / 60), 2)
     info(res.message)
     print(res.message)
     fidelity = 1 - res.fun
+    time_list.append(minute)
     eval_list.append(res.nfev)
     fidelity_list.append(fidelity)
     info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
     print(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
-    info(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
-    print(f'Fidelity list: {fidelity_list}\nEval list: {eval_list}')
-    savemat(f'{path}/fidelity_D{D}.mat', {'fidelity': fidelity_list})
-
-    total = time.perf_counter() - start
-    info(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Eval: {res.nfev}')
-    print(f'Runtime: {total:.4f}s, {total/60:.4f}m, {total/3600:.4f}h, Eval: {res.nfev}')
+    info(f'Fidelity list: {fidelity_list}\nTime list: {time_list}\nEval list: {eval_list}')
+    print(f'Fidelity list: {fidelity_list}\nTime list: {time_list}\nEval list: {eval_list}')

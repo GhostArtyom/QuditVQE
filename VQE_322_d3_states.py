@@ -38,16 +38,22 @@ def callback(xk):
     '''Callback when loss < tol
     xk: current parameter vector
     '''
-    minima = 0.25
+    minima1, minima2 = 0.5, 0.25
     f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
-    if 0 < loss - minima < 2e-3:
-        local_minima.append(loss - minima)
-    if len(local_minima) >= 30:
-        info(f'vec{vec}: {local_minima}')
-        info(f'Reach local minima, restart optimization')
-        print(f'Reach local minima, restart optimization')
+    if 0 < loss - minima1 < 2e-3:
+        local_minima1.append(loss - minima1)
+    if 0 < loss - minima2 < 2e-3:
+        local_minima2.append(loss - minima2)
+    if len(local_minima1) >= 30:
+        info(f'vec{vec}: {local_minima1}')
+        info(f'Reach local minima1, restart optimization')
+        print(f'Reach local minima1, restart optimization')
         raise StopAsyncIteration
+    if len(local_minima2) >= 30:
+        info(f'vec{vec}: {local_minima2}')
+        info(f'Reach local minima2, restart optimization')
+        print(f'Reach local minima2, restart optimization')
     if loss < 1e-12:  # tolerance
         raise StopIteration
 
@@ -99,6 +105,8 @@ else:
     info(f'Simulator: mqvector, Method: {method}')
 
 time_list, eval_list, fidelity_list = [], [], []
+# v = input('Execute vec')
+# for vec in range(v, v + 1):
 for vec in range(1, vec_num + 1):  # index start from 1
     psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
     rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
@@ -109,7 +117,7 @@ for vec in range(1, vec_num + 1):  # index start from 1
     sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
     while True:
         try:
-            local_minima = []
+            local_minima1, local_minima2 = [], []
             options = {'gtol': 1e-12, 'maxiter': 500}  # solver options
             p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
             res = minimize(fun, p0, args=(sim_grad, []), method=method, jac=True, callback=callback, options=options)

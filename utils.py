@@ -15,7 +15,7 @@ A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
 
 
-def dict_file(path):
+def dict_file(path: str) -> dict:
     dict_file = {}
     for root, dirs, files in os.walk(path):
         i = 1
@@ -24,6 +24,7 @@ def dict_file(path):
             dict_file[f'{subfolder}_{i}'] = name
             i += 1
     return dict_file
+
 
 def is_power_of_two(num: int) -> bool:
     if not isinstance(num, int):
@@ -49,7 +50,7 @@ def is_hermitian(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
-def str_special(str_pr):
+def str_special(str_pr: str) -> str:
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
     if isinstance(str_pr, (int, str)):
         return str(str_pr)
@@ -125,10 +126,7 @@ def decompose_u3(mat: np.ndarray):
     return phase, theta, phi, lam
 
 
-def one_qubit_decompose(gate: UnivMathGate,
-                        basis: str = 'zyz',
-                        with_phase: bool = True,
-                        with_params: bool = True) -> Circuit:
+def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True):
     name_phase = gate.name + '_phase'
     name_theta = gate.name + '_theta'
     name_phi = gate.name + '_phi'
@@ -206,10 +204,7 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
     return f1, f2
 
 
-def two_qubit_decompose(gate: UnivMathGate,
-                        basis: str = 'zyz',
-                        with_phase: bool = True,
-                        with_params: bool = True) -> Circuit:
+def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True):
     name_rxx = gate.name + '_Rxx'
     name_ryy = gate.name + '_Ryy'
     name_rzz = gate.name + '_Rzz'
@@ -254,7 +249,7 @@ def two_qubit_decompose(gate: UnivMathGate,
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
-def Uind(basis, d, ind, pr, obj):
+def Uind(basis: str, d: int, ind: list, pr: list, obj: list) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     if len(ind) != 2:
@@ -286,7 +281,7 @@ def Uind(basis, d, ind, pr, obj):
     return circ
 
 
-def Ub(basis, d, name, obj):
+def Ub(basis: str, d: int, name: str, obj: list) -> Circuit:
     circ = Circuit()
     index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
@@ -304,7 +299,7 @@ def Ub(basis, d, name, obj):
     return circ
 
 
-def GCRb(d, ind, name, obj, ctrl, state):
+def GCRb(d: int, ind: list, name: str, obj: int, ctrl: list, state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()
@@ -350,7 +345,7 @@ def GCRb(d, ind, name, obj, ctrl, state):
     return circ
 
 
-def GCPb(d, name, obj, ctrl, state):
+def GCPb(d: int, name: str, obj: int, ctrl: list, state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()
@@ -366,7 +361,7 @@ def GCPb(d, name, obj, ctrl, state):
     return circ
 
 
-def Cb(d, name, obj, ctrl, state):
+def Cb(d: int, name: str, obj: int, ctrl: list, state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()
@@ -378,7 +373,7 @@ def Cb(d, name, obj, ctrl, state):
     return circ
 
 
-def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False):
+def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False) -> Circuit:
     name = f'{gate.name}_'
     obj = gate.obj_qubits
     circ = Circuit()
@@ -411,6 +406,16 @@ def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: 
         for i in obj:
             circ += GlobalPhase(f'{name}phase').on(i)
     return circ
+
+
+def circuit_depth(circ: Circuit) -> int:
+    nq = circ.n_qubits
+    depth = [0] * nq
+    for i in range(nq):
+        for g in circ:
+            if i in g.obj_qubits or i in g.ctrl_qubits:
+                depth[i] += 1
+    return max(depth)
 
 
 def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:

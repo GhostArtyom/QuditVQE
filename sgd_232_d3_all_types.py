@@ -143,9 +143,10 @@ def run_one_model(i_model, D, d, initial_t, type, Diag_list):
         t_old, t, eta, energy, grad = once_update_t(D, d, t, coef, learning_rate, evo_step, evo_threshold, evo_iter_max,
                                                     Diag_list)
         grad_norm = npl.norm(grad)
-        print([int(model), int(local), i, energy, t_old, eta, grad_norm, learning_rate])
+        # print([int(model), int(local), i, energy, t_old, eta, grad_norm, learning_rate])
         if grad_norm < gd_threshold or i == gd_iter_max or energy - local < 0.001 and energy - local > 0:
-            f = open(os.path.join(os.getcwd(), '232_sgd_all_types_model{0}_d{1}.txt'.format(model, d)), mode='a')
+            f = open(os.path.join(os.getcwd(), './sgd_232/sgd_232_all_types_model{0}_d{1}.txt'.format(model, d)),
+                     mode='a')
             if energy - local < 0:
                 label = 'True'
             else:
@@ -200,11 +201,10 @@ def generate_obs():
     return all_Diag, all_type
 
 
-def running(initial_num, type_num):
+def running(initial_num, type_num, input_model):
     d = 3
     D = 10
     all_Diag, all_type = generate_obs()
-    input_model = 0  # 0:1216, 1:1410, 2:1705, 3:45
     for i_model in [input_model]:
         Diag_list = all_Diag[type_num]
         type = all_type[type_num]
@@ -213,21 +213,20 @@ def running(initial_num, type_num):
         run_one_model(i_model, D, d, initial_t, type, Diag_list)
 
 
-def parallel_run(run_func, pool_size=2, callback=None):
+def parallel_run(run_func, input_model, pool_size=2, callback=None):
     from multiprocessing import Pool
     pool = Pool(pool_size)
     for initial_num in range(10000):
         for type_num in range(56):  # N_type = len(all_Diag) = 56
-            pool.apply_async(func=run_func, args=(
-                initial_num,
-                type_num,
-            ), callback=callback)
+            pool.apply_async(func=run_func, args=(initial_num, type_num, input_model), callback=callback)
     pool.close()
     pool.join()
 
 
 if __name__ == '__main__':
-    # parallel_run(running, 2)
-    for initial_num in range(20):
-        for type_num in range(56):
-            running(initial_num, type_num)
+    # 0:1216, 1:1410, 2:1705, 3:45
+    input_model = int(input('input model num'))
+    parallel_run(running, input_model, 8)
+    # for initial_num in range(20):
+    #     for type_num in range(56):
+    #         running(initial_num, type_num)

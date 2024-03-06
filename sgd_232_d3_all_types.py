@@ -1,19 +1,24 @@
-import numpy as np
-import numpy.linalg as npl
-import evoMPS.tdvp_uniform as mps
-import numdifftools as nd
-from scipy.linalg import expm
-import xlrd
 import os
-import random
 import copy
 import math
+import random
+import numpy as np
+import numdifftools as nd
+from numpy.linalg import norm
+from scipy.linalg import expm
+import evoMPS.tdvp_uniform as mps
+from logging import info, INFO, basicConfig
+# python == 3.8.2 or 3.9.13
+# numpy == 1.19.2 or 1.19.3
+# scipy == 1.5.2 or 1.5.4
+# numdifftools == 0.9.41
+# evoMPS == 2.1.0
 
-#---------- the dimension of local observable is d=3
+# the dimension of local observable is d=3
 # I0 = np.eye(3)
-# I1 = - np.eye(3)
-# D1 = np.diag((1,1,-1))
-# D2 = np.diag((1,-1,-1))
+# I1 = -np.eye(3)
+# D1 = np.diag((1, 1, -1))
+# D2 = np.diag((1, -1, -1))
 
 
 def param_A0A1(t, Diag_list):
@@ -33,9 +38,9 @@ def param_A0A1(t, Diag_list):
     A0 = U0.dot(D1).dot(U0.conj().T)
     A1 = U1.dot(D2).dot(U1.conj().T)
     A2 = U2.dot(D3).dot(U2.conj().T)
-    # commute01 = npl.norm(A0.dot(A1) - A1.dot(A0))
-    # commute02 = npl.norm(A0.dot(A2) - A2.dot(A0))
-    # commute12 = npl.norm(A1.dot(A2) - A2.dot(A1))
+    # commute01 = norm(A0.dot(A1) - A1.dot(A0))
+    # commute02 = norm(A0.dot(A2) - A2.dot(A0))
+    # commute12 = norm(A1.dot(A2) - A2.dot(A1))
     # print(commute12)
     # if commute01 > 1.0e-6 and commute02 > 1.0e-6 and commute12 > 1.0e-6:
     return A0, A1, A2
@@ -122,6 +127,9 @@ def run_one_model(i_model, D, d, initial_t, type, Diag_list):
     coef = -all_coef[i_model, :]
     local = all_local[i_model]
 
+    log = os.path.join(os.getcwd(), f'sgd_232/sgd_232_d{d}_all_types_model{model}.log')
+    basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
+
     # print("\n i_model = ", i_model)
     # print("\n model = ", model)
     # print("\n coef = ", coef)
@@ -140,18 +148,12 @@ def run_one_model(i_model, D, d, initial_t, type, Diag_list):
         i += 1
         # print("\n iteration = ", i)
         learning_rate = max(0.12 * 0.98**(i - 1), 0.01)
-        t_old, t, eta, energy, grad = once_update_t(D, d, t, coef, learning_rate, evo_step, evo_threshold, evo_iter_max,
-                                                    Diag_list)
-        grad_norm = npl.norm(grad)
+        t_old, t, eta, energy, grad = once_update_t(D, d, t, coef, learning_rate, evo_step, evo_threshold, evo_iter_max, Diag_list)
+        grad_norm = norm(grad)
         # print([int(model), int(local), i, energy, t_old, eta, grad_norm, learning_rate])
-        if grad_norm < gd_threshold or i == gd_iter_max or energy - local < 0.001 and energy - local > 0:
-            f = open(os.path.join(os.getcwd(), './sgd_232/sgd_232_all_types_model{0}_d{1}.txt'.format(model, d)),
-                     mode='a')
-            if energy - local < 0:
-                label = 'True'
-            else:
-                label = 'False'
-            f.write("{0},{1}\n".format([int(model), int(local), i, energy, t_old, eta, type], label))
+        # if grad_norm < gd_threshold or i == gd_iter_max or energy - local < 0.001 and energy - local > 0:
+        if energy < local:
+            info(f'{model}, {local}, {i}, {energy}, {eta}, {grad_norm}, {learning_rate}, {type}, {t_old}')
             break
 
 
@@ -160,7 +162,7 @@ def initialize_t(num):
     for i in range(num):
         # initial_t.append(random.uniform(-1,1))
         initial_t.append(random.uniform(-math.pi / 2, math.pi / 2))
-    # initial_t /= npl.norm(initial_t)
+    # initial_t /= norm(initial_t)
     return initial_t
 
 
@@ -224,7 +226,7 @@ def parallel_run(run_func, input_model, pool_size=2, callback=None):
 
 
 if __name__ == '__main__':
-    # 0:1216, 1:1410, 2:1705, 3:45
+    # num0:1216, num1:1410, num2:1705, num3:45
     input_model = int(input('input model num'))
     parallel_run(running, input_model, 8)
     # for initial_num in range(20):

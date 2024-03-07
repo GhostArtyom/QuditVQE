@@ -153,8 +153,7 @@ def run_one_model(i_model, D, d, initial_t, type, Diag_list):
         # print([int(model), int(local), i, energy, t_old, eta, grad_norm, learning_rate])
         # if grad_norm < gd_threshold or i == gd_iter_max or energy - local < 0.001 and energy - local > 0:
         if energy < local:
-            info(f'{model}, {local}, {i}, {energy}, {eta}, {grad_norm}, {learning_rate}, {type}, {t_old}')
-            break
+            info(f'model{model}, local: {local}, energy: {energy}, iter: {i}, eta: {eta}, grad_norm: {grad_norm}, t_old: {repr(t_old)}')
 
 
 def initialize_t(num):
@@ -227,8 +226,8 @@ def parallel_run(run_func, input_model, pool_size=2, callback=None):
 
 if __name__ == '__main__':
     # num0:1216, num1:1410, num2:1705, num3:45
-    input_model = int(input('input model num'))
-    parallel_run(running, input_model, 8)
-    # for initial_num in range(20):
-    #     for type_num in range(56):
-    #         running(initial_num, type_num)
+    # input_model = int(input('input model num'))
+    # parallel_run(running, input_model, 8)
+    for initial_num in range(20):
+        for type_num in range(56):
+            running(initial_num, type_num, 0)

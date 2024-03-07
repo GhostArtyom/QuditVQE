@@ -153,7 +153,7 @@ def run_one_model(i_model, D, d, initial_t, type, Diag_list):
         # print([int(model), int(local), i, energy, t_old, eta, grad_norm, learning_rate])
         # if grad_norm < gd_threshold or i == gd_iter_max or energy - local < 0.001 and energy - local > 0:
         if energy < local:
-            info(f'model{model}, local: {local}, energy: {energy}, iter: {i}, eta: {eta}, grad_norm: {grad_norm}, t_old: {repr(t_old)}')
+            info(f'model{model}, local: {local}, energy: {energy}, iter: {i}, eta: {eta}, grad_norm: {grad_norm}, t_old: {list(t_old)}')
             break
 
 

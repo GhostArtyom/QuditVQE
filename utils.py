@@ -50,6 +50,15 @@ def is_hermitian(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
+def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
+    mat_real = np.real(mat)
+    mat_imag = np.imag(mat)
+    mat_real[np.abs(mat_real) < tol] = 0
+    mat_imag[np.abs(mat_imag) < tol] = 0
+    mat_approx = mat_real + 1j * mat_imag
+    return mat_approx
+
+
 def str_special(str_pr: str) -> str:
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
     if isinstance(str_pr, (int, str)):

@@ -165,7 +165,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     return (circ, pr) if with_params else circ.apply_value(pr)
 
 
-def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
+def simult_svd(mat1: np.ndarray, mat2: np.ndarray, is_complex: bool = True):
     d = mat1.shape[0]
     u_a, d_a, v_a_h = svd(mat1)
     u_a_h = u_a.conj().T
@@ -186,7 +186,7 @@ def simult_svd(mat1: np.ndarray, mat2: np.ndarray):
     d1 = u.conj().T @ mat1 @ v
     d2 = u.conj().T @ mat2 @ v
     d = d1 + 1j * d2
-    return u, v, d
+    return (u, v, d) if is_complex else (u, v, d1, d2)
 
 
 def kron_factor_4x4_to_2x2s(mat: np.ndarray):

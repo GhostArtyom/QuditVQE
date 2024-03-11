@@ -354,22 +354,6 @@ def GCRb(d: int, ind: list, name: str, obj: int, ctrl: list, state: int) -> Circ
     return circ
 
 
-def GCPb(d: int, name: str, obj: int, ctrl: list, state: int) -> Circuit:
-    if d != 3:
-        raise ValueError('Only works when d = 3')
-    circ = Circuit()
-    if state == 0:
-        corr = Circuit()
-    elif state == 1:
-        corr = Circuit()
-    elif state == 2:
-        corr = Circuit()
-    circ += corr
-    circ = circ + GlobalPhase(name).on(obj, ctrl)
-    circ += corr.hermitian()
-    return circ
-
-
 def Cb(d: int, name: str, obj: int, ctrl: list, state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')

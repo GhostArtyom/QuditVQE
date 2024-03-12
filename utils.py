@@ -258,7 +258,7 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
-def Uind(basis: str, d: int, ind: list, pr: list, obj: list) -> Circuit:
+def Uind(basis: str, d: int, ind: List[int], pr: List[str], obj: List[int]) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     if len(ind) != 2:
@@ -290,7 +290,7 @@ def Uind(basis: str, d: int, ind: list, pr: list, obj: list) -> Circuit:
     return circ
 
 
-def Ub(basis: str, d: int, name: str, obj: list) -> Circuit:
+def Ub(basis: str, d: int, name: str, obj: List[int]) -> Circuit:
     circ = Circuit()
     index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
@@ -308,7 +308,7 @@ def Ub(basis: str, d: int, name: str, obj: list) -> Circuit:
     return circ
 
 
-def GCRb(d: int, ind: list, name: str, obj: int, ctrl: list, state: int) -> Circuit:
+def GCRb(d: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()
@@ -354,7 +354,7 @@ def GCRb(d: int, ind: list, name: str, obj: int, ctrl: list, state: int) -> Circ
     return circ
 
 
-def Cb(d: int, name: str, obj: int, ctrl: list, state: int) -> Circuit:
+def Cb(d: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()

@@ -160,7 +160,7 @@ def initialize_t(num):
     initial_t = []
     for i in range(num):
         # initial_t.append(random.uniform(-1,1))
-        initial_t.append(random.uniform(-math.pi / 2, math.pi / 2))
+        initial_t.append(random.uniform(-math.pi, math.pi))
     # initial_t /= norm(initial_t)
     return initial_t
 
@@ -214,12 +214,12 @@ def running(initial_num, type_num, input_model):
         run_one_model(i_model, D, d, initial_t, type, Diag_list)
 
 
-def parallel_run(run_func, input_model, pool_size=2, callback=None):
+def parallel_run(run_func, input_model, pool_size):
     from multiprocessing import Pool
     pool = Pool(pool_size)
-    for initial_num in range(10000):
+    for initial_num in range(50000):
         for type_num in range(56):  # N_type = len(all_Diag) = 56
-            pool.apply_async(func=run_func, args=(initial_num, type_num, input_model), callback=callback)
+            pool.apply_async(func=run_func, args=(initial_num, type_num, input_model))
     pool.close()
     pool.join()
 

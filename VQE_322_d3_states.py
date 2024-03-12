@@ -4,20 +4,26 @@ import time
 import numpy as np
 from utils import *
 from h5py import File
+from typing import List
 from scipy.io import savemat
 from scipy.optimize import minimize
 from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
+from mindquantum.simulator.utils import GradOpsWrapper
 from mindquantum.simulator import Simulator, get_supported_simulator
 
 
-def fun(p0, sim_grad, loss_list=None):
-    '''Optimize function of fidelity
-    p0: initial parameters
-    sim_grad: simulator forward with gradient
-    loss_list: list of loss values for loss function
+def fun(p0: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
+    '''Optimize function of fidelity.
+    Args:
+        p0 (np.ndarray): initial parameters.
+        sim_grad (GradOpsWrapper): simulator forward with gradient.
+        loss_list (List[float]): list of loss values for loss function.
+    Returns:
+        f (float): fidelity, as the expectation value.
+        g (np.ndarray): gradients of parameters.
     '''
     f, g = sim_grad(p0)
     f = 1 - np.real(f)[0][0]
@@ -32,9 +38,10 @@ def fun(p0, sim_grad, loss_list=None):
     return f, g
 
 
-def callback(xk):
-    '''Callback when loss < tol
-    xk: current parameter vector
+def callback(xk: np.ndarray):
+    '''Callback when loss < tol or reach local minima.
+    Args:
+        xk (np.ndarray): current parameter vector.
     '''
     minima1, minima2 = 0.5, 0.25
     f, _ = sim_grad(xk)
@@ -44,14 +51,11 @@ def callback(xk):
     if 0 < loss - minima2 < 2e-3:
         local_minima2.append(loss - minima2)
     if len(local_minima1) >= 30:
-        info(f'vec{vec}: {local_minima1}')
-        info(f'Reach local minima1, restart optimization')
-        print(f'Reach local minima1, restart optimization')
+        info(f'vec{vec} reach local minima1, restart optimization')
         raise StopAsyncIteration
     if len(local_minima2) >= 30:
-        info(f'vec{vec}: {local_minima2}')
-        info(f'Reach local minima2, restart optimization')
-        print(f'Reach local minima2, restart optimization')
+        info(f'vec{vec} reach local minima2, restart optimization')
+        raise StopAsyncIteration
     if loss < 1e-12:  # tolerance
         raise StopIteration
 

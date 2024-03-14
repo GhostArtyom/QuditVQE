@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from math import log
-from typing import List
+from typing import List, Union
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from numpy.linalg import det, eigh, svd
@@ -59,7 +59,7 @@ def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
     return mat_approx
 
 
-def str_special(str_pr: str) -> str:
+def str_special(str_pr: Union[str, int, float]) -> str:
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
     if isinstance(str_pr, (int, str)):
         return str(str_pr)

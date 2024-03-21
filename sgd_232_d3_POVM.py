@@ -1,15 +1,26 @@
 import os
 import copy
+import time
 import random
 import numpy as np
 import cvxpy as cp
-from time import time
 from sympy import Symbol
 from sqlalchemy import true
 from numpy.linalg import norm
 from scipy.linalg import expm
+from multiprocessing import Pool
 import evoMPS.tdvp_uniform as mps
 from sympy.utilities import lambdify
+from logging import info, INFO, basicConfig
+
+
+def get_logger(name):
+    logger = getLogger(name)
+    fh = FileHandler(f'{name}.log')
+    fh.setFormatter(Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+    logger.setLevel(INFO)
+    logger.addHandler(fh)
+    return logger
 
 
 def t2observable(t, Diag_list):
@@ -146,11 +157,14 @@ def cal_gradient(d, t_value, coef, A, lfp, rfp):
 
 
 def run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list):
-    t = initial_t(d, t_type)
+    t = initial_t(9, t_type)
 
-    print("\n model = ", model)
-    print("\n coef = ", coef)
-    print("\n local = ", local)
+    # print("\n model = ", model)
+    # print("\n coef = ", coef)
+    # print("\n local = ", local)
+
+    log = os.path.join(os.getcwd(), f'sgd_232/sgd_232_d{d}_POVM_model{model}_{t_type}.log')
+    basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     i = 0
     gd_iter_max = 80
@@ -159,11 +173,11 @@ def run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list):
     evo_threshold = 1.0e-3
     evo_iter_max = 50000
     momentum = 0
-    print("initial t = \n", t)
+    # print("initial t = \n", t)
     while i <= gd_iter_max:
         i += 1
-        print("\n-----------------------iteration {0} -----------------------".format(i))
-        ite_start = time.time()
+        # print("\n iteration {0}".format(i))
+        time_iter_start = time.perf_counter()
         learning_rate = max(0.12 * 0.9**(i - 1), 1.0e-4)
         '''
         covert parameters "t" to observables "obs" and project into POVM "A0, A1, A2"
@@ -188,48 +202,54 @@ def run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list):
         '''
         excute once gradient descent method to update parameters "t"
         '''
-        time00 = time.time()
+        time_grad_start = time.perf_counter()
         grad = cal_gradient(d, t, coef, A, lfp, rfp)
-        time11 = time.time()
-        print("========== once gradient time cost = ", time11 - time00)
+        time_grad_end = time.perf_counter()
+        time_grad = time_grad_start - time_grad_end
+        # print("once gradient time cost = ", time_grad)
         t_old = copy.deepcopy(t)
         t = t - learning_rate * grad + momentum * np.array(t)
-        print("************* gradident =", grad)
+        # print("gradident =", grad)
         grad_norm = norm(grad)
-        ite_end = time.time()
-        print("~~~~~~~~~~ iteration time cost = ", ite_end - ite_start)
-        print("\n", [int(model), i, int(local), energy, grad_norm, eta, learning_rate])
-        print("\n", t_old)
+        time_iter_end = time.perf_counter()
+        time_iter = time_iter_end - time_iter_start
+        # print("iteration time cost = ", time_iter)
+        # print("\n", [int(model), i, int(local), energy, grad_norm, eta, learning_rate])
+        # print("\n", t_old)
 
         e_gap = energy - local
-        if t_type == "complex":
-            file_e_name = "POVM_complex_232_" + "d{0}_model{1}_sgd_energy.txt".format(d, model)
-            file_t_name = "POVM_complex_232_" + "d{0}_model{1}_sgd_observables.txt".format(d, model)
-        elif t_type == "real":
-            file_e_name = "POVM_real_232_" + "d{0}_model{1}_sgd_energy.txt".format(d, model)
-            file_t_name = "POVM_real_232_" + "d{0}_model{1}_sgd_observables.txt".format(d, model)
+        # if t_type == "complex":
+        #     file_e_name = "POVM_complex_232_" + "d{0}_model{1}_sgd_energy.txt".format(d, model)
+        #     file_t_name = "POVM_complex_232_" + "d{0}_model{1}_sgd_observables.txt".format(d, model)
+        # elif t_type == "real":
+        #     file_e_name = "POVM_real_232_" + "d{0}_model{1}_sgd_energy.txt".format(d, model)
+        #     file_t_name = "POVM_real_232_" + "d{0}_model{1}_sgd_observables.txt".format(d, model)
 
-        f_e_iterative = open(os.path.join(os.getcwd(), file_e_name), mode="a")
-        f_e_iterative.write("{0}\n".format(str([n_try, i, d, D, int(local), energy, grad_norm, eta, learning_rate])))
+        # f_e_iterative = open(os.path.join(os.getcwd(), file_e_name), mode="a")
+        # f_e_iterative.write("{0}\n".format(str([n_try, i, d, D, int(local), energy, grad_norm, eta, learning_rate])))
 
-        f_t_iterative = open(os.path.join(os.getcwd(), file_t_name), mode="a")
-        f_t_iterative.write("{0}\n".format(str([n_try, i, t_old])))
+        # f_t_iterative = open(os.path.join(os.getcwd(), file_t_name), mode="a")
+        # f_t_iterative.write("{0}\n".format(str([n_try, i, t_old])))
 
-        if grad_norm < gd_threshold or i == gd_iter_max or e_gap > 0 and e_gap < 1.0e-3:
+        # if grad_norm < gd_threshold or i == gd_iter_max or e_gap > 0 and e_gap < 1.0e-3:
+        if e_gap < 0:
+            info(
+                f'n_try: {n_try}, i: {i}, D{D}, local: {local}, energy: {energy}, grad_norm: {grad_norm}, eta: {eta}, learning_rate: {learning_rate}, t_old: {t_old}'
+            )
             break
 
 
-def initial_t(d, t_type):
+def initial_t(num, t_type):
     t = []
-    for i in range(9):
+    for i in range(num):
         if t_type == "complex":
-            t.append(random.uniform(-1, 1) + 1j * random.uniform(-1, 1))
+            t.append(random.uniform(-np.pi, np.pi) + 1j * random.uniform(-np.pi, np.pi))
         elif t_type == "real":
-            t.append(random.uniform(-1, 1))
+            t.append(random.uniform(-np.pi, np.pi))
     return t
 
 
-def running(i_model):
+def running(n_try, i_model):
     d = 3
     D = 9
 
@@ -247,27 +267,31 @@ def running(i_model):
 
     t_type = "complex"
 
-    efficient_times = 0
-    for n_try in range(1, 10000):
-        success = False
-        while not success:
-            try:
-                run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list)
-                success = True
-                efficient_times += 1
-            except:
-                break
-    print("model_{0} efficient trails = {1}".format(model, efficient_times))
+    run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list)
+    # efficient_times = 0
+    # for n_try in range(1, int(1e5)):
+    #     success = False
+    #     while not success:
+    #         try:
+    #             run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list)
+    #             success = True
+    #             efficient_times += 1
+    #         except:
+    #             break
+    # print(f'model{model} efficient trails = {efficient_times}')
 
 
-def parallel_run(run_func, pool_size=2):
-    from multiprocessing import Pool
+def parallel_run(run_func, input_model, pool_size):
     pool = Pool(pool_size)
-    for i_model in [2, 1]:  # num0:1216, num1:1410, num2:1705, num3:45
-        pool.apply_async(func=run_func, args=(i_model, ))
+    for initial_num in range(int(1e5)):
+        pool.apply_async(func=run_func, args=(initial_num, input_model))
+    # for i_model in [2, 1]:  # num0:1216, num1:1410, num2:1705, num3:45
+    #     pool.apply_async(func=run_func, args=(i_model, ))
     pool.close()
     pool.join()
 
 
 if __name__ == '__main__':
-    parallel_run(running, 2)
+    # num1:1410, num2:1705
+    input_model = int(input('input model num'))
+    parallel_run(running, input_model, 12)

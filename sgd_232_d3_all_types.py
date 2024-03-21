@@ -6,6 +6,7 @@ import numpy as np
 import numdifftools as nd
 from numpy.linalg import norm
 from scipy.linalg import expm
+from multiprocessing import Pool
 import evoMPS.tdvp_uniform as mps
 from logging import info, INFO, basicConfig
 # python == 3.8.2 or 3.9.13
@@ -215,7 +216,6 @@ def running(initial_num, type_num, input_model):
 
 
 def parallel_run(run_func, input_model, pool_size):
-    from multiprocessing import Pool
     pool = Pool(pool_size)
     for initial_num in range(50000):
         for type_num in range(56):  # N_type = len(all_Diag) = 56

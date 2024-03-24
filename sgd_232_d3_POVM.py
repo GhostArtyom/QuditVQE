@@ -14,15 +14,6 @@ from sympy.utilities import lambdify
 from logging import info, INFO, basicConfig
 
 
-def get_logger(name):
-    logger = getLogger(name)
-    fh = FileHandler(f'{name}.log')
-    fh.setFormatter(Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
-    logger.setLevel(INFO)
-    logger.addHandler(fh)
-    return logger
-
-
 def t2observable(t, Diag_list):
     D1 = Diag_list[0]
     D2 = Diag_list[1]

@@ -12,6 +12,16 @@ from multiprocessing import Pool
 import evoMPS.tdvp_uniform as mps
 from sympy.utilities import lambdify
 from logging import info, INFO, basicConfig
+'''
+python == 3.8.2 or 3.9.13
+numpy == 1.19.2 or 1.19.3
+scipy == 1.5.2 or 1.5.4
+sqlalchemy == 2.0.29
+Mosek == 10.1.28
+evoMPS == 2.1.0
+cvxpy == 1.4.2
+sympy == 1.12
+'''
 
 
 def t2observable(t, Diag_list):
@@ -49,9 +59,7 @@ def obs2POVM(d, A0, A1, A2):
     M21 = cp.Variable((d, d), hermitian=True)
     POVM2 = M20 - M21
 
-    constraints = [
-        M00 >> 0, M01 >> 0, M00 + M01 == Id, M10 >> 0, M11 >> 0, M10 + M11 == Id, M20 >> 0, M21 >> 0, M20 + M21 == Id
-    ]
+    constraints = [M00 >> 0, M01 >> 0, M00 + M01 == Id, M10 >> 0, M11 >> 0, M10 + M11 == Id, M20 >> 0, M21 >> 0, M20 + M21 == Id]
     objective = cp.Minimize(cp.norm(A0 - POVM0) + cp.norm(A1 - POVM1) + cp.norm(A2 - POVM2))
 
     problem = cp.Problem(objective, constraints)
@@ -224,9 +232,7 @@ def run_one_model(model, coef, local, D, d, t_type, n_try, Diag_list):
 
         # if grad_norm < gd_threshold or i == gd_iter_max or e_gap > 0 and e_gap < 1.0e-3:
         if e_gap < 0:
-            info(
-                f'n_try: {n_try}, i: {i}, D{D}, local: {local}, energy: {energy}, grad_norm: {grad_norm}, eta: {eta}, learning_rate: {learning_rate}, t_old: {t_old}'
-            )
+            info(f'n_try: {n_try}, i: {i}, D{D}, local: {local}, energy: {energy}, grad_norm: {grad_norm}, eta: {eta}, learning_rate: {learning_rate}, t_old: {t_old}')
             break
 
 
@@ -286,3 +292,5 @@ if __name__ == '__main__':
     # num1:1410, num2:1705
     input_model = int(input('input model num'))
     parallel_run(running, input_model, 12)
+    # for initial_num in range(20):
+    #     running(initial_num, 1)

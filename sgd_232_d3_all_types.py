@@ -9,11 +9,13 @@ from scipy.linalg import expm
 from multiprocessing import Pool
 import evoMPS.tdvp_uniform as mps
 from logging import info, INFO, basicConfig
-# python == 3.8.2 or 3.9.13
-# numpy == 1.19.2 or 1.19.3
-# scipy == 1.5.2 or 1.5.4
-# numdifftools == 0.9.41
-# evoMPS == 2.1.0
+'''
+python == 3.8.2 or 3.9.13
+numpy == 1.19.2 or 1.19.3
+scipy == 1.5.2 or 1.5.4
+numdifftools == 0.9.41
+evoMPS == 2.1.0
+'''
 
 # the dimension of local observable is d=3
 # I0 = np.eye(3)

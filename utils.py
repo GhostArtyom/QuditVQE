@@ -1,10 +1,11 @@
 import os
 import numpy as np
 from math import log
+from functools import reduce
 from typing import List, Union
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
-from numpy.linalg import det, eigh, svd
+from numpy.linalg import det, eigh, norm, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
 
@@ -57,6 +58,26 @@ def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
     mat_imag[np.abs(mat_imag) < tol] = 0
     mat_approx = mat_real + 1j * mat_imag
     return mat_approx
+
+
+def random_qudit(dim: int, ndim: int = 1) -> np.ndarray:
+    '''Generate random one-qudit state or matrix'''
+    if ndim == 1:
+        qudit = np.random.rand(dim) + 1j * np.random.rand(dim)
+    elif ndim == 2:
+        qudit = np.random.rand(dim, dim) + 1j * np.random.rand(dim, dim)
+    else:
+        raise ValueError(f'Wrong qudit ndim {ndim}')
+    qudit /= norm(qudit)
+    return qudit
+
+
+def random_qudits(dim: int, n_qudits: int, ndim: int = 1) -> np.ndarray:
+    '''Generate random n-qudit states or matrices'''
+    qudit_list = [random_qudit(dim, ndim) for _ in range(n_qudits)]
+    qudits = reduce(np.kron, qudit_list)
+    qudits /= norm(qudits)
+    return qudits
 
 
 def str_special(str_pr: Union[str, int, float]) -> str:

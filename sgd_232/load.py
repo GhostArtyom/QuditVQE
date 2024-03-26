@@ -11,7 +11,7 @@ for f in files:
     pattern = 'energy: (-?\d+\.\d+)'
     energy_list = [float(re.search(pattern, line).group(1)) for line in data if re.search(pattern, line)]
     min_energy = min(energy_list) if len(energy_list) > 0 else ' No violation'
-    print(model, types, min_energy, len(data), sorted(energy_list)[:10])
+    print(model, types, min_energy, len(data))
     print([line[20:] for line in data if str(min_energy) in line][0])
 
 # files = [os.path.join(path, f) for f in sorted(os.listdir(path)) if 'txt' in f]
@@ -26,6 +26,15 @@ for f in files:
 #     print(model, types, min_energy, len(energy_list), len(data))
 
 '''
+20240326
+model1216 all_types -9.018750920337176 1334
+model1410 all_types -4.039201468403175 1282
+model1705 all_types -5.041619449081026 2197
+model45 all_types  No violation 0
+model1216 promising -9.018702489306039 2546
+model1410 promising -4.036005968606142 1604
+model1705 promising -5.041090250419363 4393
+model45 promising  No violation 0
 20240324
 model1410 POVM -4.038861771619601 11112
 model1705 POVM -5.0192710472420945 622

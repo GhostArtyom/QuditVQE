@@ -5,7 +5,6 @@ import numpy as np
 from utils import *
 from h5py import File
 from typing import List
-from scipy.io import savemat
 from scipy.optimize import minimize
 from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
@@ -15,57 +14,56 @@ from mindquantum.simulator.utils import GradOpsWrapper
 from mindquantum.simulator import Simulator, get_supported_simulator
 
 
-def fun(p0: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
-    '''Optimize function of fidelity.
+def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
+    '''Optimization function of fidelity.
     Args:
-        p0 (np.ndarray): initial parameters.
+        init_params (np.ndarray): initial parameters.
         sim_grad (GradOpsWrapper): simulator forward with gradient.
         loss_list (List[float]): list of loss values for loss function.
     Returns:
         f (float): fidelity, as the expectation value.
         g (np.ndarray): gradients of parameters.
     '''
-    f, g = sim_grad(p0)
+    f, g = sim_grad(init_params)
     f = 1 - np.real(f)[0][0]
     g = -np.real(g)[0][0]
     if loss_list is not None:
         loss_list.append(f)
         i = len(loss_list)
-        if i % 10 == 0:
-            global start, num, layers
+        if i % 50 == 0:
             t = time.perf_counter() - start
             info(f'D{D}, vec{vec}, Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
     return f, g
 
 
 def callback(xk: np.ndarray):
-    '''Callback when loss < tol or reach local minima.
+    '''Callback when reach local minima or loss < tol.
     Args:
         xk (np.ndarray): current parameter vector.
     '''
-    minima1, minima2 = 0.5, 0.25
     f, _ = sim_grad(xk)
     loss = 1 - np.real(f)[0][0]
+    minima1, minima2 = 0.5, 0.25
     if 0 < loss - minima1 < 2e-3:
         local_minima1.append(loss - minima1)
     if 0 < loss - minima2 < 2e-3:
         local_minima2.append(loss - minima2)
     if len(local_minima1) >= 30:
-        info(f'vec{vec} reach local minima1, restart optimization')
+        info(f'D{D}, vec{vec}: reach local minima1, restart optimization')
         raise StopAsyncIteration
     if len(local_minima2) >= 30:
-        info(f'vec{vec} reach local minima2, restart optimization')
+        info(f'D{D}, vec{vec}: reach local minima2, restart optimization')
         raise StopAsyncIteration
     if loss < 1e-12:  # tolerance
         raise StopIteration
 
 
 layers = 2  # number of layers
-num = input('File name: num')  # input num of file index
+num = int(input('File name: num'))  # input num of file index
 # D = input('Bond dimension: D=')  # input bond dimension D
 dim = [5, 6, 7, 8, 9]
 for D in dim:
-    sub = sorted(os.listdir('./data_322'))[int(num) + 1]
+    sub = sorted(os.listdir('./data_322'))[num + 1]  # index of subfolder is start from 2
     path = f'./data_322/{sub}'  # path of subfolder
     D_str = f'{dim[0]}-{dim[-1]}' if len(dim) > 1 else dim[0]
     log = f'./data_322/Logs/{sub}_D{D_str}_L{layers}.log'
@@ -94,9 +92,11 @@ for D in dim:
     p_name = ansatz.ansatz_params_name
     p_num = len(p_name)
     g_num = sum(1 for _ in ansatz)
+    depth = circuit_depth(ansatz)
     info(f'Number of qubits: {nq}')
-    info(f'Number of params: {p_num}')
     info(f'Number of gates: {g_num}')
+    info(f'Number of params: {p_num}')
+    info(f'Depth of circuit: {depth}')
 
     sim_list = set([i[0] for i in get_supported_simulator()])
     if 'mqvector_gpu' in sim_list and nq >= 14:
@@ -109,13 +109,16 @@ for D in dim:
         info(f'Simulator: mqvector, Method: {method}')
 
     time_dict, eval_dict, fidelity_dict = {}, {}, {}
-    for vec in range(1, vec_num + 1):  # index start from 1
+    for vec in range(1, vec_num + 1):  # vec index start from 1
     # v = int(input('Execute vec'))
     # for vec in range(v, v + 1):
     # for vec in range(v, 41):
-        vs = f'vec{vec}'  # vec num string
-        time_dict[vs], eval_dict[vs], fidelity_dict[vs] = [], [], []
-        for i in range(1, 11):  # repeat 10 times
+        repetitions = 10
+        vec_str = f'vec{vec}'
+        time_dict[vec_str] = []
+        eval_dict[vec_str] = []
+        fidelity_dict[vec_str] = []
+        for i in range(1, repetitions + 1):
             psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
             rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
             Ham = Hamiltonian(rho)  # set target state as Hamiltonian
@@ -126,22 +129,25 @@ for D in dim:
             while True:
                 try:
                     local_minima1, local_minima2 = [], []
-                    options = {'gtol': 1e-12, 'maxiter': 500}  # solver options
-                    p0 = np.random.uniform(-np.pi, np.pi, p_num)  # initial parameters
-                    res = minimize(fun, p0, (sim_grad, []), method, jac=True, callback=callback, options=options)
+                    solver_options = {'gtol': 1e-12, 'maxiter': 500}
+                    init_params = np.random.uniform(-np.pi, np.pi, p_num)
+                    res = minimize(optimization, init_params, (sim_grad, []), method, \
+                                   jac=True, callback=callback, options=solver_options)
                     break
                 except StopIteration:
-                    break
+                    break  # reach loss tolerance
                 except StopAsyncIteration:
-                    continue
-            minute = round(((time.perf_counter() - start) / 60), 2)
-            info(res.message)
+                    continue  # reach local minima
             fidelity = 1 - res.fun
-            time_dict[vs].append(minute)
-            eval_dict[vs].append(res.nfev)
-            fidelity_dict[vs].append(fidelity)
-            info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Iter: {i}')
+            end = time.perf_counter()
+            minute = round(((end - start) / 60), 2)
+            time_dict[vec_str].append(minute)
+            eval_dict[vec_str].append(res.nfev)
+            fidelity_dict[vec_str].append(fidelity)
+
+            info(res.message)
+            info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {i}')
             info(f'Time dict: {time_dict}\nEval dict: {eval_dict}\n{fidelity_dict}')
-        print(f'D={D} vec{vec} finish')
-    info(f'Bond dimension D={D} finish')
-    print(f'Fidelity dict: {fidelity_dict}\nBond dimension D={D} finish')
+        print(f'num{num} D={D} vec{vec} finish')
+    info(f'num{num} D={D} finish')
+    print(f'num{num} D={D} finish\n{fidelity_dict}')

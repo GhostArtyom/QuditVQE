@@ -2,7 +2,6 @@ import re
 import os
 import time
 import numpy as np
-from utils import *
 from h5py import File
 from typing import List
 from scipy.optimize import minimize
@@ -12,6 +11,7 @@ from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator.utils import GradOpsWrapper
 from mindquantum.simulator import Simulator, get_supported_simulator
+from utils import circuit_depth, su2_encoding, qutrit_symmetric_ansatz
 
 
 def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
@@ -21,27 +21,28 @@ def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: L
         sim_grad (GradOpsWrapper): simulator forward with gradient.
         loss_list (List[float]): list of loss values for loss function.
     Returns:
-        f (float): fidelity, as the expectation value.
-        g (np.ndarray): gradients of parameters.
+        loss (float): loss value of optimization.
+        grad (np.ndarray): gradients of parameters.
     '''
     f, g = sim_grad(init_params)
-    f = 1 - np.real(f)[0][0]
-    g = -np.real(g)[0][0]
+    loss = 1 - np.real(f)[0][0]
+    grad = -np.real(g)[0][0]
     if loss_list is not None:
-        loss_list.append(f)
+        loss_list.append(loss)
         i = len(loss_list)
-        if i % 50 == 0:
+        if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
             t = time.perf_counter() - start
-            info(f'D{D}, vec{vec}, Loss: {f:.15f}, Fidelity: {1-f:.15f}, {i}, {t:.2f}')
-    return f, g
+            info(f'D{D}, vec{vec}, Loss: {loss:.15f}, Fidelity: {1-loss:.15f}, {i}, {t:.2f}')
+    return loss, grad
 
 
-def callback(xk: np.ndarray):
+def callback(curr_params: np.ndarray, tol : float =1e-12):
     '''Callback when reach local minima or loss < tol.
     Args:
-        xk (np.ndarray): current parameter vector.
+        curr_params (np.ndarray): current parameters.
+        tol (float): tolerance of loss function.
     '''
-    f, _ = sim_grad(xk)
+    f, _ = sim_grad(curr_params)
     loss = 1 - np.real(f)[0][0]
     minima1, minima2 = 0.5, 0.25
     if 0 < loss - minima1 < 2e-3:
@@ -54,13 +55,13 @@ def callback(xk: np.ndarray):
     if len(local_minima2) >= 30:
         info(f'D{D}, vec{vec}: reach local minima2, restart optimization')
         raise StopAsyncIteration
-    if loss < 1e-12:  # tolerance
+    if loss < tol:
         raise StopIteration
 
 
 layers = 2  # number of layers
-num = int(input('File name: num'))  # input num of file index
-# D = input('Bond dimension: D=')  # input bond dimension D
+num = int(input('File name: num'))
+# D = input('Bond dimension: D=')
 dim = [5, 6, 7, 8, 9]
 for D in dim:
     sub = sorted(os.listdir('./data_322'))[num + 1]  # index of subfolder is start from 2

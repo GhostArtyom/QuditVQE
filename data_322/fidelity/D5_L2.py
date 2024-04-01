@@ -1149,10 +1149,8 @@ for i in fidelity.keys():
         fidelity[i][k].extend(v)
     fidelity[i] = dict(fidelity[i])
 
-# for i in fidelity.keys():
-#     for k, v in fidelity[i].items():
-#         print(i, k, len(v))
-#     print()
+for i in fidelity.keys():
+    print(i, {int(k[3:]): len(v) for k, v in fidelity[i].items()})
 
 for num in range(1, 6):
     sub = sorted(os.listdir('./data_322'))[num + 1]

@@ -1,5 +1,3 @@
-import os
-from scipy.io import savemat
 from collections import defaultdict
 
 fidelity = {
@@ -1040,12 +1038,3 @@ for i in fidelity.keys():
     for k, v in fidelity_20240305[i].items():
         fidelity[i][k].extend(v)
     fidelity[i] = dict(fidelity[i])
-
-for i in fidelity.keys():
-    print(i, {int(k[3:]): len(v) for k, v in fidelity[i].items()})
-
-for num in range(1, 6):
-    sub = sorted(os.listdir('./data_322'))[num + 1]
-    path = f'./data_322/{sub}'  # path of subfolder
-    # print(num, fidelity[f'num{num}'])
-    # savemat(f'{path}/fidelity_num{num}_D6_L2.mat', fidelity[f'num{num}'])

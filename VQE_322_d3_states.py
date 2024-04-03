@@ -61,11 +61,10 @@ def callback(curr_params: np.ndarray, tol : float =1e-12):
 
 layers = 2  # number of layers
 num = int(input('File name: num'))
-# D = input('Bond dimension: D=')
+sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+path = f'./data_322/{sub}'  # path of subfolder
 dim = [5, 6, 7, 8, 9]
 for D in dim:
-    sub = sorted(os.listdir('./data_322'))[num + 1]  # index of subfolder is start from 2
-    path = f'./data_322/{sub}'  # path of subfolder
     D_str = f'{dim[0]}-{dim[-1]}' if len(dim) > 1 else dim[0]
     log = f'./data_322/Logs/{sub}_D{D_str}_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)

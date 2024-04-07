@@ -28,7 +28,7 @@ def dict_file(path: str) -> dict:
 
 
 def is_power_of_two(num: int) -> bool:
-    if not isinstance(num, int):
+    if not isinstance(num, (int, np.int64)):
         num = round(num, 12)
         if num % 1 != 0:
             raise ValueError(f'Wrong number type {num} {type(num)}')
@@ -439,9 +439,9 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
         raise ValueError(f'Wrong state shape {rho.shape}')
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
-    if not isinstance(d, int):
+    if not isinstance(d, (int, np.int64)):
         raise ValueError(f'Wrong dimension type {d} {type(d)}')
-    if not isinstance(ind, int):
+    if not isinstance(ind, (int, np.int64)):
         raise ValueError(f'Wrong index type {ind} {type(ind)}')
     n = rho.shape[0]
     m = n // d
@@ -477,9 +477,9 @@ def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.n
         raise ValueError(f'Wrong state shape {rho.shape}')
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
-    if not isinstance(d, int):
+    if not isinstance(d, (int, np.int64)):
         raise ValueError(f'Wrong dimension type {d} {type(d)}')
-    if isinstance(position, int):
+    if isinstance(position, (int, np.int64)):
         position = [position]
     n = rho.shape[0]
     nq = round(log(n, d), 12)
@@ -522,9 +522,9 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
 
 
 def sym_ind(d: int, m: int) -> dict:
-    if not isinstance(d, int):
+    if not isinstance(d, (int, np.int64)):
         raise ValueError(f'Wrong dimension type {d} {type(d)}')
-    if not isinstance(m, int):
+    if not isinstance(m, (int, np.int64)):
         raise ValueError(f'Wrong multi type {m} {type(m)}')
     if m == 1:
         ind = {}

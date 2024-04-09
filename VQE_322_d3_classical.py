@@ -37,7 +37,7 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
                 info(f'num{num}, D{D}, Repeat: {r}, Loss: {loss:.15f}, Fidelity: {1-loss:.15f}, {i}, {t:.2f}')
         return loss, grad
 
-    def callback(curr_params: np.ndarray, tol: float = 1e-12):
+    def callback(curr_params: np.ndarray, tol: float = 1e-15):
         '''Callback when reach local minima or loss < tol.
         Args:
             curr_params (np.ndarray): current parameters.
@@ -103,7 +103,7 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         info(f'Simulator: mqvector, Method: {method}')
 
     num_str = f'num{num}'
-    time_dict[num_str], eval_dict[num_str], fidelity_dict[num_str] = [], [], []
+    eval_dict[num_str], time_dict[num_str], fidelity_dict[num_str] = [], [], []
     for r in range(1, repetitions + 1):
         psi = su2_encoding(state, N, is_csr=True)  # encode qutrit state to qubit
         rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
@@ -115,7 +115,7 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         while True:
             try:
                 local_minima1, local_minima2 = [], []
-                solver_options = {'gtol': 1e-12, 'maxiter': maxiter}
+                solver_options = {'gtol': 1e-15, 'maxiter': maxiter}
                 init_params = np.random.uniform(-np.pi, np.pi, p_num)
                 res = minimize(optimization, init_params, (sim_grad, []), method, \
                                 jac=True, callback=callback, options=solver_options)
@@ -131,13 +131,12 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         eval_dict[num_str].append(res.nfev)
         fidelity_dict[num_str].append(fidelity)
 
-        info(res.message)
         info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}')
-        info(f'time_dict = {time_dict}, eval_dict = {eval_dict}\n{fidelity_dict}')
+        info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
     print(f'num{num} D={D} L={layers} finish\n{fidelity_dict}')
     info(f'num{num} D={D} L={layers} finish')
 
 
-time_dict, eval_dict, fidelity_dict = {}, {}, {}
+eval_dict, time_dict, fidelity_dict = {}, {}, {}
 for num in range(1, 6):
-    running(num, layers=2, maxiter=500, repetitions=5)
+    running(num, layers=2, maxiter=500, repetitions=10)

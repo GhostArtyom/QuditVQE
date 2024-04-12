@@ -63,13 +63,13 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
     sub = sorted(os.listdir(path))[num - 1]
     model = re.search('model\d+', sub).group(0)
 
-    s = File(f'{path}/322_classical_d3_num{num}_{model}_target_state_vector.mat')
+    s = File(f'{path}/322_classical_d3_num{num}_{model}_D2_target_state_vector.mat')
     state = s['target_state_vec'][:].view('complex')
     D = s['D'][0]  # bond dimension
     N = s['N'][0]  # number of qudits
     s.close()
 
-    log = f'./data_322/Logs/num1~5_classical_L{layers}.log'
+    log = f'./data_322/Logs/num{num}_classical_L{layers}_D{D}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     d = 3  # dimension of qudit state
@@ -138,5 +138,6 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
 
 
 eval_dict, time_dict, fidelity_dict = {}, {}, {}
-for num in range(1, 6):
-    running(num, layers=2, maxiter=500, repetitions=10)
+running(num=1, layers=2, maxiter=500, repetitions=20)
+# for num in range(1, 6):
+#     running(num, layers=2, maxiter=500, repetitions=10)

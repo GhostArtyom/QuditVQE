@@ -3,6 +3,7 @@ import numpy as np
 from math import log
 from functools import reduce
 from typing import List, Union
+from fractions import Fraction
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from numpy.linalg import det, eigh, norm, svd
@@ -80,27 +81,34 @@ def random_qudits(dim: int, n_qudits: int, ndim: int = 1) -> np.ndarray:
     return qudits
 
 
-def str_special(str_pr: Union[str, int, float]) -> str:
+def str_special(pr_str: Union[str, int, float]) -> str:
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
-    if isinstance(str_pr, (int, str)):
-        return str(str_pr)
-    elif str_pr % 1 == 0:
-        return str(int(str_pr))
-    div = -1 if str_pr < 0 else 1
-    str_pr *= -1 if str_pr < 0 else 1
-    for key, val in special.items():
-        if isinstance(str_pr, str):
+    if isinstance(pr_str, (int, str)):
+        return str(pr_str)
+    elif pr_str % 1 == 0:
+        return str(int(pr_str))
+    coef = -1 if pr_str < 0 else 1
+    pr_str *= -1 if pr_str < 0 else 1
+    for k, v in special.items():
+        frac = Fraction(pr_str / v).limit_denominator(100)
+        multi = round(pr_str / v, 4)
+        divisor = round(v / pr_str, 4)
+        if np.isclose(multi % 1, 0):
+            coef *= int(multi)
+            pr_str = k if coef == 1 else f'-{k}' if coef == -1 else f'{coef}{k}'
             break
-        if np.isclose(str_pr / val % 1, 0):
-            div *= int(str_pr / val)
-            str_pr = key if div == 1 else f'-{key}' if div == -1 else f'{div}{key}'
-        elif np.isclose(val / str_pr % 1, 0):
-            div *= int(val / str_pr)
-            key = 1 if val == 1 else key
-            str_pr = f'{key}/{div}' if div > 0 else f'-{key}/{-div}'
-    if isinstance(str_pr, str):
-        return str_pr
-    return str(round(str_pr * div, 4))
+        elif np.isclose(divisor % 1, 0):
+            coef *= int(divisor)
+            k = 1 if v == 1 else k
+            pr_str = f'{k}/{coef}' if coef > 0 else f'-{k}/{-coef}'
+            break
+        elif abs(pr_str / v - frac) < 1e-6:
+            x, y = frac.numerator, frac.denominator
+            pr_str = f'{x}{k}/{y}' if coef > 0 else f'-{x}{k}/{y}'
+            break
+    if isinstance(pr_str, str):
+        return pr_str
+    return str(round(pr_str * coef, 4))
 
 
 def str_ket(dim: int, state: np.ndarray) -> str:
@@ -119,20 +127,20 @@ def str_ket(dim: int, state: np.ndarray) -> str:
         base = np.base_repr(ind, dim).zfill(nq)
         real = np.real(val)
         imag = np.imag(val)
-        str_real = str_special(real)
-        str_imag = str_special(imag)
+        real_str = str_special(real)
+        imag_str = str_special(imag)
         if np.abs(val) < tol:
             continue
         if np.abs(real) < tol:
-            string.append(f'{str_imag}j¦{base}⟩')
+            string.append(f'{imag_str}j¦{base}⟩')
             continue
         if np.abs(imag) < tol:
-            string.append(f'{str_real}¦{base}⟩')
+            string.append(f'{real_str}¦{base}⟩')
             continue
-        if str_imag.startswith('-'):
-            string.append(f'{str_real}{str_imag}j¦{base}⟩')
+        if imag_str.startswith('-'):
+            string.append(f'{real_str}{imag_str}j¦{base}⟩')
         else:
-            string.append(f'{str_real}+{str_imag}j¦{base}⟩')
+            string.append(f'{real_str}+{imag_str}j¦{base}⟩')
     # return '\n'.join(string)
     print('\n'.join(string))
     print(state)
@@ -316,13 +324,13 @@ def Ub(basis: str, d: int, name: str, obj: List[int]) -> Circuit:
     index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
         for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            pr = [f'{name}RZ{str_pr}', f'{name}RY{str_pr}', f'{name}Rz{str_pr}']
+            pr_str = f'{"".join(str(i) for i in ind)}_{i}'
+            pr = [f'{name}RZ{pr_str}', f'{name}RY{pr_str}', f'{name}Rz{pr_str}']
             circ += Uind(basis, d, ind, pr, obj)
     elif basis == 'u3':
         for i, ind in enumerate(index):
-            str_pr = f'{"".join(str(i) for i in ind)}_{i}'
-            pr = [f'{name}𝜃{str_pr}', f'{name}𝜑{str_pr}', f'{name}𝜆{str_pr}']
+            pr_str = f'{"".join(str(i) for i in ind)}_{i}'
+            pr = [f'{name}𝜃{pr_str}', f'{name}𝜑{pr_str}', f'{name}𝜆{pr_str}']
             circ += Uind(basis, d, ind, pr, obj)
     else:
         raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')

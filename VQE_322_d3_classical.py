@@ -4,6 +4,7 @@ import time
 import numpy as np
 from h5py import File
 from typing import List
+from scipy.io import loadmat
 from scipy.optimize import minimize
 from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
@@ -60,14 +61,21 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
             raise StopIteration
 
     path = f'./data_322/classical'
-    sub = sorted(os.listdir(path))[num - 1]
+    sub = [i for i in os.listdir(path) if f'num{num}' in i][0]
     model = re.search('model\d+', sub).group(0)
+    name = f'{path}/322_classical_d3_num{num}_{model}_D1_target_state_vector.mat'
 
-    s = File(f'{path}/322_classical_d3_num{num}_{model}_D2_target_state_vector.mat')
-    state = s['target_state_vec'][:].view('complex')
-    D = s['D'][0]  # bond dimension
-    N = s['N'][0]  # number of qudits
-    s.close()
+    try:
+        s = File(name)
+        state = s['target_state_vec'][:].view('complex')
+        D = s['D'][0]  # bond dimension
+        N = s['N'][0]  # number of qudits
+        s.close()
+    except OSError:
+        s = loadmat(name)
+        state = s['target_state_vec'].flatten()
+        D = s['D'][0][0].astype(np.int64)  # bond dimension
+        N = s['N'][0][0].astype(np.int64)  # number of qudits
 
     log = f'./data_322/Logs/num{num}_classical_L{layers}_D{D}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
@@ -138,6 +146,6 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
 
 
 eval_dict, time_dict, fidelity_dict = {}, {}, {}
-running(num=1, layers=2, maxiter=500, repetitions=20)
+running(num=4, layers=2, maxiter=500, repetitions=20)
 # for num in range(1, 6):
 #     running(num, layers=2, maxiter=500, repetitions=10)

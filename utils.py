@@ -300,11 +300,11 @@ def Uind(basis: str, d: int, ind: List[int], pr: List[str], obj: List[int]) -> C
         raise ValueError(f'U3 params length {len(pr)} should be 3')
     circ = Circuit()
     if ind == [0, 1]:
-        corr = Circuit() + X(obj[1], obj[0]) + RY(np.pi / 2).on(obj[0], obj[1]) + X(obj[1], obj[0]) + X(obj[1])
+        corr = Circuit() + X(obj[0], obj[1]) + RY(-np.pi / 2).on(obj[1], obj[0]) + X(obj[1])
     elif ind == [0, 2]:
-        corr = Circuit() + X(obj[0]) + X(obj[1], obj[0]) + X(obj[0])
+        corr = Circuit() + X(obj[1], obj[0]) + X(obj[1])
     elif ind == [1, 2]:
-        corr = Circuit() + X(obj[1], obj[0]) + RY(-np.pi / 2).on(obj[0], obj[1]) + X(obj[1], obj[0])
+        corr = Circuit() + X(obj[0], obj[1]) + RY(np.pi / 2).on(obj[1], obj[0]) + X(obj[0])
     circ += corr
     if basis == 'zyz':
         circ += RZ(pr[0]).on(obj[0], obj[1])

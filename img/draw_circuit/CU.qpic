@@ -1,10 +1,13 @@
 GATESIZE 14
+DEPTHPAD 4
+WIREPAD 4
+
 q0 W
 q1 W
 
-q1 G $U^{ij}$ q0 width=20 P:width=8 \scriptsize$m$
+q1 G:width=16 $U^{ij}$ q0 P:size=8 \FontSize{6}$m$
 =
 
 q1 G $V$
-q1 G $\Delta$ q0 P:width=8 \scriptsize$m$
-q1 G $V^\dag$ width=16
+q1 G $\Delta$ q0 P:size=8 \FontSize{6}$m$
+q1 G $\,V^\dag$ width=15

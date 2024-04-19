@@ -115,6 +115,12 @@ def ExecuteShellFunctions(args):
             #     encoding = 'utf-8'
             # texfile.write(line.decode(encoding))
             #
+            if b'% Line' in line:
+                line = line.replace(b'%', b'\n%')
+            if b'\end{document}' in line:
+                line = line.replace(b'\r\n', b'')
+            else:
+                line = line.replace(b'\r\n', b'\n')
             texfile.write(line.decode())
     tikz.wait()
     if args.filetype == 'tex':

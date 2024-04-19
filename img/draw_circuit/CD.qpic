@@ -1,17 +1,20 @@
 GATESIZE 14
+DEPTHPAD 4
+WIREPAD 5
+
 q0 W
 q1 W
 
-q1 G $\Delta$ q0 P:width=8 \scriptsize$m$
+q1 G $\Delta$ q0 P:size=8 \FontSize{6}$m$
 =
 
-q1 G \scriptsize$R_z^{01}\!(\alpha_1)$ width=30 q0 P:width=8 \scriptsize$m$
+q1 G:width=32 $R_z^{01}\!(\alpha_1)$ q0 P:size=8 \FontSize{6}$m$
 
-q1 G \scriptsize$R_z^{02}\!(\alpha_2)$ width=30 q0 P:width=8 \scriptsize$m$
+q1 G:width=32 $R_z^{02}\!(\alpha_2)$ q0 P:size=8 \FontSize{6}$m$
 
 q0 LABEL \cdots
 q1 LABEL \cdots
 
-q1 G \scriptsize$R_z^{0d\mbox{-}1}\!(\alpha_{d\mbox{-}1})$ width=42 q0 P:width=8 \scriptsize$m$
+q1 G:width=45 $R_z^{0d\mbox{-}1}\!(\alpha_{d\mbox{-}1})$ q0 P:size=8 \FontSize{6}$m$
 
-q0 G \footnotesize$S_m$
+q0 G $S_m$

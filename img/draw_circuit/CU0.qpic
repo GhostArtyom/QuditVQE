@@ -1,16 +1,11 @@
 GATESIZE 14
+
 q0 W
 q1 W
 q2 W
 q3 W
 
-q2 G $U^{ij}$ q1 width=20 P:width=8 \scriptsize$0$
+q2 G:width=20:height=25 $U^{ij}$ q0 P:size=10 \FontSize{7}$0$
 =
 
-q0 G $X$
-q1 G $X$
-
-q2 q3 G $U_e^{ij}$ q0 q1 width=20
-
-q0 G $X$
-q1 G $X$
+q2 q3 G:width=20 $U_\mathrm{ext}^{ij}$ q0 P:size=3.5 {} q1 P:size=3.5 {}

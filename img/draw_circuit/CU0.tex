@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage[pdftex,active,tightpage]{preview}
+\usepackage{tikz}
+\usepackage{braket}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage[fontsize=8pt]{fontsize}
+\def\sub{\subset}
+\def\I{\mathbb{I}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\Q{\mathbb{Q}}
+\def\Z{\mathbb{Z}}
+\def\sube{\subseteq}
+\newcommand\FontSize[1]{\fontsize{#1}{\baselineskip}\selectfont}
+\begin{document}
+\begin{preview}
+\begin{tikzpicture}[scale=1.000000,x=1pt,y=1pt]
+\filldraw[color=white] (0.000000, -8.500000) rectangle (91.000000, 59.500000);
+% Drawing wires
+
+% Line 3: q0 W
+\draw[color=black] (53.000000,51.000000) -- (98.000000,51.000000);
+\draw[color=black] (0.000000,42.500000) -- (38.000000,42.500000);
+
+% Line 4: q1 W
+\draw[color=black] (53.000000,34.000000) -- (98.000000,34.000000);
+
+% Line 5: q2 W
+\draw[color=black] (53.000000,17.000000) -- (98.000000,17.000000);
+\draw[color=black] (0.000000,8.500000) -- (38.000000,8.500000);
+
+% Line 6: q3 W
+\draw[color=black] (53.000000,0.000000) -- (98.000000,0.000000);
+% Done with wires; drawing gates
+
+% Line 8: q2 G:width=20:height=25 $U^{ij}$ q0 P:size=10 \FontSize{7}$0$
+\draw (16.000000,42.500000) -- (16.000000,8.500000);
+\begin{scope}
+\draw[fill=white] (16.000000, 8.500000) +(-45.000000:14.142136pt and 17.677670pt) -- +(45.000000:14.142136pt and 17.677670pt) -- +(135.000000:14.142136pt and 17.677670pt) -- +(225.000000:14.142136pt and 17.677670pt) -- cycle;
+\clip (16.000000, 8.500000) +(-45.000000:14.142136pt and 17.677670pt) -- +(45.000000:14.142136pt and 17.677670pt) -- +(135.000000:14.142136pt and 17.677670pt) -- +(225.000000:14.142136pt and 17.677670pt) -- cycle;
+\draw (16.000000, 8.500000) node {$U^{ij}$};
+\end{scope}
+\begin{scope}
+\draw[fill=white] (16.000000, 42.500000) circle(5.000000pt);
+\clip (16.000000, 42.500000) circle(5.000000pt);
+\draw (16.000000, 42.500000) node {\FontSize{7}$0$};
+\end{scope}
+
+% Line 9: =
+\draw[fill=white,color=white] (38.000000, -7.000000) rectangle (53.000000, 58.000000);
+\draw (45.500000, 25.500000) node {$=$};
+
+% Line 11: q2 q3 G:width=20 $U_\mathrm{ext}^{ij}$ q0 P:size=3.5 {} q1 P:size=3.5 {}
+\draw (75.000000,51.000000) -- (75.000000,0.000000);
+\begin{scope}
+\draw[fill=white] (75.000000, 8.500000) +(-45.000000:14.142136pt and 21.920310pt) -- +(45.000000:14.142136pt and 21.920310pt) -- +(135.000000:14.142136pt and 21.920310pt) -- +(225.000000:14.142136pt and 21.920310pt) -- cycle;
+\clip (75.000000, 8.500000) +(-45.000000:14.142136pt and 21.920310pt) -- +(45.000000:14.142136pt and 21.920310pt) -- +(135.000000:14.142136pt and 21.920310pt) -- +(225.000000:14.142136pt and 21.920310pt) -- cycle;
+\draw (75.000000, 8.500000) node {$U_\mathrm{ext}^{ij}$};
+\end{scope}
+\begin{scope}
+\draw[fill=white] (75.000000, 51.000000) circle(1.750000pt);
+\clip (75.000000, 51.000000) circle(1.750000pt);
+\draw (75.000000, 51.000000) node {{}};
+\end{scope}
+\begin{scope}
+\draw[fill=white] (75.000000, 34.000000) circle(1.750000pt);
+\clip (75.000000, 34.000000) circle(1.750000pt);
+\draw (75.000000, 34.000000) node {{}};
+\end{scope}
+% Done with gates; drawing ending labels
+% Done with ending labels; drawing cut lines and comments
+% Done with comments
+\end{tikzpicture}
+\end{preview}
+\end{document}

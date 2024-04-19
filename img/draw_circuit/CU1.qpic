@@ -1,16 +1,18 @@
 GATESIZE 14
+DEPTHPAD 4
+
 q0 W
 q1 W
 q2 W
 q3 W
 
-q2 G $U^{ij}$ q1 width=20 P:width=8 \scriptsize$1$
+q2 G:width=20:height=25 $U^{ij}$ q0 P:size=10 \FontSize{7}$1$
 =
 
 q0 +q1
-q0 G $R_y\big(\frac{\pi}{2}\big)$ width=32
+q0 G $R_y(\frac{\pi}{2})$ width=28
 
-q2 q3 G $U_e^{ij}$ q0 q1 width=20
+q2 q3 G $U_\mathrm{ext}^{ij}$ q0 q1 width=20
 
-q0 G $R_y\big({\small -}\frac{\pi}{2}\big)$ width=40
+q0 G $R_y(-\frac{\pi}{2})$ width=35
 q0 +q1

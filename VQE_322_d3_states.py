@@ -14,59 +14,55 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import circuit_depth, su2_encoding, qutrit_symmetric_ansatz
 
 
-def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
-    '''Optimization function of fidelity.
-    Args:
-        init_params (np.ndarray): initial parameters.
-        sim_grad (GradOpsWrapper): simulator forward with gradient.
-        loss_list (List[float]): list of loss values for loss function.
-    Returns:
-        loss (float): loss value of optimization.
-        grad (np.ndarray): gradients of parameters.
-    '''
-    f, g = sim_grad(init_params)
-    loss = 1 - np.real(f)[0][0]
-    grad = -np.real(g)[0][0]
-    if loss_list is not None:
-        loss_list.append(loss)
-        i = len(loss_list)
-        if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
+def running(num: int, D: List[int], vec: List[int], repetitions: int):
+
+    def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
+        '''Optimization function of fidelity.
+        Args:
+            init_params (np.ndarray): initial parameters.
+            sim_grad (GradOpsWrapper): simulator forward with gradient.
+            loss_list (List[float]): list of loss values for loss function.
+        Returns:
+            loss (float): loss value of optimization.
+            grad (np.ndarray): gradients of parameters.
+        '''
+        f, g = sim_grad(init_params)
+        loss = 1 - np.real(f)[0][0]
+        grad = -np.real(g)[0][0]
+        if loss_list is not None:
+            loss_list.append(loss)
+            i = len(loss_list)
+            # if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
             t = time.perf_counter() - start
-            info(f'D{D}, vec{vec}, Loss: {loss:.15f}, Fidelity: {1-loss:.15f}, {i}, {t:.2f}')
-    return loss, grad
+            info(f'num{num} D{D} vec{vec} Loss: {loss:.15f} Fidelity: {1-loss:.15f} {i} {t:.2f}')
+        return loss, grad
 
+    def callback(curr_params: np.ndarray, tol: float = 1e-12):
+        '''Callback when reach local minima or loss < tol.
+        Args:
+            curr_params (np.ndarray): current parameters.
+            tol (float): tolerance of loss function.
+        '''
+        f, _ = sim_grad(curr_params)
+        loss = 1 - np.real(f)[0][0]
+        minima1, minima2 = 0.5, 0.25
+        if 0 < loss - minima1 < 2e-3:
+            local_minima1.append(loss - minima1)
+        if 0 < loss - minima2 < 2e-3:
+            local_minima2.append(loss - minima2)
+        if len(local_minima1) >= 30:
+            info(f'D{D}, vec{vec}: reach local minima1, restart optimization')
+            raise StopAsyncIteration
+        if len(local_minima2) >= 30:
+            info(f'D{D}, vec{vec}: reach local minima2, restart optimization')
+            raise StopAsyncIteration
+        if loss < tol:
+            raise StopIteration
 
-def callback(curr_params: np.ndarray, tol : float =1e-12):
-    '''Callback when reach local minima or loss < tol.
-    Args:
-        curr_params (np.ndarray): current parameters.
-        tol (float): tolerance of loss function.
-    '''
-    f, _ = sim_grad(curr_params)
-    loss = 1 - np.real(f)[0][0]
-    minima1, minima2 = 0.5, 0.25
-    if 0 < loss - minima1 < 2e-3:
-        local_minima1.append(loss - minima1)
-    if 0 < loss - minima2 < 2e-3:
-        local_minima2.append(loss - minima2)
-    if len(local_minima1) >= 30:
-        info(f'D{D}, vec{vec}: reach local minima1, restart optimization')
-        raise StopAsyncIteration
-    if len(local_minima2) >= 30:
-        info(f'D{D}, vec{vec}: reach local minima2, restart optimization')
-        raise StopAsyncIteration
-    if loss < tol:
-        raise StopIteration
-
-
-layers = 2  # number of layers
-num = int(input('File name: num'))
-sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
-path = f'./data_322/{sub}'  # path of subfolder
-dim = [5, 6, 7, 8, 9]
-for D in dim:
-    D_str = f'{dim[0]}-{dim[-1]}' if len(dim) > 1 else dim[0]
-    log = f'./data_322/Logs/{sub}_D{D_str}_L{layers}.log'
+    layers = 2  # number of layers
+    sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+    path = f'./data_322/{sub}'  # path of subfolder
+    log = f'./data_322/Logs/num1~5_violation_D5~9_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     s = File(f'{path}/target_state/322_violation_d3_D{D}_{sub}_target_state_vector.mat')
@@ -99,7 +95,7 @@ for D in dim:
     info(f'Depth of circuit: {depth}')
 
     sim_list = set([i[0] for i in get_supported_simulator()])
-    if 'mqvector_gpu' in sim_list and nq >= 14:
+    if 'mqvector_gpu' in sim_list and nq > 14:
         sim = Simulator('mqvector_gpu', nq)
         method = 'BFGS'
         info(f'Simulator: mqvector_gpu, Method: {method}')
@@ -109,11 +105,7 @@ for D in dim:
         info(f'Simulator: mqvector, Method: {method}')
 
     time_dict, eval_dict, fidelity_dict = {}, {}, {}
-    for vec in range(1, vec_num + 1):  # vec index start from 1
-    # v = int(input('Execute vec'))
-    # for vec in range(v, v + 1):
-    # for vec in range(v, 41):
-        repetitions = 10
+    for vec in range(vec[0], vec[1]):
         vec_str = f'vec{vec}'
         time_dict[vec_str] = []
         eval_dict[vec_str] = []
@@ -151,3 +143,8 @@ for D in dim:
         print(f'num{num} D={D} vec{vec} finish')
     info(f'num{num} D={D} finish')
     print(f'num{num} D={D} finish\n{fidelity_dict}')
+
+
+for num in range(1, 6):
+    for D in [5, 6, 7, 8, 9]:
+        running(num, D, vec=[40, 41], repetitions=1)

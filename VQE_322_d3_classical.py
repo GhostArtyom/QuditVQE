@@ -15,7 +15,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import circuit_depth, su2_encoding, qutrit_symmetric_ansatz
 
 
-def running(num: int, layers: int, maxiter: int, repetitions: int):
+def running(num: int, repetitions: int):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -33,9 +33,9 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         if loss_list is not None:
             loss_list.append(loss)
             i = len(loss_list)
-            if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
-                t = time.perf_counter() - start
-                info(f'num{num}, D{D}, Repeat: {r}, Loss: {loss:.15f}, Fidelity: {1-loss:.15f}, {i}, {t:.2f}')
+            # if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
+            t = time.perf_counter() - start
+            info(f'num{num} D{D} Repeat{r} Loss: {loss:.15f} Fidelity: {1-loss:.15f} {i} {t:.2f}')
         return loss, grad
 
     def callback(curr_params: np.ndarray, tol: float = 1e-15):
@@ -77,7 +77,8 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         D = s['D'][0][0].astype(np.int64)  # bond dimension
         N = s['N'][0][0].astype(np.int64)  # number of qudits
 
-    log = f'./data_322/Logs/num{num}_classical_L{layers}_D{D}.log'
+    layers = 2  # number of layers
+    log = f'./data_322/Logs/num1~4_classical_D{D}_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     d = 3  # dimension of qudit state
@@ -101,7 +102,7 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
     info(f'Depth of circuit: {depth}')
 
     sim_list = set([i[0] for i in get_supported_simulator()])
-    if 'mqvector_gpu' in sim_list and nq >= 14:
+    if 'mqvector_gpu' in sim_list and nq > 14:
         sim = Simulator('mqvector_gpu', nq)
         method = 'BFGS'
         info(f'Simulator: mqvector_gpu, Method: {method}')
@@ -123,7 +124,7 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
         while True:
             try:
                 local_minima1, local_minima2 = [], []
-                solver_options = {'gtol': 1e-15, 'maxiter': maxiter}
+                solver_options = {'gtol': 1e-15, 'maxiter': 500}
                 init_params = np.random.uniform(-np.pi, np.pi, p_num)
                 res = minimize(optimization, init_params, (sim_grad, []), method, \
                                 jac=True, callback=callback, options=solver_options)
@@ -146,6 +147,5 @@ def running(num: int, layers: int, maxiter: int, repetitions: int):
 
 
 eval_dict, time_dict, fidelity_dict = {}, {}, {}
-running(num=4, layers=2, maxiter=500, repetitions=20)
-# for num in range(1, 6):
-#     running(num, layers=2, maxiter=500, repetitions=10)
+for num in range(1, 5):
+    running(num, repetitions=1)

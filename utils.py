@@ -8,7 +8,7 @@ from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from numpy.linalg import det, eigh, norm, svd
 from mindquantum.core.circuit import Circuit
-from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, UnivMathGate
+from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, PhaseShift, UnivMathGate
 
 DTYPE = np.float64
 CDTYPE = np.complex128
@@ -53,12 +53,15 @@ def is_hermitian(mat: np.ndarray) -> bool:
 
 
 def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
-    mat_real = np.real(mat)
-    mat_imag = np.imag(mat)
-    mat_real[np.abs(mat_real) < tol] = 0
-    mat_imag[np.abs(mat_imag) < tol] = 0
-    mat_approx = mat_real + 1j * mat_imag
-    return mat_approx
+    if np.iscomplexobj(mat):
+        mat_real = np.real(mat)
+        mat_imag = np.imag(mat)
+        mat_real[np.abs(mat_real) < tol] = 0
+        mat_imag[np.abs(mat_imag) < tol] = 0
+        mat = mat_real + 1j * mat_imag
+        return mat_real if np.all(mat_imag == 0) else mat
+    mat[np.abs(mat) < tol] = 0
+    return mat
 
 
 def random_qudit(dim: int, ndim: int = 1) -> np.ndarray:
@@ -287,143 +290,135 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
-def Uind(basis: str, d: int, ind: List[int], pr: List[str], obj: List[int]) -> Circuit:
+def two_level_unitary_synthesis(d: int, basis: str, ind: List[int], pr_str: List[str], obj: List[int]) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     if len(ind) != 2:
-        raise ValueError(f'U3 index length {len(ind)} should be 2')
+        raise ValueError(f'The qudit unitary index length {len(ind)} should be 2.')
     if len(set(ind)) != len(ind):
-        raise ValueError(f'U3 index {ind} cannot be repeated')
+        raise ValueError(f'The qudit unitary index {ind} cannot be repeated')
     if min(ind) < 0 or max(ind) >= d:
-        raise ValueError(f'U3 index {ind} should in 0 to {d-1}')
-    if len(pr) != 3:
-        raise ValueError(f'U3 params length {len(pr)} should be 3')
-    circ = Circuit()
+        raise ValueError(f'The qudit unitary index {ind} should in 0 to {d-1}.')
+    if len(pr_str) != d:
+        raise ValueError(f'The qudit unitary params length {len(pr_str)} should be {d}.')
     if ind == [0, 1]:
         corr = Circuit() + X(obj[0], obj[1]) + RY(-np.pi / 2).on(obj[1], obj[0]) + X(obj[1])
     elif ind == [0, 2]:
         corr = Circuit() + X(obj[1], obj[0]) + X(obj[1])
     elif ind == [1, 2]:
         corr = Circuit() + X(obj[0], obj[1]) + RY(np.pi / 2).on(obj[1], obj[0]) + X(obj[0])
-    circ += corr
+    circ = Circuit() + corr
     if basis == 'zyz':
-        circ += RZ(pr[0]).on(obj[0], obj[1])
-        circ += RY(pr[1]).on(obj[0], obj[1])
-        circ += RZ(pr[2]).on(obj[0], obj[1])
+        circ += RZ(pr_str[0]).on(obj[0], obj[1])
+        circ += RY(pr_str[1]).on(obj[0], obj[1])
+        circ += RZ(pr_str[2]).on(obj[0], obj[1])
     elif basis == 'u3':
-        theta, phi, lam = pr
+        theta, phi, lam = pr_str
         circ += U3(theta, phi, lam).on(obj[0], obj[1])
     else:
-        raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
+        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}.')
     circ += corr.hermitian()
     return circ
 
 
-def Ub(basis: str, d: int, name: str, obj: List[int]) -> Circuit:
+def single_qudit_unitary_synthesis(d: int, basis: str, name: str, obj: List[int]) -> Circuit:
+    if d != 3:
+        raise ValueError('Only works when d = 3')
     circ = Circuit()
     index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
         for i, ind in enumerate(index):
-            pr_str = f'{"".join(str(i) for i in ind)}_{i}'
-            pr = [f'{name}RZ{pr_str}', f'{name}RY{pr_str}', f'{name}Rz{pr_str}']
-            circ += Uind(basis, d, ind, pr, obj)
+            pr_ind = f'{"".join(str(i) for i in ind)}_{i}'
+            pr_str = [f'{name}RZ{pr_ind}', f'{name}RY{pr_ind}', f'{name}Rz{pr_ind}']
+            circ += two_level_unitary_synthesis(d, basis, ind, pr_str, obj)
     elif basis == 'u3':
         for i, ind in enumerate(index):
-            pr_str = f'{"".join(str(i) for i in ind)}_{i}'
-            pr = [f'{name}𝜃{pr_str}', f'{name}𝜑{pr_str}', f'{name}𝜆{pr_str}']
-            circ += Uind(basis, d, ind, pr, obj)
+            pr_ind = f'{"".join(str(i) for i in ind)}_{i}'
+            pr_str = [f'{name}𝜃{pr_ind}', f'{name}𝜑{pr_ind}', f'{name}𝜆{pr_ind}']
+            circ += two_level_unitary_synthesis(d, basis, ind, pr_str, obj)
     else:
-        raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
+        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}.')
     return circ
 
 
-def GCRb(d: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+def controlled_rotation_synthesis(d: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
-    circ = Circuit()
     if state == 0:
-        if ind == [0, 1]:
-            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
-                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
-        elif ind == [0, 2]:
-            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(
-                obj, ctrl[1:])
-        elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(
-                obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+        corr = Circuit() + X(ctrl[1]) + X(ctrl[2])
     elif state == 1:
-        if ind == [0, 1]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
-                np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
-        elif ind == [0, 2]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(obj, ctrl[1:]) + X(
-                ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
-        elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
-                -np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+        corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2])
     elif state == 2:
-        if ind == [0, 1]:
-            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
-                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
-        elif ind == [0, 2]:
-            corr = Circuit() + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
-        elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(
-                ctrl[0], ctrl[1:] + [obj])
-    circ += corr
+        corr = Circuit()
+    if ind == [0, 1]:
+        corr = corr + X(obj, ctrl) + RY(-np.pi / 2).on(ctrl[0], [obj] + ctrl[1:]) + X(ctrl[0], ctrl[1:])
+    elif ind == [0, 2]:
+        corr = corr + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+    elif ind == [1, 2]:
+        corr = corr + X(obj, ctrl) + RY(np.pi / 2).on(ctrl[0], [obj] + ctrl[1:]) + X(obj, ctrl[1:])
+    circ = Circuit() + corr
     if 'RX' in name:
-        circ = circ + RX(name).on(obj, ctrl)
+        circ += RX(name).on(obj, ctrl)
     elif 'RY' in name:
-        circ = circ + RY(name).on(obj, ctrl)
+        circ += RY(name).on(obj, ctrl)
     elif 'RZ' in name:
-        circ = circ + RZ(name).on(obj, ctrl)
+        circ += RZ(name).on(obj, ctrl)
     elif 'GP' in name:
-        circ = circ + GlobalPhase(name).on(obj, ctrl)
+        circ += GlobalPhase(name).on(obj, ctrl)
+    elif 'PS' in name:
+        circ += PhaseShift(name).on(obj, ctrl)
     circ += corr.hermitian()
     return circ
 
 
-def Cb(d: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+def controlled_diagonal_synthesis(d: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
     circ = Circuit()
-    circ += GCRb(d, [0, 1], f'{name}RZ01', obj, ctrl, state)
-    circ += GCRb(d, [0, 2], f'{name}RZ02', obj, ctrl, state)
-    circ += GCRb(d, [0, 1], f'{name}GP', obj, ctrl, state)
-    circ += GCRb(d, [0, 2], f'{name}GP', obj, ctrl, state)
-    circ += GCRb(d, [1, 2], f'{name}GP', obj, ctrl, state)
+    circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RZ01', obj, ctrl, state)
+    circ += controlled_rotation_synthesis(d, [0, 2], f'{name}RZ02', obj, ctrl, state)
+    circ += controlled_rotation_synthesis(d, [0, 1], f'{name}GP', obj, ctrl, state)
+    circ += controlled_rotation_synthesis(d, [0, 2], f'{name}GP', obj, ctrl, state)
+    circ += controlled_rotation_synthesis(d, [1, 2], f'{name}GP', obj, ctrl, state)
     return circ
 
 
 def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False) -> Circuit:
-    name = f'{gate.name}_'
-    obj = gate.obj_qubits
+    d = 3
+    basis = basis.lower()
+    if basis not in opt_basis:
+        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}')
+    if gate.ctrl_qubits:
+        raise ValueError(f'Currently not applicable for a controlled gate {gate}')
     circ = Circuit()
+    obj = gate.obj_qubits
+    name = f'{gate.name}_'
     if len(obj) == 2:
-        circ += Ub(basis, 3, f'{name}', obj)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}', obj)
     elif len(obj) == 4:
-        circ += Ub(basis, 3, f'{name}U1_', obj[:2])
-        circ += Cb(3, f'{name}C1_', obj[0], obj[1:], 1)
-        circ += Ub(basis, 3, f'{name}U2_', obj[:2])
-        circ += Cb(3, f'{name}C2_', obj[0], obj[1:], 2)
-        circ += Ub(basis, 3, f'{name}U3_', obj[:2])
-        circ += GCRb(3, [1, 2], f'{name}RY12', obj[-1], obj[::-1][1:], 2)
-        circ += GCRb(3, [1, 2], f'{name}RY11', obj[-1], obj[::-1][1:], 1)
-        circ += Ub(basis, 3, f'{name}U4_', obj[:2])
-        circ += Cb(3, f'{name}C3_', obj[0], obj[1:], 2)
-        circ += Ub(basis, 3, f'{name}U5_', obj[:2])
-        circ += GCRb(3, [0, 1], f'{name}RY22', obj[-1], obj[::-1][1:], 2)
-        circ += GCRb(3, [0, 1], f'{name}RY21', obj[-1], obj[::-1][1:], 1)
-        circ += Ub(basis, 3, f'{name}U6_', obj[:2])
-        circ += Cb(3, f'{name}C4_', obj[0], obj[1:], 0)
-        circ += Ub(basis, 3, f'{name}U7_', obj[:2])
-        circ += GCRb(3, [1, 2], f'{name}RY32', obj[-1], obj[::-1][1:], 2)
-        circ += GCRb(3, [1, 2], f'{name}RY31', obj[-1], obj[::-1][1:], 1)
-        circ += Ub(basis, 3, f'{name}U8_', obj[:2])
-        circ += Cb(3, f'{name}C5_', obj[0], obj[1:], 2)
-        circ += Ub(basis, 3, f'{name}U9_', obj[:2])
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U1_', obj[:2])
+        circ += controlled_diagonal_synthesis(d, f'{name}CD1_', obj[0], obj[1:], 1)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U2_', obj[:2])
+        circ += controlled_diagonal_synthesis(d, f'{name}CD2_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U3_', obj[:2])
+        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY1_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY1_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U4_', obj[:2])
+        circ += controlled_diagonal_synthesis(d, f'{name}CD3_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U5_', obj[:2])
+        circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RY2_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RY2_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U6_', obj[:2])
+        circ += controlled_diagonal_synthesis(d, f'{name}CD4_', obj[0], obj[1:], 0)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U7_', obj[:2])
+        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY3_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY3_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U8_', obj[:2])
+        circ += controlled_diagonal_synthesis(d, f'{name}CD5_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U9_', obj[:2])
     else:
-        raise ValueError('Only works when number of qutrits <= 2')
+        raise ValueError(
+            'Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
     if with_phase:
         for i in obj:
             circ += GlobalPhase(f'{name}phase').on(i)

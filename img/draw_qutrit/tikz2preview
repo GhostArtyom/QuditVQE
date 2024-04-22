@@ -1,0 +1,58 @@
+#!C:\Program Files\Python39\python.exe
+
+#############################################################################
+#Copyright (c) 2013, Institute for Defense Analyses, 4850 Mark Center Drive;#
+#               Alexandria, VA 22311-1882; 703-845-2500                     #
+#                                                                           #
+#This material may be reproduced by or for the US Government pursuant to the#
+#copyright license under the clauses at DFARS 252.227-7013 and 252.227-7014.#
+#                                                                           #
+#         Distributed under GNU General Public License, version 3.          #
+#############################################################################
+
+from __future__ import print_function
+
+import sys
+
+header=r'''\documentclass{article}
+\usepackage[pdftex,active,tightpage]{preview}
+\usepackage{tikz}
+\usepackage{braket}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage[fontsize=8pt]{fontsize}
+\def\sub{\subset}
+\def\I{\mathbb{I}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\Q{\mathbb{Q}}
+\def\Z{\mathbb{Z}}
+\def\sube{\subseteq}
+\newcommand\FontSize[1]{\fontsize{#1}{\baselineskip}\selectfont}
+'''
+
+prescript=r'''\begin{document}
+\begin{preview}
+'''
+
+postscript=r'''\end{preview}
+\end{document}
+'''
+
+header_flag = '%! '
+
+print(header, end='')
+prescript_done = 0
+
+with open(sys.argv[1]) as file:
+    for line in file.readlines():
+        if line.startswith(header_flag):
+            print(line[len(header_flag):],end='')
+            continue
+        if not prescript_done:
+            print(prescript,end='')
+            prescript_done = 1
+        print(line,end='')
+    
+print(postscript,end='')

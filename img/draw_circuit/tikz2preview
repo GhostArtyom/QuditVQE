@@ -18,6 +18,7 @@ header=r'''\documentclass{article}
 \usepackage[pdftex,active,tightpage]{preview}
 \usepackage{tikz}
 \usepackage{braket}
+\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{geometry}
 \usepackage[fontsize=8pt]{fontsize}

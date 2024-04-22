@@ -1,11 +1,9 @@
 GATESIZE 14
+WIREPAD 0
 
 q0 W
 q1 W
 q2 W
 q3 W
 
-q2 G:width=20:height=25 $U^{ij}$ q0 P:size=10 \FontSize{7}$2$
-=
-
-q2 q3 G:width=20 $U_\mathrm{enc}^{ij}$ q0 q1
+q2 q3 G:width=32 $V_\mathrm{enc}^{ij}(\boldsymbol{\theta})$ q0 q1

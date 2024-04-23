@@ -1,0 +1,35 @@
+GATESIZE 14
+DEPTHPAD 2
+WIREPAD 6
+q0 W
+q1 W
+q0 LABEL width=0
+q0 q1 G $U_\mathrm{enc}(\boldsymbol{\theta})$ width=32
+q0 LABEL width=0
+=
++q1 q0
+q0 G $R_y(-\frac{\pi}{2})$ q1 width=35
+q0 G $X$
+q1 G $R_z(\theta_{1})$ q0 width=28
+q1 G $R_y(\theta_{2})$ q0 width=28
+q1 G $R_z(\theta_{3})$ q0 width=28
+q0 G $X$
+q0 G $R_y(\frac{\pi}{2})$ q1 width=28
++q1 q0
++q0 q1
+q0 G $X$
+q1 G $R_z(\theta_{4})$ q0 width=28
+q1 G $R_y(\theta_{5})$ q0 width=28
+q1 G $R_z(\theta_{6})$ q0 width=28
+q0 G $X$
++q0 q1
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ q1 width=28
+q1 G $X$
+q1 G $R_z(\theta_{7})$ q0 width=28
+q1 G $R_y(\theta_{8})$ q0 width=28
+q1 G $R_z(\theta_{9})$ q0 width=28
+q1 G $X$
+q0 G $R_y(-\frac{\pi}{2})$ q1 width=35
++q1 q0
+q0 LABEL width=0

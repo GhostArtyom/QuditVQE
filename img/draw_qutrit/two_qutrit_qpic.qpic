@@ -1,0 +1,486 @@
+GATESIZE 14
+DEPTHPAD 2
+WIREPAD 6
+q0 W
+q1 W
+q2 W
+q3 W
+q0 LABEL width=0
+q0 q1 q2 q3 G $\large U_\mathrm{enc}(\boldsymbol{\theta})$ width=40
+q0 LABEL width=0
+=
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{1})$ q2 width=28
+q3 G $R_y(\theta_{2})$ q2 width=28
+q3 G $R_z(\theta_{3})$ q2 width=28
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{4})$ q2 width=28
+q3 G $R_y(\theta_{5})$ q2 width=28
+q3 G $R_z(\theta_{6})$ q2 width=28
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{7})$ q2 width=28
+q3 G $R_y(\theta_{8})$ q2 width=28
+q3 G $R_z(\theta_{9})$ q2 width=28
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ width=28
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $R_z(\theta_{10})$ q2 q1 q0 width=32
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
+q0 G $R_y(-\frac{\pi}{2})$ width=35
++q1 q0
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ width=28
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $R_z(\theta_{11})$ q2 q1 q0 width=32
++q2 q1 q0
++q2 q1 q0 q3
+q0 G $R_y(-\frac{\pi}{2})$ width=35
++q1 q0
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ width=28
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $GP(\theta_{12})$ q2 q1 q0 width=36
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
+q0 G $R_y(-\frac{\pi}{2})$ width=35
++q1 q0
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ width=28
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $GP(\theta_{13})$ q2 q1 q0 width=36
++q2 q1 q0
++q2 q1 q0 q3
+q0 G $R_y(-\frac{\pi}{2})$ width=35
++q1 q0
++q1 q0
+q0 G $R_y(\frac{\pi}{2})$ width=28
++q3 q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q1 q0
+q3 G $GP(\theta_{14})$ q2 q1 q0 width=36
++q3 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q3 q2 q1 q0
+q0 G $R_y(-\frac{\pi}{2})$ width=35
++q1 q0
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{15})$ q2 width=32
+q3 G $R_y(\theta_{16})$ q2 width=32
+q3 G $R_z(\theta_{17})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{18})$ q2 width=32
+q3 G $R_y(\theta_{19})$ q2 width=32
+q3 G $R_z(\theta_{20})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{21})$ q2 width=32
+q3 G $R_y(\theta_{22})$ q2 width=32
+q3 G $R_z(\theta_{23})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $R_z(\theta_{24})$ q2 q1 q0 width=32
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $R_z(\theta_{25})$ q2 q1 q0 width=32
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $GP(\theta_{26})$ q2 q1 q0 width=36
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $GP(\theta_{27})$ q2 q1 q0 width=36
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q1 q0
+q3 G $GP(\theta_{28})$ q2 q1 q0 width=36
++q3 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q3 q2 q1 q0
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{29})$ q2 width=32
+q3 G $R_y(\theta_{30})$ q2 width=32
+q3 G $R_z(\theta_{31})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{32})$ q2 width=32
+q3 G $R_y(\theta_{33})$ q2 width=32
+q3 G $R_z(\theta_{34})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{35})$ q2 width=32
+q3 G $R_y(\theta_{36})$ q2 width=32
+q3 G $R_z(\theta_{37})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q2 q3
+q3 G $R_y(\frac{\pi}{2})$ width=28
++q0 q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q2 q3
+q0 G $R_y(\theta_{38})$ q1 q2 q3 width=32
++q0 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q0 q1 q2 q3
+q3 G $R_y(-\frac{\pi}{2})$ width=35
++q2 q3
++q0 q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q2 q3
+q0 G $R_y(\theta_{39})$ q1 q2 q3 width=32
++q0 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q0 q1 q2 q3
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{40})$ q2 width=32
+q3 G $R_y(\theta_{41})$ q2 width=32
+q3 G $R_z(\theta_{42})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{43})$ q2 width=32
+q3 G $R_y(\theta_{44})$ q2 width=32
+q3 G $R_z(\theta_{45})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{46})$ q2 width=32
+q3 G $R_y(\theta_{47})$ q2 width=32
+q3 G $R_z(\theta_{48})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $R_z(\theta_{49})$ q2 q1 q0 width=32
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $R_z(\theta_{50})$ q2 q1 q0 width=32
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $GP(\theta_{51})$ q2 q1 q0 width=36
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $GP(\theta_{52})$ q2 q1 q0 width=36
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q1 q0
+q3 G $GP(\theta_{53})$ q2 q1 q0 width=36
++q3 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q3 q2 q1 q0
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{54})$ q2 width=32
+q3 G $R_y(\theta_{55})$ q2 width=32
+q3 G $R_z(\theta_{56})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{57})$ q2 width=32
+q3 G $R_y(\theta_{58})$ q2 width=32
+q3 G $R_z(\theta_{59})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{60})$ q2 width=32
+q3 G $R_y(\theta_{61})$ q2 width=32
+q3 G $R_z(\theta_{62})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q2 q3
+q3 G $R_y(\frac{\pi}{2})$ width=28
++q0 q1 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q1 q2 q3
+q0 G $R_y(\theta_{63})$ q1 q2 q3 width=32
++q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q1 q2 q3
+q3 G $R_y(-\frac{\pi}{2})$ width=35
++q2 q3
++q0 q1 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q1 q2 q3
+q0 G $R_y(\theta_{64})$ q1 q2 q3 width=32
++q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q1 q2 q3
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{65})$ q2 width=32
+q3 G $R_y(\theta_{66})$ q2 width=32
+q3 G $R_z(\theta_{67})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{68})$ q2 width=32
+q3 G $R_y(\theta_{69})$ q2 width=32
+q3 G $R_z(\theta_{70})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{71})$ q2 width=32
+q3 G $R_y(\theta_{72})$ q2 width=32
+q3 G $R_z(\theta_{73})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
+q1 G $X$
+q0 G $X$
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $R_z(\theta_{74})$ q2 q1 q0 width=32
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
+q0 G $X$
+q1 G $X$
+q1 G $X$
+q0 G $X$
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $R_z(\theta_{75})$ q2 q1 q0 width=32
++q2 q1 q0
++q2 q1 q0 q3
+q0 G $X$
+q1 G $X$
+q1 G $X$
+q0 G $X$
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $GP(\theta_{76})$ q2 q1 q0 width=36
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
+q0 G $X$
+q1 G $X$
+q1 G $X$
+q0 G $X$
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $GP(\theta_{77})$ q2 q1 q0 width=36
++q2 q1 q0
++q2 q1 q0 q3
+q0 G $X$
+q1 G $X$
+q1 G $X$
+q0 G $X$
++q3 q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q1 q0
+q3 G $GP(\theta_{78})$ q2 q1 q0 width=36
++q3 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q3 q2 q1 q0
+q0 G $X$
+q1 G $X$
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{79})$ q2 width=32
+q3 G $R_y(\theta_{80})$ q2 width=32
+q3 G $R_z(\theta_{81})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{82})$ q2 width=32
+q3 G $R_y(\theta_{83})$ q2 width=32
+q3 G $R_z(\theta_{84})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{85})$ q2 width=32
+q3 G $R_y(\theta_{86})$ q2 width=32
+q3 G $R_z(\theta_{87})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q2 q3
+q3 G $R_y(\frac{\pi}{2})$ width=28
++q0 q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q2 q3
+q0 G $R_y(\theta_{88})$ q1 q2 q3 width=32
++q0 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q0 q1 q2 q3
+q3 G $R_y(-\frac{\pi}{2})$ width=35
++q2 q3
++q0 q1 q2 q3
+q1 G $R_y(\frac{\pi}{2})$ q0 q2 q3 width=28
++q0 q2 q3
+q0 G $R_y(\theta_{89})$ q1 q2 q3 width=32
++q0 q2 q3
+q1 G $R_y(-\frac{\pi}{2})$ q0 q2 q3 width=35
++q0 q1 q2 q3
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{90})$ q2 width=32
+q3 G $R_y(\theta_{91})$ q2 width=32
+q3 G $R_z(\theta_{92})$ q2 width=32
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{93})$ q2 width=32
+q3 G $R_y(\theta_{94})$ q2 width=32
+q3 G $R_z(\theta_{95})$ q2 width=32
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{96})$ q2 width=32
+q3 G $R_y(\theta_{97})$ q2 width=32
+q3 G $R_z(\theta_{98})$ q2 width=32
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $R_z(\theta_{99})$ q2 q1 q0 width=32
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $R_z(\theta_{100})$ q2 q1 q0 width=36
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q2 q1 q0
+q3 G $GP(\theta_{101})$ q2 q1 q0 width=40
++q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q2 q1 q0
++q2 q1 q0 q3
++q2 q1 q0
+q3 G $GP(\theta_{102})$ q2 q1 q0 width=40
++q2 q1 q0
++q2 q1 q0 q3
++q3 q2 q1 q0
+q2 G $R_y(\frac{\pi}{2})$ q3 q1 q0 width=28
++q3 q1 q0
+q3 G $GP(\theta_{103})$ q2 q1 q0 width=40
++q3 q1 q0
+q2 G $R_y(-\frac{\pi}{2})$ q3 q1 q0 width=35
++q3 q2 q1 q0
++q3 q2
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
+q2 G $X$
+q3 G $R_z(\theta_{104})$ q2 width=36
+q3 G $R_y(\theta_{105})$ q2 width=36
+q3 G $R_z(\theta_{106})$ q2 width=36
+q2 G $X$
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
++q3 q2
++q2 q3
+q2 G $X$
+q3 G $R_z(\theta_{107})$ q2 width=36
+q3 G $R_y(\theta_{108})$ q2 width=36
+q3 G $R_z(\theta_{109})$ q2 width=36
+q2 G $X$
++q2 q3
++q3 q2
+q2 G $R_y(\frac{\pi}{2})$ q3 width=28
+q3 G $X$
+q3 G $R_z(\theta_{110})$ q2 width=36
+q3 G $R_y(\theta_{111})$ q2 width=36
+q3 G $R_z(\theta_{112})$ q2 width=36
+q3 G $X$
+q2 G $R_y(-\frac{\pi}{2})$ q3 width=35
++q3 q2
+q2 LABEL width=0

@@ -1,4 +1,4 @@
-GATESIZE 14
+GATESIZE 10
 DEPTHPAD 2
 WIREPAD 0
 
@@ -7,10 +7,10 @@ q1 W
 q2 W
 q3 W
 
-q0 +q1
-q0 G $R_y(\frac{\pi}{2})$ width=28
++q1 q0:size=2.5
+q0 G:height=12 $R_y(\frac{\pi}{2})$ width=28
 
-q2 q3 G:width=32 $V_\mathrm{enc}^{ij}(\boldsymbol{\theta})$ q0 q1
+q2 q3 G:width=32 $V_\mathrm{enc}^{ij}(\boldsymbol{\theta})$ q0:size=2.5 q1:size=2.5
 
-q0 G $R_y(-\frac{\pi}{2})$ width=35
-q0 +q1
+q0 G:height=12 $R_y(-\frac{\pi}{2})$ width=35
++q1 q0:size=2.5

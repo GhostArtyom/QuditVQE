@@ -1,4 +1,4 @@
-GATESIZE 14
+GATESIZE 10
 WIREPAD 0
 
 q0 W
@@ -6,4 +6,4 @@ q1 W
 q2 W
 q3 W
 
-q2 q3 G:width=32  $V_\mathrm{enc}^{ij}(\boldsymbol{\theta})$ q0 P:size=3.5 {} q1 P:size=3.5 {}
+q2 q3 G:width=32  $V_\mathrm{enc}^{ij}(\boldsymbol{\theta})$ q0 P:size=3 {} q1 P:size=3 {}

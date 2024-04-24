@@ -374,12 +374,22 @@ def controlled_rotation_synthesis(d: int, ind: List[int], name: str, obj: int, c
 def controlled_diagonal_synthesis(d: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
     if d != 3:
         raise ValueError('Only works when d = 3')
-    circ = Circuit()
-    circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RZ01', obj, ctrl, state)
-    circ += controlled_rotation_synthesis(d, [0, 2], f'{name}RZ02', obj, ctrl, state)
-    circ += controlled_rotation_synthesis(d, [0, 1], f'{name}GP', obj, ctrl, state)
-    circ += controlled_rotation_synthesis(d, [0, 2], f'{name}GP', obj, ctrl, state)
-    circ += controlled_rotation_synthesis(d, [1, 2], f'{name}GP', obj, ctrl, state)
+    if state == 0:
+        corr = Circuit() + X(ctrl[1]) + X(ctrl[2])
+    elif state == 1:
+        corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2])
+    elif state == 2:
+        corr = Circuit()
+    ind01 = Circuit() + X(obj, ctrl) + RY(-np.pi / 2).on(ctrl[0], [obj] + ctrl[1:]) + X(ctrl[0], ctrl[1:])
+    ind02 = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+    ind12 = Circuit() + X(obj, ctrl) + RY(np.pi / 2).on(ctrl[0], [obj] + ctrl[1:]) + X(obj, ctrl[1:])
+    circ = Circuit() + corr
+    circ = circ + ind01 + RZ(f'{name}RZ01').on(obj, ctrl) + ind01.hermitian()
+    circ = circ + ind02 + RZ(f'{name}RZ02').on(obj, ctrl) + ind02.hermitian()
+    circ = circ + ind01 + GlobalPhase(f'{name}GP').on(obj, ctrl) + ind01.hermitian()
+    circ = circ + ind02 + GlobalPhase(f'{name}GP').on(obj, ctrl) + ind02.hermitian()
+    circ = circ + ind12 + GlobalPhase(f'{name}GP').on(obj, ctrl) + ind12.hermitian()
+    circ += corr.hermitian()
     return circ
 
 

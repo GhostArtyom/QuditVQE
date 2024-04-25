@@ -3,10 +3,14 @@ DEPTHPAD 2
 WIREPAD 6
 q0 W
 q1 W
+q0 LABEL width=0
 q1 G $U(\boldsymbol{\alpha})$ width=25 q0 P:width=8 \FontSize{6}$m$
+q0 LABEL width=0
 =
-q1 G $V(\boldsymbol{\alpha_1})$ width=28
+q1 G $V(\boldsymbol{\alpha_1})$ width=30
 q1 G:width=32 $R_z^{01}\!(\alpha_1)$ q0 P:size=8 \FontSize{6}$m$
 q1 G:width=32 $R_z^{02}\!(\alpha_2)$ q0 P:size=8 \FontSize{6}$m$
 q0 G:width=32 $P_m(\alpha_3)$
 q1 G $V(\boldsymbol{\alpha_1})^\dag\!$ width=32
+q0 LABEL width=0
+q1 LABEL width=0

@@ -386,7 +386,7 @@ def controlled_diagonal_synthesis(d: int, name: str, obj: int, ctrl: List[int], 
     circ = Circuit() + corr
     circ = circ + ind01 + RZ(f'{name}RZ01').on(obj, ctrl) + ind01.hermitian()
     circ = circ + ind02 + RZ(f'{name}RZ02').on(obj, ctrl) + ind02.hermitian()
-    circ += PhaseShift(name).on(ctrl[2], ctrl[1])
+    circ += PhaseShift(name).on(ctrl[1], ctrl[2])
     circ += corr.hermitian()
     return circ
 

@@ -60,7 +60,7 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
             raise StopIteration
 
     layers = 2  # number of layers
-    sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+    sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
     path = f'./data_322/{sub}'  # path of subfolder
     log = f'./data_322/Logs/num1~5_violation_D5~9_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)

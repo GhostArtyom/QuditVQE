@@ -11,7 +11,7 @@ def module(name: str):
         print(i, sum(fidelity_dict.values()), fidelity_dict)
 
     for num in range(1, 6):
-        sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+        sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
         path = f'./data_322/{sub}'  # path of subfolder
         print(f'{path}/fidelity_num{num}_{name}.mat')
         # savemat(f'{path}/fidelity_num{num}_{name}.mat', fidelity[f'num{num}'])

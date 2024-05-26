@@ -61,7 +61,7 @@ def running(num: int, repetitions: int):
             raise StopIteration
 
     path = f'./data_322/classical'
-    sub = [i for i in os.listdir(path) if f'num{num}' in i][0]
+    sub = [i for i in sorted(os.listdir(path)) if f'num{num}' in i][0]
     model = re.search('model\d+', sub).group(0)
     name = f'{path}/322_classical_d3_num{num}_{model}_D1_target_state_vector.mat'
 

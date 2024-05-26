@@ -55,7 +55,7 @@ fidelity = {
     ]
 }
 for num in range(1, 6):
-    sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+    sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
     path = f'./data_322/{sub}'  # path of subfolder
     # print(num, fidelity[f'num{num}'])
     # savemat(f'{path}/fidelity_num{num}_D9_L2.mat', {'fidelity': fidelity[f'num{num}']})
@@ -114,7 +114,7 @@ fidelity = {
     ]
 }
 for num in range(1, 6):
-    sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+    sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
     path = f'./data_322/{sub}'  # path of subfolder
     # print(num, fidelity[f'num{num}'])
     # savemat(f'{path}/fidelity_num{num}_D5_L2.mat', {'fidelity': fidelity[f'num{num}']})

@@ -59,7 +59,7 @@ def running(num: int, D: int, layers: int, repetitions: int, vec_end: int):
         if loss < tol:
             raise StopIteration
 
-    sub = [i for i in os.listdir('./data_322') if f'num{num}' in i][0]
+    sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
     path = f'./data_322/{sub}'  # path of subfolder
     log = f'./data_322/Logs/test_segmentation_fault.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)

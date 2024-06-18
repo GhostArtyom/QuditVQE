@@ -597,7 +597,7 @@ def is_symmetric(mat: np.ndarray, n_qubits: int = 1) -> bool:
     return is_sym
 
 
-def su2_decoding(qubit: np.ndarray, n_qubits: int = 1) -> np.ndarray:
+def symmetric_decoding(qubit: np.ndarray, n_qubits: int = 1) -> np.ndarray:
     if qubit.ndim == 2 and (qubit.shape[0] == 1 or qubit.shape[1] == 1):
         qubit = qubit.flatten()
     if qubit.ndim == 2 and qubit.shape[0] != qubit.shape[1]:
@@ -637,7 +637,7 @@ def su2_decoding(qubit: np.ndarray, n_qubits: int = 1) -> np.ndarray:
     return qudit
 
 
-def su2_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = False) -> np.ndarray:
+def symmetric_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = False) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:

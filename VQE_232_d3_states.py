@@ -88,7 +88,7 @@ info(f'Number of qubits: {nq}')
 info(f'Number of params: {p_num}')
 info(f'Number of gates: {g_num}')
 
-psi = su2_encoding(state, k + 1, is_csr=True)  # encode qutrit state to qubit
+psi = symmetric_encoding(state, k + 1, is_csr=True)  # encode qutrit state to qubit
 rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
 Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 info(f'Hamiltonian Dimension: {rho.shape}')
@@ -121,7 +121,7 @@ sim.reset()  # reset simulator to zero state
 pr_res = dict(zip(p_name, res.x))  # optimal result parameters
 sim.apply_circuit(ansatz.apply_value(pr_res))  # apply result params to circuit
 psi_res = sim.get_qs()  # get result pure state
-psi_res = su2_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
+psi_res = symmetric_decoding(psi_res, k + 1)  # decode qubit result state to qutrit
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 info(f'state & psi_res norm L2:  {norm(state - psi_res, 2):.20f}')

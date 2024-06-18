@@ -11,7 +11,7 @@ from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator.utils import GradOpsWrapper
 from mindquantum.simulator import Simulator, get_supported_simulator
-from utils import circuit_depth, su2_encoding, qutrit_symmetric_ansatz
+from utils import circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
 def running(num: int, D: List[int], vec: List[int], repetitions: int):
@@ -111,7 +111,7 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
         eval_dict[vec_str] = []
         fidelity_dict[vec_str] = []
         for i in range(1, repetitions + 1):
-            psi = su2_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
+            psi = symmetric_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
             rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
             Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 

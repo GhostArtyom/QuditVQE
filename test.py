@@ -24,7 +24,7 @@ from scipy.sparse import csc_matrix, csr_matrix
 
 np.set_printoptions(linewidth=1000)
 
-# su2_encoding
+# symmetric_encoding
 d, m = 3, 2
 # a = np.arange(d) + 1
 # a = np.arange(d**2).reshape(d, d) + 1
@@ -32,13 +32,13 @@ d, m = 3, 2
 a = np.random.rand(d, d) + 1j * np.random.rand(d, d)
 for i in range(m):
     qudit = a if i == 0 else np.kron(qudit, a)
-qubit = su2_encoding(qudit, m)
+qubit = symmetric_encoding(qudit, m)
 # print(qudit, qudit.shape)
 # print(qubit, qubit.shape)
 print(qudit.shape, qubit.shape)
 print(is_symmetric(qubit, m))
-# su2_decoding
-decode = su2_decoding(qubit, m)
+# symmetric_decoding
+decode = symmetric_decoding(qubit, m)
 print(np.allclose(qudit, decode))
 
 # partial_trace

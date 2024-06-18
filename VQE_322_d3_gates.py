@@ -74,12 +74,12 @@ g.close()
 circ = Circuit()
 ansatz = Circuit()
 nq = (k + 1) * (d - 1)
-Id = su2_encoding(np.eye(d**2), 2)
+Id = symmetric_encoding(np.eye(d**2), 2)
 p = np.eye(Id.shape[0]) - Id
 for i in range(len(g_name)):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
-        mat = su2_encoding(gates[i][j], 2) + p
+        mat = symmetric_encoding(gates[i][j], 2) + p
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         circ += UnivMathGate(name, mat).on(obj)
 
@@ -87,7 +87,7 @@ layers = int(input('Number of layers: '))
 for i in range(layers):
     for j in range(k):
         name = f'G{j + 1}_L{i + 1}'
-        mat = su2_encoding(gates[i][j], 2) + p
+        mat = symmetric_encoding(gates[i][j], 2) + p
         obj = list(range(nq - (d - 1) * (j + 2), nq - (d - 1) * j))
         gate_u = UnivMathGate(name, mat).on(obj)
         ansatz += qutrit_symmetric_ansatz(gate_u)
@@ -107,7 +107,7 @@ rho = csc.T.dot(csc.conj())
 Ham = Hamiltonian(rho)
 print('Hamiltonian Dimension:', rho.shape)
 
-psi = su2_decoding(psi, k + 1)
+psi = symmetric_decoding(psi, k + 1)
 rho_rdm = reduced_density_matrix(psi, d, position)
 print('rdm3 & rho norm L2:  %.20f' % norm(rdm3 - rho_rdm, 2))
 print('rdm3 & rho fidelity: %.20f' % fidelity(rdm3, rho_rdm))
@@ -134,7 +134,7 @@ sim.reset()
 pr_res = dict(zip(p_name, res.x))
 sim.apply_circuit(ansatz.apply_value(pr_res))
 psi_res = sim.get_qs()
-psi_res = su2_decoding(psi_res, k + 1)
+psi_res = symmetric_decoding(psi_res, k + 1)
 rho_res_rdm = reduced_density_matrix(psi_res, d, position)
 
 print('psi & psi_res norm L2:  %.20f' % norm(psi - psi_res, 2))

@@ -39,8 +39,8 @@ def is_power_of_two(num: int) -> bool:
 
 def is_unitary(mat: np.ndarray) -> bool:
     if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
-        d = mat.shape[0]
-        return np.allclose(np.eye(d), mat @ mat.conj().T)
+        dim = mat.shape[0]
+        return np.allclose(np.eye(dim), mat @ mat.conj().T)
     else:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
@@ -291,17 +291,17 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
-def two_level_unitary_synthesis(d: int, basis: str, ind: List[int], pr_str: List[str], obj: List[int]) -> Circuit:
-    if d != 3:
-        raise ValueError('Only works when d = 3')
+def two_level_unitary_synthesis(dim: int, basis: str, ind: List[int], pr_str: List[str], obj: List[int]) -> Circuit:
+    if dim != 3:
+        raise ValueError('Only works when dim = 3')
     if len(ind) != 2:
         raise ValueError(f'The qudit unitary index length {len(ind)} should be 2.')
     if len(set(ind)) != len(ind):
         raise ValueError(f'The qudit unitary index {ind} cannot be repeated')
-    if min(ind) < 0 or max(ind) >= d:
-        raise ValueError(f'The qudit unitary index {ind} should in 0 to {d-1}.')
-    if len(pr_str) != d:
-        raise ValueError(f'The qudit unitary params length {len(pr_str)} should be {d}.')
+    if min(ind) < 0 or max(ind) >= dim:
+        raise ValueError(f'The qudit unitary index {ind} should in 0 to {dim-1}.')
+    if len(pr_str) != dim:
+        raise ValueError(f'The qudit unitary params length {len(pr_str)} should be {dim}.')
     if ind == [0, 1]:
         corr = Circuit() + X(obj[0], obj[1]) + RY(-np.pi / 2).on(obj[1], obj[0]) + X(obj[1])
     elif ind == [0, 2]:
@@ -322,29 +322,29 @@ def two_level_unitary_synthesis(d: int, basis: str, ind: List[int], pr_str: List
     return circ
 
 
-def single_qudit_unitary_synthesis(d: int, basis: str, name: str, obj: List[int]) -> Circuit:
-    if d != 3:
-        raise ValueError('Only works when d = 3')
+def single_qudit_unitary_synthesis(dim: int, basis: str, name: str, obj: List[int]) -> Circuit:
+    if dim != 3:
+        raise ValueError('Only works when dim = 3')
     circ = Circuit()
     index = [[0, 1], [0, 2], [1, 2]]
     if basis == 'zyz':
         for i, ind in enumerate(index):
             pr_ind = f'{"".join(str(i) for i in ind)}_{i}'
             pr_str = [f'{name}RZ{pr_ind}', f'{name}RY{pr_ind}', f'{name}Rz{pr_ind}']
-            circ += two_level_unitary_synthesis(d, basis, ind, pr_str, obj)
+            circ += two_level_unitary_synthesis(dim, basis, ind, pr_str, obj)
     elif basis == 'u3':
         for i, ind in enumerate(index):
             pr_ind = f'{"".join(str(i) for i in ind)}_{i}'
             pr_str = [f'{name}𝜃{pr_ind}', f'{name}𝜑{pr_ind}', f'{name}𝜆{pr_ind}']
-            circ += two_level_unitary_synthesis(d, basis, ind, pr_str, obj)
+            circ += two_level_unitary_synthesis(dim, basis, ind, pr_str, obj)
     else:
         raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}.')
     return circ
 
 
-def controlled_rotation_synthesis(d: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
-    if d != 3:
-        raise ValueError('Only works when d = 3')
+def controlled_rotation_synthesis(dim: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+    if dim != 3:
+        raise ValueError('Only works when dim = 3')
     if state == 0:
         corr = Circuit() + X(ctrl[1]) + X(ctrl[2])
     elif state == 1:
@@ -372,9 +372,9 @@ def controlled_rotation_synthesis(d: int, ind: List[int], name: str, obj: int, c
     return circ
 
 
-def controlled_diagonal_synthesis(d: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
-    if d != 3:
-        raise ValueError('Only works when d = 3')
+def controlled_diagonal_synthesis(dim: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+    if dim != 3:
+        raise ValueError('Only works when dim = 3')
     if state == 0:
         corr = Circuit() + X(ctrl[1]) + X(ctrl[2])
     elif state == 1:
@@ -393,7 +393,7 @@ def controlled_diagonal_synthesis(d: int, name: str, obj: int, ctrl: List[int], 
 
 
 def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False) -> Circuit:
-    d = 3
+    dim = 3
     basis = basis.lower()
     if basis not in opt_basis:
         raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}')
@@ -403,31 +403,30 @@ def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: 
     obj = gate.obj_qubits
     name = f'{gate.name}_'
     if len(obj) == 2:
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}', obj)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}', obj)
     elif len(obj) == 4:
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U1_', obj[:2])
-        circ += controlled_diagonal_synthesis(d, f'{name}CD1_', obj[0], obj[1:], 1)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U2_', obj[:2])
-        circ += controlled_diagonal_synthesis(d, f'{name}CD2_', obj[0], obj[1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U3_', obj[:2])
-        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY1_1', obj[-1], obj[::-1][1:], 1)
-        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY1_2', obj[-1], obj[::-1][1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U4_', obj[:2])
-        circ += controlled_diagonal_synthesis(d, f'{name}CD3_', obj[0], obj[1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U5_', obj[:2])
-        circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RY2_1', obj[-1], obj[::-1][1:], 1)
-        circ += controlled_rotation_synthesis(d, [0, 1], f'{name}RY2_2', obj[-1], obj[::-1][1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U6_', obj[:2])
-        circ += controlled_diagonal_synthesis(d, f'{name}CD4_', obj[0], obj[1:], 0)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U7_', obj[:2])
-        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY3_1', obj[-1], obj[::-1][1:], 1)
-        circ += controlled_rotation_synthesis(d, [1, 2], f'{name}RY3_2', obj[-1], obj[::-1][1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U8_', obj[:2])
-        circ += controlled_diagonal_synthesis(d, f'{name}CD5_', obj[0], obj[1:], 2)
-        circ += single_qudit_unitary_synthesis(d, basis, f'{name}U9_', obj[:2])
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U1_', obj[:2])
+        circ += controlled_diagonal_synthesis(dim, f'{name}CD1_', obj[0], obj[1:], 1)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U2_', obj[:2])
+        circ += controlled_diagonal_synthesis(dim, f'{name}CD2_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U3_', obj[:2])
+        circ += controlled_rotation_synthesis(dim, [1, 2], f'{name}RY1_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(dim, [1, 2], f'{name}RY1_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U4_', obj[:2])
+        circ += controlled_diagonal_synthesis(dim, f'{name}CD3_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U5_', obj[:2])
+        circ += controlled_rotation_synthesis(dim, [0, 1], f'{name}RY2_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(dim, [0, 1], f'{name}RY2_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U6_', obj[:2])
+        circ += controlled_diagonal_synthesis(dim, f'{name}CD4_', obj[0], obj[1:], 0)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U7_', obj[:2])
+        circ += controlled_rotation_synthesis(dim, [1, 2], f'{name}RY3_1', obj[-1], obj[::-1][1:], 1)
+        circ += controlled_rotation_synthesis(dim, [1, 2], f'{name}RY3_2', obj[-1], obj[::-1][1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U8_', obj[:2])
+        circ += controlled_diagonal_synthesis(dim, f'{name}CD5_', obj[0], obj[1:], 2)
+        circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U9_', obj[:2])
     else:
-        raise ValueError(
-            'Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
+        raise ValueError('Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
     if with_phase:
         for i in obj:
             circ += GlobalPhase(f'{name}phase').on(i)
@@ -444,35 +443,35 @@ def circuit_depth(circ: Circuit) -> int:
     return max(depth)
 
 
-def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
+def partial_trace(rho: np.ndarray, dim: int, ind: int) -> np.ndarray:
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
     if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong state shape {rho.shape}')
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
-    if not isinstance(d, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {d} {type(d)}')
+    if not isinstance(dim, (int, np.int64)):
+        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
     if not isinstance(ind, (int, np.int64)):
         raise ValueError(f'Wrong index type {ind} {type(ind)}')
     n = rho.shape[0]
-    m = n // d
-    if n == d and rho.ndim == 1:
+    m = n // dim
+    if n == dim and rho.ndim == 1:
         return rho.conj() @ rho
-    elif n == d and rho.ndim == 2:
+    elif n == dim and rho.ndim == 2:
         return np.trace(rho)
-    nq = round(log(m, d), 12)
+    nq = round(log(m, dim), 12)
     if nq % 1 != 0:
-        raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
+        raise ValueError(f'Wrong matrix size {n} is not a power of {dim}')
     nq = int(nq)
     if ind < 0 or ind > nq:
         raise ValueError(f'Wrong index {ind} is not in 0 to {nq}')
     pt = csr_matrix((m, m), dtype=CDTYPE)
-    for k in range(d):
+    for k in range(dim):
         i_ = np.zeros(m, dtype=np.int64)
         for i in range(m):
-            ii = np.base_repr(i, d).zfill(nq)
-            i_[i] = int(ii[:ind] + str(k) + ii[ind:], d)
+            ii = np.base_repr(i, dim).zfill(nq)
+            i_[i] = int(ii[:ind] + str(k) + ii[ind:], dim)
         psi = csr_matrix((np.ones(m), (np.arange(m), i_)), shape=(m, n))
         if rho.ndim == 1:
             temp = psi.dot(csr_matrix(rho).T)
@@ -482,38 +481,38 @@ def partial_trace(rho: np.ndarray, d: int, ind: int) -> np.ndarray:
     return pt.toarray()
 
 
-def reduced_density_matrix(rho: np.ndarray, d: int, position: List[int]) -> np.ndarray:
+def reduced_density_matrix(rho: np.ndarray, dim: int, position: List[int]) -> np.ndarray:
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
     if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
         raise ValueError(f'Wrong state shape {rho.shape}')
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
-    if not isinstance(d, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {d} {type(d)}')
+    if not isinstance(dim, (int, np.int64)):
+        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
     if isinstance(position, (int, np.int64)):
         position = [position]
     n = rho.shape[0]
-    nq = round(log(n, d), 12)
+    nq = round(log(n, dim), 12)
     if nq % 1 != 0:
-        raise ValueError(f'Wrong matrix size {n} is not a power of {d}')
+        raise ValueError(f'Wrong matrix size {n} is not a power of {dim}')
     nq = int(nq)
     p = [x for x in range(nq) if x not in position]
     for ind in p[::-1]:
-        rho = partial_trace(rho, d, ind)
+        rho = partial_trace(rho, dim, ind)
     return rho
 
 
 def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
     state = {'rho': rho, 'sigma': sigma}
-    for i, mat in state.items():
+    for key, mat in state.items():
         if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
             mat = mat.flatten()
-            state[i] = mat
+            state[key] = mat
         if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
-            raise ValueError(f'Wrong {i} shape {mat.shape}')
+            raise ValueError(f'Wrong {key} shape {mat.shape}')
         if mat.ndim != 1 and mat.ndim != 2:
-            raise ValueError(f'Wrong {i} shape {mat.shape}')
+            raise ValueError(f'Wrong {key} shape {mat.shape}')
     rho, sigma = state.values()
     if rho.shape[0] != sigma.shape[0]:
         raise ValueError(f'Mismatch state shape: rho {rho.shape}, sigma {sigma.shape}')
@@ -533,14 +532,14 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
         raise ValueError(f'Wrong state ndim: rho {rho.ndim}, sigma {sigma.ndim}')
 
 
-def sym_ind(d: int, m: int) -> dict:
-    if not isinstance(d, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {d} {type(d)}')
-    if not isinstance(m, (int, np.int64)):
-        raise ValueError(f'Wrong multi type {m} {type(m)}')
-    if m == 1:
+def symmetric_index(dim: int, n_qudits: int) -> dict:
+    if not isinstance(dim, (int, np.int64)):
+        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
+    if not isinstance(n_qudits, (int, np.int64)):
+        raise ValueError(f'Wrong multi type {n_qudits} {type(n_qudits)}')
+    if n_qudits == 1:
         ind = {}
-        for i in range(2**(d - 1)):
+        for i in range(2**(dim - 1)):
             num1 = bin(i).count('1')
             if num1 in ind:
                 ind[num1].append(i)
@@ -548,23 +547,23 @@ def sym_ind(d: int, m: int) -> dict:
                 ind[num1] = [i]
     else:
         ind, ind_ = {}, {}
-        for i in range(2**(d - 1)):
+        for i in range(2**(dim - 1)):
             num1 = bin(i).count('1')
-            i_ = bin(i)[2::].zfill(d - 1)
+            i_ = bin(i)[2::].zfill(dim - 1)
             if num1 in ind_:
                 ind_[num1].append(i_)
             else:
                 ind_[num1] = [i_]
-        for i in range(d**m):
+        for i in range(dim**n_qudits):
             multi = ['']
-            base = np.base_repr(i, d).zfill(m)
-            for j in range(m):
+            base = np.base_repr(i, dim).zfill(n_qudits)
+            for j in range(n_qudits):
                 multi = [x + y for x in multi for y in ind_[int(base[j])]]
             ind[i] = [int(x, 2) for x in multi]
     return ind
 
 
-def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
+def is_symmetric(mat: np.ndarray, n_qubits: int = 1) -> bool:
     if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
         mat = mat.flatten()
     if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
@@ -576,21 +575,21 @@ def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
     if not is_power_of_two(n):
         raise ValueError(f'Wrong matrix size {n} is not a power of 2')
     nq = int(np.log2(n))
-    d = nq // m + 1
-    if nq % m == 0 and nq != m:
-        ind = sym_ind(d, m)
+    dim = nq // n_qubits + 1
+    if nq % n_qubits == 0 and nq != n_qubits:
+        ind = symmetric_index(dim, n_qubits)
     else:
-        raise ValueError(f'Wrong matrix shape {mat.shape} or multi {m}')
+        raise ValueError(f'Wrong matrix shape {mat.shape} or multi {n_qubits}')
     if mat.ndim == 1:
-        for i in range(d**m):
+        for i in range(dim**n_qubits):
             i_ = ind[i]
             if len(i_) != 1:
                 a = mat[i_]
                 is_sym = is_sym & np.allclose(a, a[0])
     elif mat.ndim == 2:
-        for i in range(d**m):
+        for i in range(dim**n_qubits):
             i_ = ind[i]
-            for j in range(d**m):
+            for j in range(dim**n_qubits):
                 j_ = ind[j]
                 if len(i_) != 1 or len(j_) != 1:
                     a = mat[np.ix_(i_, j_)]
@@ -598,63 +597,63 @@ def is_symmetric(mat: np.ndarray, m: int = 1) -> bool:
     return is_sym
 
 
-def su2_decoding(qubit: np.ndarray, m: int = 1) -> np.ndarray:
+def su2_decoding(qubit: np.ndarray, n_qubits: int = 1) -> np.ndarray:
     if qubit.ndim == 2 and (qubit.shape[0] == 1 or qubit.shape[1] == 1):
         qubit = qubit.flatten()
     if qubit.ndim == 2 and qubit.shape[0] != qubit.shape[1]:
-        raise ValueError(f'Wrong qubit shape {qubit.shape}')
+        raise ValueError(f'Wrong qubit state shape {qubit.shape}')
     if qubit.ndim != 1 and qubit.ndim != 2:
-        raise ValueError(f'Wrong qubit shape {qubit.shape}')
+        raise ValueError(f'Wrong qubit state shape {qubit.shape}')
     n = qubit.shape[0]
     if not is_power_of_two(n):
-        raise ValueError(f'Wrong matrix size {n} is not a power of 2')
+        raise ValueError(f'Wrong qubit state size {n} is not a power of 2')
     nq = int(np.log2(n))
-    d = nq // m + 1
-    if nq % m == 0 and nq != m:
-        ind = sym_ind(d, m)
+    dim = nq // n_qubits + 1
+    if nq % n_qubits == 0 and nq != n_qubits:
+        ind = symmetric_index(dim, n_qubits)
     else:
-        raise ValueError(f'Wrong matrix shape {qubit.shape} or multi {m}')
+        raise ValueError(f'Wrong qubit state shape {qubit.shape} or multi {n_qubits}')
     if qubit.ndim == 1:
-        qudit = np.zeros(d**m, dtype=CDTYPE)
-        for i in range(d**m):
+        qudit = np.zeros(dim**n_qubits, dtype=CDTYPE)
+        for i in range(dim**n_qubits):
             i_ = ind[i]
             qubit_i = qubit[i_]
             if np.allclose(qubit_i, qubit_i[0]):
                 qudit[i] = qubit_i[0] * np.sqrt(len(i_))
             else:
-                raise ValueError('Qubit matrix is not symmetric')
+                raise ValueError('Qubit state is not symmetric')
     elif qubit.ndim == 2:
-        qudit = np.zeros([d**m, d**m], dtype=CDTYPE)
-        for i in range(d**m):
+        qudit = np.zeros([dim**n_qubits, dim**n_qubits], dtype=CDTYPE)
+        for i in range(dim**n_qubits):
             i_ = ind[i]
-            for j in range(d**m):
+            for j in range(dim**n_qubits):
                 j_ = ind[j]
                 qubit_ij = qubit[np.ix_(i_, j_)]
                 if np.allclose(qubit_ij, qubit_ij[0][0]):
                     div = np.sqrt(len(i_)) * np.sqrt(len(j_))
                     qudit[i, j] = qubit_ij[0][0] * div
                 else:
-                    raise ValueError('Qubit matrix is not symmetric')
+                    raise ValueError('Qubit state is not symmetric')
     return qudit
 
 
-def su2_encoding(qudit: np.ndarray, m: int = 1, is_csr: bool = False) -> np.ndarray:
+def su2_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = False) -> np.ndarray:
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:
-        raise ValueError(f'Wrong qudit shape {qudit.shape}')
+        raise ValueError(f'Wrong qudit state shape {qudit.shape}')
     if qudit.ndim != 1 and qudit.ndim != 2:
-        raise ValueError(f'Wrong qudit shape {qudit.shape}')
-    d = round(qudit.shape[0]**(1 / m), 12)
-    if d % 1 == 0:
-        d = int(d)
-        n = 2**((d - 1) * m)
-        ind = sym_ind(d, m)
+        raise ValueError(f'Wrong qudit state shape {qudit.shape}')
+    dim = round(qudit.shape[0]**(1 / n_qudits), 12)
+    if dim % 1 == 0:
+        dim = int(dim)
+        n = 2**((dim - 1) * n_qudits)
+        ind = symmetric_index(dim, n_qudits)
     else:
-        raise ValueError(f'Wrong qudit shape {qudit.shape} or multi {m}')
+        raise ValueError(f'Wrong qudit state shape {qudit.shape} or multi {n_qudits}')
     if qudit.ndim == 1:
         qubit = csr_matrix((n, 1), dtype=CDTYPE)
-        for i in range(d**m):
+        for i in range(dim**n_qudits):
             ind_i = ind[i]
             num_i = len(ind_i)
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
@@ -664,10 +663,10 @@ def su2_encoding(qudit: np.ndarray, m: int = 1, is_csr: bool = False) -> np.ndar
             qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
         qubit = csr_matrix((n, n), dtype=CDTYPE)
-        for i in range(d**m):
+        for i in range(dim**n_qudits):
             ind_i = ind[i]
             num_i = len(ind_i)
-            for j in range(d**m):
+            for j in range(dim**n_qudits):
                 ind_j = ind[j]
                 num_j = len(ind_j)
                 i_ = np.repeat(ind_i, num_j)

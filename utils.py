@@ -107,6 +107,7 @@ def str_special(pr_str: Union[str, int, float]) -> str:
             break
         elif abs(pr_str / v - frac) < 1e-6:
             x, y = frac.numerator, frac.denominator
+            x = '' if x == 1 else x
             pr_str = f'{x}{k}/{y}' if coef > 0 else f'-{x}{k}/{y}'
             break
     if isinstance(pr_str, str):

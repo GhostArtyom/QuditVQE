@@ -115,7 +115,7 @@ def str_special(pr_str: Union[str, int, float]) -> str:
     return str(round(pr_str * coef, 4))
 
 
-def str_ket(dim: int, state: np.ndarray) -> str:
+def str_ket(state: np.ndarray, dim: int = 2) -> str:
     '''Get ket format of the qudit state'''
     if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
         state = state.flatten()

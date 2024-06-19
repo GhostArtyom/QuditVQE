@@ -536,7 +536,7 @@ def symmetric_index(dim: int, n_qudits: int) -> dict:
     if not isinstance(dim, (int, np.int64)):
         raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
     if not isinstance(n_qudits, (int, np.int64)):
-        raise ValueError(f'Wrong multi type {n_qudits} {type(n_qudits)}')
+        raise ValueError(f'Wrong n_qudits type {n_qudits} {type(n_qudits)}')
     if n_qudits == 1:
         ind = {}
         for i in range(2**(dim - 1)):
@@ -579,7 +579,7 @@ def is_symmetric(mat: np.ndarray, n_qubits: int = 1) -> bool:
     if nq % n_qubits == 0 and nq != n_qubits:
         ind = symmetric_index(dim, n_qubits)
     else:
-        raise ValueError(f'Wrong matrix shape {mat.shape} or multi {n_qubits}')
+        raise ValueError(f'Wrong matrix shape {mat.shape} or n_qubits {n_qubits}')
     if mat.ndim == 1:
         for i in range(dim**n_qubits):
             i_ = ind[i]
@@ -612,7 +612,7 @@ def symmetric_decoding(qubit: np.ndarray, n_qubits: int = 1) -> np.ndarray:
     if nq % n_qubits == 0 and nq != n_qubits:
         ind = symmetric_index(dim, n_qubits)
     else:
-        raise ValueError(f'Wrong qubit state shape {qubit.shape} or multi {n_qubits}')
+        raise ValueError(f'Wrong qubit state shape {qubit.shape} or n_qubits {n_qubits}')
     if qubit.ndim == 1:
         qudit = np.zeros(dim**n_qubits, dtype=CDTYPE)
         for i in range(dim**n_qubits):
@@ -650,7 +650,7 @@ def symmetric_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = Fals
         n = 2**((dim - 1) * n_qudits)
         ind = symmetric_index(dim, n_qudits)
     else:
-        raise ValueError(f'Wrong qudit state shape {qudit.shape} or multi {n_qudits}')
+        raise ValueError(f'Wrong qudit state shape {qudit.shape} or n_qudits {n_qudits}')
     if qudit.ndim == 1:
         qubit = csr_matrix((n, 1), dtype=CDTYPE)
         for i in range(dim**n_qudits):

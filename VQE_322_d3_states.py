@@ -3,8 +3,9 @@ import os
 import time
 import numpy as np
 from h5py import File
-from typing import List
+from typing import List, Union
 from scipy.optimize import minimize
+from scipy.io import loadmat, savemat
 from logging import info, INFO, basicConfig
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import UnivMathGate
@@ -14,7 +15,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
-def running(num: int, D: List[int], vec: List[int], repetitions: int):
+def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -32,12 +33,12 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
         if loss_list is not None:
             loss_list.append(loss)
             i = len(loss_list)
-            # if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
-            t = time.perf_counter() - start
-            info(f'num{num} D{D} vec{vec} Loss: {loss:.15f} Fidelity: {1-loss:.15f} {i} {t:.2f}')
+            if i <= 50 and i % 10 == 0 or i > 50 and i % 50 == 0:
+                t = time.perf_counter() - start
+                info(f'num{num} D{D} vec{v} r{r} Loss: {loss:.15f} Fidelity: {1-loss:.15f} {i} {t:.2f}')
         return loss, grad
 
-    def callback(curr_params: np.ndarray, tol: float = 1e-12):
+    def callback(curr_params: np.ndarray, tol: float = 1e-15):
         '''Callback when reach local minima or loss < tol.
         Args:
             curr_params (np.ndarray): current parameters.
@@ -51,10 +52,10 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
         if 0 < loss - minima2 < 2e-3:
             local_minima2.append(loss - minima2)
         if len(local_minima1) >= 30:
-            info(f'D{D}, vec{vec}: reach local minima1, restart optimization')
+            info(f'D{D}, vec{v}: reach local minima1, restart optimization')
             raise StopAsyncIteration
         if len(local_minima2) >= 30:
-            info(f'D{D}, vec{vec}: reach local minima2, restart optimization')
+            info(f'D{D}, vec{v}: reach local minima2, restart optimization')
             raise StopAsyncIteration
         if loss < tol:
             raise StopIteration
@@ -95,7 +96,7 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
     info(f'Depth of circuit: {depth}')
 
     sim_list = set([i[0] for i in get_supported_simulator()])
-    if 'mqvector_gpu' in sim_list and nq > 14:
+    if 'mqvector_gpu' in sim_list and nq >= 14:
         sim = Simulator('mqvector_gpu', nq)
         method = 'BFGS'
         info(f'Simulator: mqvector_gpu, Method: {method}')
@@ -105,13 +106,14 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
         info(f'Simulator: mqvector, Method: {method}')
 
     time_dict, eval_dict, fidelity_dict = {}, {}, {}
-    for vec in range(vec[0], vec[1]):
-        vec_str = f'vec{vec}'
+    vec = range(vec, vec_num + 1) if isinstance(vec, int) else vec
+    for v in vec:
+        vec_str = f'vec{v}'
         time_dict[vec_str] = []
         eval_dict[vec_str] = []
         fidelity_dict[vec_str] = []
-        for i in range(1, repetitions + 1):
-            psi = symmetric_encoding(state[vec], k + 1, is_csr=True)  # encode qutrit state to qubit
+        for r in range(1, repetitions + 1):
+            psi = symmetric_encoding(state[v], k + 1, is_csr=True)  # encode qutrit state to qubit
             rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
             Ham = Hamiltonian(rho)  # set target state as Hamiltonian
 
@@ -121,7 +123,7 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
             while True:
                 try:
                     local_minima1, local_minima2 = [], []
-                    solver_options = {'gtol': 1e-12, 'maxiter': 500}
+                    solver_options = {'gtol': 1e-15, 'maxiter': 500}
                     init_params = np.random.uniform(-np.pi, np.pi, p_num)
                     res = minimize(optimization, init_params, (sim_grad, []), method, \
                                    jac=True, callback=callback, options=solver_options)
@@ -137,14 +139,27 @@ def running(num: int, D: List[int], vec: List[int], repetitions: int):
             eval_dict[vec_str].append(res.nfev)
             fidelity_dict[vec_str].append(fidelity)
 
-            info(res.message)
-            info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {i}')
-            info(f'Time dict: {time_dict}\nEval dict: {eval_dict}\n{fidelity_dict}')
-        print(f'num{num} D={D} vec{vec} finish')
+            sim.reset()
+            pr_res = dict(zip(p_name, res.x))
+            sim.apply_circuit(ansatz.apply_value(pr_res))
+            psi_res = sim.get_qs()
+            D_vec_r = f'D{D}_vec{v}_r{r}'
+            mat_name = f'{path}/fidelity_state_pr_violation_num{num}.mat'
+            save = {f'{D_vec_r}_fidelity': fidelity, f'{D_vec_r}_state': psi_res, f'{D_vec_r}_pr': res.x}
+            try:
+                load = loadmat(mat_name)
+                load.update(save)
+                savemat(mat_name, load)
+            except FileNotFoundError:
+                savemat(mat_name, save)
+
+            info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {r}')
+            info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
+        print(f'num{num} D={D} vec{v} finish')
     info(f'num{num} D={D} finish')
     print(f'num{num} D={D} finish\n{fidelity_dict}')
 
 
 for num in range(1, 6):
     for D in [5, 6, 7, 8, 9]:
-        running(num, D, vec=[40, 41], repetitions=1)
+        running(num, D, vec=40, repetitions=5)

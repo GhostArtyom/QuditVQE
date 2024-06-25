@@ -6,6 +6,7 @@ from typing import List, Union
 from fractions import Fraction
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
+from scipy.io import loadmat, savemat
 from numpy.linalg import det, eigh, norm, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, PhaseShift, UnivMathGate
@@ -15,6 +16,15 @@ CDTYPE = np.complex128
 opt_basis = ['zyz', 'u3']
 A = np.array([[1, 1, -1, 1], [1, 1, 1, -1], [1, -1, -1, -1], [1, -1, 1, 1]])
 M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / np.sqrt(2)
+
+
+def updatemat(name: str, save: dict):
+    if os.path.exists(name):
+        load = loadmat(name)
+        load.update(save)
+        savemat(name, load)
+    else:
+        savemat(name, save)
 
 
 def dict_file(path: str) -> dict:

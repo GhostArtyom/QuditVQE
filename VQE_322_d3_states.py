@@ -12,7 +12,7 @@ from mindquantum.core.gates import UnivMathGate
 from mindquantum.core.operators import Hamiltonian
 from mindquantum.simulator.utils import GradOpsWrapper
 from mindquantum.simulator import Simulator, get_supported_simulator
-from utils import circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
+from utils import updatemat, circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
 def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
@@ -106,7 +106,7 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
         info(f'Simulator: mqvector, Method: {method}')
 
     time_dict, eval_dict, fidelity_dict = {}, {}, {}
-    vec = range(vec, vec_num + 1) if isinstance(vec, int) else vec
+    vec = [vec] if isinstance(vec, int) else vec
     for v in vec:
         vec_str = f'vec{v}'
         time_dict[vec_str] = []
@@ -146,12 +146,7 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
             D_vec_r = f'D{D}_vec{v}_r{r}'
             mat_name = f'{path}/fidelity_state_pr_violation_num{num}.mat'
             save = {f'{D_vec_r}_fidelity': fidelity, f'{D_vec_r}_state': psi_res, f'{D_vec_r}_pr': res.x}
-            try:
-                load = loadmat(mat_name)
-                load.update(save)
-                savemat(mat_name, load)
-            except FileNotFoundError:
-                savemat(mat_name, save)
+            updatemat(mat_name, save)
 
             info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {r}')
             info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
@@ -162,4 +157,4 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
 
 for num in range(1, 6):
     for D in [5, 6, 7, 8, 9]:
-        running(num, D, vec=40, repetitions=5)
+        running(num, D, vec=1, repetitions=5)

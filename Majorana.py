@@ -79,7 +79,7 @@ for num in range(1, 6):
         state = load[f'num{num}_D{D}_vec{vec}'][0]
         nq = num_qudits(state, dim)
         for s in range(nq):
-            site = state_site(state, dim, site)
+            site = state_site(state, dim, s)
             coor = Majorana_representation(site, dim)
             savd_dict[f'num{num}_D{D}_vec{vec}_site{s+1}'] = coor
         t = time.perf_counter() - start

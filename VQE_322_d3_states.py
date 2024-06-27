@@ -151,8 +151,8 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
             info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {r}')
             info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
         print(f'num{num} D={D} vec{v} finish')
-    info(f'num{num} D={D} finish')
-    print(f'num{num} D={D} finish\n{fidelity_dict}')
+    # info(f'num{num} D={D} finish')
+    # print(f'num{num} D={D} finish\n{fidelity_dict}')
 
 
 for num in range(1, 6):

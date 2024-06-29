@@ -15,7 +15,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import updatemat, circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
-def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
+def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int, layers: int = 2):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -52,15 +52,14 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
         if 0 < loss - minima2 < 2e-3:
             local_minima2.append(loss - minima2)
         if len(local_minima1) >= 30:
-            info(f'D{D}, vec{v}: reach local minima1, restart optimization')
+            info(f'num{num} D{D} vec{v} r{r}: reach local minima1, restart optimization')
             raise StopAsyncIteration
         if len(local_minima2) >= 30:
-            info(f'D{D}, vec{v}: reach local minima2, restart optimization')
+            info(f'num{num} D{D} vec{v} r{r}: reach local minima2, restart optimization')
             raise StopAsyncIteration
         if loss < tol:
             raise StopIteration
 
-    layers = 2  # number of layers
     sub = [i for i in sorted(os.listdir('./data_322')) if f'num{num}' in i][0]
     path = f'./data_322/{sub}'  # path of subfolder
     log = f'./data_322/Logs/num1~5_violation_D5~9_L{layers}.log'
@@ -116,10 +115,11 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
             psi = symmetric_encoding(state[v], k + 1, is_csr=True)  # encode qutrit state to qubit
             rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
             Ham = Hamiltonian(rho)  # set target state as Hamiltonian
-
-            start = time.perf_counter()
             sim.reset()  # reset simulator to zero state
             sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
+
+            local_minima_times = 0
+            start = time.perf_counter()
             while True:
                 try:
                     local_minima1, local_minima2 = [], []
@@ -131,30 +131,38 @@ def running(num: int, D: int, vec: Union[int, List[int]], repetitions: int):
                 except StopIteration:
                     break  # reach loss tolerance
                 except StopAsyncIteration:
+                    local_minima_times += 1
+                    info(f'num{num} D{D} vec{v} r{r}: reach local minima {local_minima_times} times')
+                    print(f'num{num} D{D} vec{v} r{r}: reach local minima {local_minima_times} times')
+                    if local_minima_times >= 5:
+                        break  # reach local minima 5 times
                     continue  # reach local minima
-            fidelity = 1 - res.fun
-            end = time.perf_counter()
-            minute = round(((end - start) / 60), 2)
-            time_dict[vec_str].append(minute)
-            eval_dict[vec_str].append(res.nfev)
-            fidelity_dict[vec_str].append(fidelity)
+            try:
+                fidelity = 1 - res.fun
+                end = time.perf_counter()
+                minute = round(((end - start) / 60), 2)
+                time_dict[vec_str].append(minute)
+                eval_dict[vec_str].append(res.nfev)
+                fidelity_dict[vec_str].append(fidelity)
 
-            sim.reset()
-            pr_res = dict(zip(p_name, res.x))
-            sim.apply_circuit(ansatz.apply_value(pr_res))
-            psi_res = sim.get_qs()
-            D_vec_r = f'D{D}_vec{v}_r{r}'
-            mat_name = f'{path}/fidelity_state_pr_violation_num{num}.mat'
-            save = {f'{D_vec_r}_fidelity': fidelity, f'{D_vec_r}_state': psi_res, f'{D_vec_r}_pr': res.x}
-            updatemat(mat_name, save)
+                sim.reset()
+                pr_res = dict(zip(p_name, res.x))
+                sim.apply_circuit(ansatz.apply_value(pr_res))
+                psi_res = sim.get_qs()
+                D_vec_r = f'D{D}_vec{v}_r{r}'
+                mat_name = f'{path}/fidelity_state_pr_num{num}_L{layers}.mat'
+                save = {f'{D_vec_r}_fidelity': fidelity, f'{D_vec_r}_state': psi_res, f'{D_vec_r}_pr': res.x}
+                updatemat(mat_name, save)
 
-            info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {r}')
-            info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
-        print(f'num{num} D={D} vec{v} finish')
-    # info(f'num{num} D={D} finish')
-    # print(f'num{num} D={D} finish\n{fidelity_dict}')
+                info(f'Optimal: {res.fun}, Fidelity: {fidelity:.20f}, Repeat: {r}')
+                info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
+            except UnboundLocalError:
+                pass
+        print(f'num{num} D{D} vec{v} finish')
+    # info(f'num{num} D{D} finish')
+    # print(f'num{num} D{D} finish\n{fidelity_dict}')
 
 
 for num in range(1, 6):
     for D in [5, 6, 7, 8, 9]:
-        running(num, D, vec=1, repetitions=5)
+        running(num, D, vec=[1, 2, 3], repetitions=3, layers=1)

@@ -92,22 +92,34 @@ def Majorana_points(points: List[np.ndarray], dim: int = 2) -> np.ndarray:
 
 
 def angle_to_coor(theta: float, phi: float) -> np.ndarray:
+    if isinstance(theta, (float, DTYPE)):
+        raise ValueError(f'Wrong type of theta {theta} {type(theta)}')
+    if isinstance(phi, (float, DTYPE)):
+        raise ValueError(f'Wrong type of phi {phi} {type(phi)}')
     coor = [np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)]
     return np.array(coor)
 
 
 def angle_to_state(theta: float, phi: float) -> np.ndarray:
+    if isinstance(theta, (float, DTYPE)):
+        raise ValueError(f'Wrong type of theta {theta} {type(theta)}')
+    if isinstance(phi, (float, DTYPE)):
+        raise ValueError(f'Wrong type of phi {phi} {type(phi)}')
     state = [np.cos(theta / 2), np.sin(theta / 2) * np.exp(1j * phi)]
     return np.array(state)
 
 
 def coor_to_angle(coor: np.ndarray) -> Tuple[float]:
+    if coor.shape != (3, ):
+        raise ValueError(f'Wrong coor shape {coor.shape}')
     theta = np.arccos(coor[2])
     phi = np.arctan2(coor[1], coor[0])
     return theta, phi
 
 
 def coor_to_state(coor: np.ndarray) -> np.ndarray:
+    if coor.shape != (3, ):
+        raise ValueError(f'Wrong coor shape {coor.shape}')
     return angle_to_state(*coor_to_angle(coor))
 
 
@@ -123,6 +135,8 @@ def state_to_angle(state: np.ndarray) -> Tuple[float]:
 
 
 def state_to_coor(state: np.ndarray) -> np.ndarray:
+    if state.shape != (2, ):
+        raise ValueError(f'Wrong state shape {state.shape}')
     return angle_to_coor(*state_to_angle(state))
 
 
@@ -131,9 +145,9 @@ if __name__ == '__main__':
     vec = 1
     savd_dict = {}
     start = time.perf_counter()
+    load = loadmat('./data_322/target_state_violation.mat')
     for num in range(1, 6):
         for D in [5, 6, 7, 8, 9]:
-            load = loadmat('./data_322/prepared_state_violation.mat')
             state = load[f'num{num}_D{D}_vec{vec}'][0]
             nq = num_qudits(state, dim)
             for s in range(nq):

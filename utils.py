@@ -19,6 +19,7 @@ M = np.array([[1, 0, 0, 1j], [0, 1j, 1, 0], [0, 1j, -1, 0], [1, 0, 0, -1j]]) / n
 
 
 def updatemat(name: str, save: dict):
+    '''Update the mat file.'''
     if os.path.exists(name):
         load = loadmat(name)
         load.update(save)
@@ -28,6 +29,7 @@ def updatemat(name: str, save: dict):
 
 
 def dict_file(path: str) -> dict:
+    '''Return a dict of the file path.'''
     dict_file = {}
     for root, _, files in os.walk(path):
         i = 1
@@ -39,15 +41,17 @@ def dict_file(path: str) -> dict:
 
 
 def is_power_of_two(num: int) -> bool:
+    '''Check if the number is a power of 2.'''
     if not isinstance(num, (int, np.int64)):
         num = round(num, 12)
         if num % 1 != 0:
-            raise ValueError(f'Wrong number type {num} {type(num)}')
+            raise ValueError(f'Wrong type of number {num} {type(num)}')
         num = int(num)
     return (num & (num - 1) == 0) and num != 0
 
 
 def is_unitary(mat: np.ndarray) -> bool:
+    '''Check if the matrix is ​​unitary.'''
     if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
         dim = mat.shape[0]
         return np.allclose(np.eye(dim), mat @ mat.conj().T)
@@ -56,6 +60,7 @@ def is_unitary(mat: np.ndarray) -> bool:
 
 
 def is_hermitian(mat: np.ndarray) -> bool:
+    '''Check if the matrix is hermitian.'''
     if mat.ndim == 2 and mat.shape[0] == mat.shape[1]:
         return np.allclose(mat, mat.conj().T)
     else:
@@ -63,6 +68,7 @@ def is_hermitian(mat: np.ndarray) -> bool:
 
 
 def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
+    '''Return an approximation of the matrix.'''
     if np.iscomplexobj(mat):
         mat_real = np.real(mat)
         mat_imag = np.imag(mat)
@@ -75,7 +81,7 @@ def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
 
 
 def random_qudit(dim: int, ndim: int = 1) -> np.ndarray:
-    '''Generate random one-qudit state or matrix'''
+    '''Generate a random one-qudit state or matrix.'''
     if ndim == 1:
         qudit = np.random.rand(dim) + 1j * np.random.rand(dim)
     elif ndim == 2:
@@ -87,46 +93,47 @@ def random_qudit(dim: int, ndim: int = 1) -> np.ndarray:
 
 
 def random_qudits(dim: int, n_qudits: int, ndim: int = 1) -> np.ndarray:
-    '''Generate random n-qudit states or matrices'''
+    '''Generate a random n-qudit state or matrix by tensor product.'''
     qudit_list = [random_qudit(dim, ndim) for _ in range(n_qudits)]
     qudits = reduce(np.kron, qudit_list)
     qudits /= norm(qudits)
     return qudits
 
 
-def str_special(pr_str: Union[str, int, float]) -> str:
+def str_special(param: Union[str, int, float]) -> str:
+    '''Return a special string form of the parameter.'''
     special = {'': 1, 'π': np.pi, '√2': np.sqrt(2), '√3': np.sqrt(3), '√5': np.sqrt(5)}
-    if isinstance(pr_str, (int, str)):
-        return str(pr_str)
-    elif pr_str % 1 == 0:
-        return str(int(pr_str))
-    coef = -1 if pr_str < 0 else 1
-    pr_str *= -1 if pr_str < 0 else 1
+    if isinstance(param, (int, str)):
+        return str(param)
+    elif param % 1 == 0:
+        return str(int(param))
+    coeff = -1 if param < 0 else 1
+    param *= -1 if param < 0 else 1
     for k, v in special.items():
-        frac = Fraction(pr_str / v).limit_denominator(100)
-        multi = round(pr_str / v, 4)
-        divisor = round(v / pr_str, 4)
+        frac = Fraction(param / v).limit_denominator(100)
+        multi = round(param / v, 4)
+        divisor = round(v / param, 4)
         if np.isclose(multi % 1, 0):
-            coef *= int(multi)
-            pr_str = k if coef == 1 else f'-{k}' if coef == -1 else f'{coef}{k}'
+            coeff *= int(multi)
+            param = k if coeff == 1 else f'-{k}' if coeff == -1 else f'{coeff}{k}'
             break
         elif np.isclose(divisor % 1, 0):
-            coef *= int(divisor)
+            coeff *= int(divisor)
             k = 1 if v == 1 else k
-            pr_str = f'{k}/{coef}' if coef > 0 else f'-{k}/{-coef}'
+            param = f'{k}/{coeff}' if coeff > 0 else f'-{k}/{-coeff}'
             break
-        elif abs(pr_str / v - frac) < 1e-6:
+        elif abs(param / v - frac) < 1e-6:
             x, y = frac.numerator, frac.denominator
             x = '' if x == 1 else x
-            pr_str = f'{x}{k}/{y}' if coef > 0 else f'-{x}{k}/{y}'
+            param = f'{x}{k}/{y}' if coeff > 0 else f'-{x}{k}/{y}'
             break
-    if isinstance(pr_str, str):
-        return pr_str
-    return str(round(pr_str * coef, 4))
+    if isinstance(param, str):
+        return param
+    return str(round(param * coeff, 4))
 
 
-def str_ket(state: np.ndarray, dim: int = 2) -> str:
-    '''Get ket format of the qudit state'''
+def str_ket(state: np.ndarray, dim: int = 2, tol: float = 1e-8) -> str:
+    '''Return a ket format of the qudit state.'''
     if state.ndim == 2 and (state.shape[0] == 1 or state.shape[1] == 1):
         state = state.flatten()
     if state.ndim != 1:
@@ -135,15 +142,14 @@ def str_ket(state: np.ndarray, dim: int = 2) -> str:
     if nq % 1 != 0:
         raise ValueError(f'Wrong state shape {state.shape} is not a power of {dim}')
     nq = int(nq)
-    tol = 1e-8
     string = []
-    for ind, val in enumerate(state):
+    for ind, value in enumerate(state):
         base = np.base_repr(ind, dim).zfill(nq)
-        real = np.real(val)
-        imag = np.imag(val)
+        real = np.real(value)
+        imag = np.imag(value)
         real_str = str_special(real)
         imag_str = str_special(imag)
-        if np.abs(val) < tol:
+        if np.abs(value) < tol:
             continue
         if np.abs(real) < tol:
             string.append(f'{imag_str}j¦{base}⟩')
@@ -160,6 +166,7 @@ def str_ket(state: np.ndarray, dim: int = 2) -> str:
 
 
 def decompose_zyz(mat: np.ndarray):
+    '''ZYZ decomposition of a one-qubit unitary matrix.'''
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
     cos = np.sqrt(np.real(matU[0, 0] * matU[1, 1]))
@@ -172,12 +179,14 @@ def decompose_zyz(mat: np.ndarray):
 
 
 def decompose_u3(mat: np.ndarray):
+    '''U3 decomposition of a one-qubit unitary matrix.'''
     phase, theta, phi, lam = decompose_zyz(mat)
     phase += (phi + lam) / 2
     return phase, theta, phi, lam
 
 
 def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True):
+    '''Return a one-qubit decomposition circuit.'''
     name_phase = gate.name + '_phase'
     name_theta = gate.name + '_theta'
     name_phi = gate.name + '_phi'
@@ -208,6 +217,7 @@ def one_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
 
 
 def simult_svd(mat1: np.ndarray, mat2: np.ndarray, is_complex: bool = True):
+    '''Simultaneous SVD of two matrices, based on Eckart-Young theorem.'''
     d = mat1.shape[0]
     u_a, d_a, v_a_h = svd(mat1)
     u_a_h = u_a.conj().T
@@ -232,6 +242,7 @@ def simult_svd(mat1: np.ndarray, mat2: np.ndarray, is_complex: bool = True):
 
 
 def kron_factor_4x4_to_2x2s(mat: np.ndarray):
+    '''Split a 4x4 matrix U = kron(A, B) into A, B.'''
     # Use the entry with the largest magnitude as a reference point.
     a, b = max(((i, j) for i in range(4) for j in range(4)), key=lambda t: abs(mat[t]))
     # Extract sub-factors touching the reference cell.
@@ -256,6 +267,7 @@ def kron_factor_4x4_to_2x2s(mat: np.ndarray):
 
 
 def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = True, with_params: bool = True):
+    '''Return a two-qubit decomposition circuit.'''
     name_rxx = gate.name + '_Rxx'
     name_ryy = gate.name + '_Ryy'
     name_rzz = gate.name + '_Rzz'
@@ -288,29 +300,38 @@ def two_qubit_decompose(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool
     for g in circ:
         if len(g.obj_qubits) == 1 and isinstance(g, UnivMathGate):
             if basis == 'zyz':
-                gate_d, para = one_qubit_decompose(g, 'zyz', False)
+                gate_d, param = one_qubit_decompose(g, 'zyz', False)
             elif basis == 'u3':
-                gate_d, para = one_qubit_decompose(g, 'u3', with_phase)
+                gate_d, param = one_qubit_decompose(g, 'u3', with_phase)
             else:
                 raise ValueError(f'Wrong basis {basis} is not in {opt_basis}')
             circ_d += gate_d
-            pr.update(para)
+            pr.update(param)
         else:
             circ_d += g
     return (circ_d, pr) if with_params else circ_d.apply_value(pr)
 
 
 def two_level_unitary_synthesis(dim: int, basis: str, ind: List[int], pr_str: List[str], obj: List[int]) -> Circuit:
+    '''Synthesize a qutrit two-level unitary gate with qubit circuit.
+    Args:
+        basis (str): decomposition basis, can be one of 'zyz' or 'u3'.
+        ind (List[int]): the subspace index of the qutrit two-level unitary gate.
+        pr_str (List[str]): the params name of the qutrit two-level unitary gate.
+        obj (List[int]): object qubits.
+    Returns:
+        circ (mindquantum.core.circuit.Circuit): qubit circuit that can synthesize a qutrit two-level unitary gate.
+    '''
     if dim != 3:
         raise ValueError('Only works when dim = 3')
     if len(ind) != 2:
-        raise ValueError(f'The qudit unitary index length {len(ind)} should be 2.')
+        raise ValueError(f'The qudit unitary index length {len(ind)} should be 2')
     if len(set(ind)) != len(ind):
         raise ValueError(f'The qudit unitary index {ind} cannot be repeated')
     if min(ind) < 0 or max(ind) >= dim:
-        raise ValueError(f'The qudit unitary index {ind} should in 0 to {dim-1}.')
+        raise ValueError(f'The qudit unitary index {ind} should in 0 to {dim-1}')
     if len(pr_str) != dim:
-        raise ValueError(f'The qudit unitary params length {len(pr_str)} should be {dim}.')
+        raise ValueError(f'The qudit unitary parameter length {len(pr_str)} should be {dim}')
     if ind == [0, 1]:
         corr = Circuit() + X(obj[0], obj[1]) + RY(-np.pi / 2).on(obj[1], obj[0]) + X(obj[1])
     elif ind == [0, 2]:
@@ -326,12 +347,20 @@ def two_level_unitary_synthesis(dim: int, basis: str, ind: List[int], pr_str: Li
         theta, phi, lam = pr_str
         circ += U3(theta, phi, lam).on(obj[0], obj[1])
     else:
-        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}.')
+        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}')
     circ += corr.hermitian()
     return circ
 
 
 def single_qudit_unitary_synthesis(dim: int, basis: str, name: str, obj: List[int]) -> Circuit:
+    '''Synthesize a single qutrit unitary gate with qubit circuit.
+    Args:
+        basis (str): decomposition basis, can be one of 'zyz' or 'u3'.
+        name (str): the name of the single qutrit unitary gate.
+        obj (List[int]): object qubits.
+    Returns:
+        circ (mindquantum.core.circuit.Circuit): qubit circuit that can synthesize a single qutrit unitary gate.
+    '''
     if dim != 3:
         raise ValueError('Only works when dim = 3')
     circ = Circuit()
@@ -347,11 +376,21 @@ def single_qudit_unitary_synthesis(dim: int, basis: str, name: str, obj: List[in
             pr_str = [f'{name}𝜃{pr_ind}', f'{name}𝜑{pr_ind}', f'{name}𝜆{pr_ind}']
             circ += two_level_unitary_synthesis(dim, basis, ind, pr_str, obj)
     else:
-        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}.')
+        raise ValueError(f'{basis} is not a supported decomposition method of {opt_basis}')
     return circ
 
 
 def controlled_rotation_synthesis(dim: int, ind: List[int], name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+    '''Synthesize a qutrit controlled rotation gate with qubit circuit.
+    Args:
+        ind (List[int]): the subspace index of the qutrit controlled rotation gate.
+        name (str): the name of the qutrit controlled rotation gate.
+        obj (int): object qubit.
+        ctrl (List[int]): control qubits.
+        state (int): the control state of the qutrit controlled rotation gate.
+    Returns:
+        circ (mindquantum.core.circuit.Circuit): qubit circuit that can synthesize a qutrit controlled rotation gate.
+    '''
     if dim != 3:
         raise ValueError('Only works when dim = 3')
     if state == 0:
@@ -382,6 +421,15 @@ def controlled_rotation_synthesis(dim: int, ind: List[int], name: str, obj: int,
 
 
 def controlled_diagonal_synthesis(dim: int, name: str, obj: int, ctrl: List[int], state: int) -> Circuit:
+    '''Synthesize a qutrit controlled diagonal gate with qubit circuit.
+    Args:
+        name (str): the name of the qutrit controlled diagonal gate.
+        obj (int): object qubit.
+        ctrl (List[int]): control qubits.
+        state (int): the control state of the qutrit controlled diagonal gate.
+    Returns:
+        circ (mindquantum.core.circuit.Circuit): qubit circuit that can synthesize a qutrit controlled diagonal gate.
+    '''
     if dim != 3:
         raise ValueError('Only works when dim = 3')
     if state == 0:
@@ -402,6 +450,15 @@ def controlled_diagonal_synthesis(dim: int, name: str, obj: int, ctrl: List[int]
 
 
 def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: bool = False) -> Circuit:
+    '''Construct a qubit ansatz that preserves the symmetry of encoding for arbitrary qutrit gate.
+    Args:
+        gate (mindquantum.core.gates.UnivMathGate): symmetry-preserving qubit gate encoded by qutrit gate.
+        basis (str): decomposition basis, can be one of 'zyz' or 'u3'. Default: 'zyz'.
+        with_phase (bool): whether return global phase in form of a mindquantum.core.gates.GlobalPhase gate
+        on the qubit circuit. Default: False.
+    Returns:
+        circ (mindquantum.core.circuit.Circuit): qubit ansatz that preserves the symmetry of qutrit encoding.
+    '''
     dim = 3
     basis = basis.lower()
     if basis not in opt_basis:
@@ -435,7 +492,7 @@ def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: 
         circ += controlled_diagonal_synthesis(dim, f'{name}CD5_', obj[0], obj[1:], 2)
         circ += single_qudit_unitary_synthesis(dim, basis, f'{name}U9_', obj[:2])
     else:
-        raise ValueError('Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
+        raise ValueError('Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4')
     if with_phase:
         for i in obj:
             circ += GlobalPhase(f'{name}phase').on(i)
@@ -443,6 +500,7 @@ def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: 
 
 
 def circuit_depth(circ: Circuit) -> int:
+    '''Calculate the depth of the circuit.'''
     nq = circ.n_qubits
     depth = [0] * nq
     for i in range(nq):
@@ -453,6 +511,7 @@ def circuit_depth(circ: Circuit) -> int:
 
 
 def partial_trace(rho: np.ndarray, dim: int, ind: int) -> np.ndarray:
+    '''Calculate the partial trace of the qudit state or matrix.'''
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
     if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
@@ -460,9 +519,9 @@ def partial_trace(rho: np.ndarray, dim: int, ind: int) -> np.ndarray:
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
     if not isinstance(dim, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
+        raise ValueError(f'Wrong type of dimension {dim} {type(dim)}')
     if not isinstance(ind, (int, np.int64)):
-        raise ValueError(f'Wrong index type {ind} {type(ind)}')
+        raise ValueError(f'Wrong type of index {ind} {type(ind)}')
     n = rho.shape[0]
     m = n // dim
     if n == dim and rho.ndim == 1:
@@ -491,6 +550,7 @@ def partial_trace(rho: np.ndarray, dim: int, ind: int) -> np.ndarray:
 
 
 def reduced_density_matrix(rho: np.ndarray, dim: int, position: List[int]) -> np.ndarray:
+    '''Calculate the reduced density matrix of the qudit state or matrix.'''
     if rho.ndim == 2 and (rho.shape[0] == 1 or rho.shape[1] == 1):
         rho = rho.flatten()
     if rho.ndim == 2 and rho.shape[0] != rho.shape[1]:
@@ -498,7 +558,7 @@ def reduced_density_matrix(rho: np.ndarray, dim: int, position: List[int]) -> np
     if rho.ndim != 1 and rho.ndim != 2:
         raise ValueError(f'Wrong state shape {rho.shape}')
     if not isinstance(dim, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
+        raise ValueError(f'Wrong type of dimension {dim} {type(dim)}')
     if isinstance(position, (int, np.int64)):
         position = [position]
     n = rho.shape[0]
@@ -513,6 +573,7 @@ def reduced_density_matrix(rho: np.ndarray, dim: int, position: List[int]) -> np
 
 
 def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
+    '''Calculate the fidelity of two qudit states.'''
     state = {'rho': rho, 'sigma': sigma}
     for key, mat in state.items():
         if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
@@ -542,10 +603,18 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray, sqrt: bool = False) -> float:
 
 
 def symmetric_index(dim: int, n_qudits: int) -> dict:
+    '''The index of the qudit state or matrix element corresponding to the qubit symmetric state or matrix during mapping.
+    Args:
+        dim (int): the dimension of qudit state or matrix.
+        n_qudits (int): the number fo qudit state or matrix.
+    Returns:
+        ind (dict): which keys are the index of the qudit state or matrix,
+        values are the corresponding index of qubit symmetric state or matrix.
+    '''
     if not isinstance(dim, (int, np.int64)):
-        raise ValueError(f'Wrong dimension type {dim} {type(dim)}')
+        raise ValueError(f'Wrong type of dimension {dim} {type(dim)}')
     if not isinstance(n_qudits, (int, np.int64)):
-        raise ValueError(f'Wrong n_qudits type {n_qudits} {type(n_qudits)}')
+        raise ValueError(f'Wrong type of n_qudits {n_qudits} {type(n_qudits)}')
     if n_qudits == 1:
         ind = {}
         for i in range(2**(dim - 1)):
@@ -573,6 +642,13 @@ def symmetric_index(dim: int, n_qudits: int) -> dict:
 
 
 def is_symmetric(mat: np.ndarray, n_qudits: int = 1) -> bool:
+    '''Check whether the qubit state or matrix is symmetric.
+    Args:
+        qubit (np.ndarray): the qubit state or matrix that needs to be checked whether it is symmetric.
+        n_qubits (int): the number of qubits in the qubit symmetric state or matrix. Default: 1.
+    Returns:
+        is_sym (bool): whether the qubit state or matrix is symmetric.
+    '''
     if mat.ndim == 2 and (mat.shape[0] == 1 or mat.shape[1] == 1):
         mat = mat.flatten()
     if mat.ndim == 2 and mat.shape[0] != mat.shape[1]:
@@ -607,6 +683,14 @@ def is_symmetric(mat: np.ndarray, n_qudits: int = 1) -> bool:
 
 
 def symmetric_decoding(qubit: np.ndarray, n_qudits: int = 1) -> np.ndarray:
+    '''Qudit symmetric state decoding, decodes a qubit symmetric state or matrix into a qudit state or matrix.
+    Args:
+        qubit (np.ndarray): the qubit symmetric state or matrix that needs to be decoded,
+        where the qubit state or matrix must preserve symmetry.
+        n_qudits (int): the number of qudits in the qudit state or matrix. Default: 1.
+    Returns:
+        qudit (np.ndarray): the qudit state or matrix obtained after the qudit symmetric decoding.
+    '''
     if qubit.ndim == 2 and (qubit.shape[0] == 1 or qubit.shape[1] == 1):
         qubit = qubit.flatten()
     if qubit.ndim == 2 and qubit.shape[0] != qubit.shape[1]:
@@ -647,6 +731,13 @@ def symmetric_decoding(qubit: np.ndarray, n_qudits: int = 1) -> np.ndarray:
 
 
 def symmetric_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = False) -> np.ndarray:
+    '''Qudit symmetric state encoding, encodes a qudit state or matrix into a qubit symmetric state or matrix.
+    Args:
+        qudit (np.ndarray): the qudit state or matrix that needs to be encoded.
+        n_qudits (int): the number of qudits in the qudit state or matrix. Default: 1.
+    Returns:
+        qubit (np.ndarray): the qubit symmetric state or matrix obtained after the qudit symmetric encoding.
+    '''
     if qudit.ndim == 2 and (qudit.shape[0] == 1 or qudit.shape[1] == 1):
         qudit = qudit.flatten()
     if qudit.ndim == 2 and qudit.shape[0] != qudit.shape[1]:

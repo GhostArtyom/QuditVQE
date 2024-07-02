@@ -29,7 +29,7 @@ def updatemat(name: str, save: dict):
 
 def dict_file(path: str) -> dict:
     dict_file = {}
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         i = 1
         for name in sorted(files):
             subfolder = os.path.split(root)[-1]
@@ -155,7 +155,6 @@ def str_ket(state: np.ndarray, dim: int = 2) -> str:
             string.append(f'{real_str}{imag_str}j¦{base}⟩')
         else:
             string.append(f'{real_str}+{imag_str}j¦{base}⟩')
-    # return '\n'.join(string)
     print('\n'.join(string))
     print(state)
 

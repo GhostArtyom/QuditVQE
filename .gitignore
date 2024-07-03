@@ -159,8 +159,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-## LaTeX build tool auxiliary files:
+# LaTeX build tool auxiliary files
 *.synctex
 *.synctex(busy)
 *.synctex.gz
 *.synctex.gz(busy)
+
+# MATLAB default autosave extension
+*.m~
+*.asv

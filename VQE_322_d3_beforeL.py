@@ -15,7 +15,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
-def running(num: int, num_iter: int, repetitions: int):
+def running(num: int, num_iter: int, repeat: int):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -113,7 +113,7 @@ def running(num: int, num_iter: int, repetitions: int):
 
     iter_str = f'iter{num_iter}'
     eval_dict[iter_str], time_dict[iter_str], fidelity_dict[iter_str] = [], [], []
-    for r in range(1, repetitions + 1):
+    for r in range(1, repeat + 1):
         psi = symmetric_encoding(state, N, is_csr=True)  # encode qutrit state to qubit
         rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
         Ham = Hamiltonian(rho)  # set target state as Hamiltonian
@@ -163,4 +163,4 @@ def running(num: int, num_iter: int, repetitions: int):
 for num in range(1, 6):
     eval_dict, time_dict, fidelity_dict = {}, {}, {}
     for num_iter in range(1, 7):
-        running(num, num_iter, repetitions=10)
+        running(num, num_iter, repeat=10)

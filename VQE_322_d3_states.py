@@ -14,7 +14,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import updatemat, circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
-def running(num: int, D: int, vec: Union[int, List[int]], repeat: int, layers: int = 2):
+def running(num: int, D: int, vec: Union[int, List[int]], repeat: Union[int, range, List[int]], layers: int = 2):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -107,38 +107,37 @@ def running(num: int, D: int, vec: Union[int, List[int]], repeat: int, layers: i
     vec = [vec] if isinstance(vec, int) else vec
     for v in vec:
         vec_str = f'vec{v}'
-        time_dict[vec_str] = []
-        eval_dict[vec_str] = []
-        fidelity_dict[vec_str] = []
+        time_dict[vec_str], eval_dict[vec_str], fidelity_dict[vec_str] = [], [], []
         repetitions = range(1, repeat + 1) if isinstance(repeat, int) else repeat
+
+        psi = symmetric_encoding(state[v], k + 1, is_csr=True)  # encode qutrit state to qubit
+        rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
+        Ham = Hamiltonian(rho)  # set target state as Hamiltonian
         for r in repetitions:
-            psi = symmetric_encoding(state[v], k + 1, is_csr=True)  # encode qutrit state to qubit
-            rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
-            Ham = Hamiltonian(rho)  # set target state as Hamiltonian
             sim.reset()  # reset simulator to zero state
             sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
+            init_params = np.random.uniform(-np.pi, np.pi, p_num)
+            solver_options = {'gtol': 1e-15, 'maxiter': 500}
 
             start = time.perf_counter()
             while True:
                 try:
                     local_minima1, local_minima2 = [], []
-                    solver_options = {'gtol': 1e-15, 'maxiter': 500}
-                    init_params = np.random.uniform(-np.pi, np.pi, p_num)
-                    res = minimize(optimization, init_params, (sim_grad, []), method, \
-                                   jac=True, callback=callback, options=solver_options)
+                    res = minimize(optimization, init_params, (sim_grad, []), method, jac=True, callback=callback, options=solver_options)
                     break
                 except StopIteration:
                     break  # reach loss tolerance
                 except StopAsyncIteration:
                     continue  # reach local minima
-            fidelity = 1 - res.fun
             end = time.perf_counter()
+
+            fidelity = 1 - res.fun
             minute = round(((end - start) / 60), 2)
             time_dict[vec_str].append(minute)
             eval_dict[vec_str].append(res.nfev)
             fidelity_dict[vec_str].append(fidelity)
 
-            sim.reset()
+            sim.reset()  # reset simulator to zero state
             pr_res = dict(zip(p_name, res.x))
             sim.apply_circuit(ansatz.apply_value(pr_res))
             psi_res = sim.get_qs()
@@ -151,7 +150,8 @@ def running(num: int, D: int, vec: Union[int, List[int]], repeat: int, layers: i
             info(f'{res.message}\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
         print(f'num{num} D{D} vec{v} finish')
     info(f'num{num} D{D} finish')
-    print(f'num{num} D{D} finish\n{fidelity_dict}')
+    print(f'num{num} D{D} finish')
+    print(fidelity_dict)
 
 
 for num in range(1, 6):

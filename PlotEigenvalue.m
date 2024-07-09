@@ -1,6 +1,6 @@
 clear; clf; close all
 
-path = './data_232/from_classical_to_violation/';
+path = './data_232/from_classical_to_violation_iter20/';
 eig_cell = cell(2, 20);
 energy_mat = zeros(2, 20);
 model_list = [1216 1705];

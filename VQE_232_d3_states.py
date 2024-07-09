@@ -57,7 +57,7 @@ def running(model: int, num_iter: int, repeat: Union[int, range, List[int]], lay
         if loss < tol:
             raise StopIteration
 
-    path = f'./data_232/from_classical_to_violation'  # path of folder
+    path = f'./data_232/from_classical_to_violation_iter30'  # path of folder
     name = f'{path}/232_d3_D9_model{model}_RDM2_iter{num_iter}_target_state_vector.mat'
     s = File(name)
     state = s['target_state_vec'][:].view('complex')
@@ -65,7 +65,7 @@ def running(model: int, num_iter: int, repeat: Union[int, range, List[int]], lay
     N = s['N'][0]  # number of qudits
     s.close()
 
-    log = f'./data_232/Logs/from_classical_to_violation_L{layers}.log'
+    log = f'./data_232/Logs/from_classical_to_violation_iter30_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     d = 3  # dimension of qudit state
@@ -146,5 +146,5 @@ def running(model: int, num_iter: int, repeat: Union[int, range, List[int]], lay
 
 for model in [1216, 1705]:
     eval_dict, time_dict, fidelity_dict = {}, {}, {}
-    for num_iter in range(1, 21):
-        running(model, num_iter, repeat=20, layers=2)
+    for num_iter in range(1, 31):
+        running(model, num_iter, repeat=20, layers=1)

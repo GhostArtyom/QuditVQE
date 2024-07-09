@@ -40,7 +40,7 @@ end
 
 function [xdata, ydata] = plotFidelity(loadmat, layers, num, D)
     n_qubits = 14; line_width = 1.5; marker_size = 15;
-    color_list = ["#4474C4" "#388E3C"]; color = color_list(layers);
+    color_list = ["#388E3C" "#4474C4"]; color = color_list(layers);
     data = loadmat.(sprintf('num%d_D%d', num, D));
     xdata = data.energy; ydata = data.fidelity;
     ydata = -log(sqrt(ydata)) / n_qubits;

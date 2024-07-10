@@ -44,14 +44,14 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
         f, _ = sim_grad(curr_params)
         loss = 1 - np.real(f)[0][0]
         minima1, minima2 = 0.5, 0.25
-        if 0 < loss - minima1 < 2e-3:
+        if 0 < loss - minima1 < 1e-4:
             local_minima1.append(loss - minima1)
-        if 0 < loss - minima2 < 2e-3:
+        if 0 < loss - minima2 < 1e-4:
             local_minima2.append(loss - minima2)
-        if len(local_minima1) >= 30:
+        if len(local_minima1) >= 100:
             info(f'model{model} D{D} iter{num} r{repeat}: reach local minima1, restart optimization')
             raise StopAsyncIteration
-        if len(local_minima2) >= 30:
+        if len(local_minima2) >= 100:
             info(f'model{model} D{D} iter{num} r{repeat}: reach local minima2, restart optimization')
             raise StopAsyncIteration
         if loss < tol:
@@ -95,15 +95,14 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
         info(f'Number of params: {p_num}')
         info(f'Depth of circuit: {depth}')
         info(f'Simulator: mqvector, Method: BFGS')
-
-    sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
-    init_params = np.random.uniform(-np.pi, np.pi, p_num)
     solver_options = {'gtol': 1e-15, 'maxiter': 500}
+    sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
 
     start = time.perf_counter()
     while True:
         try:
             local_minima1, local_minima2 = [], []
+            init_params = np.random.uniform(-np.pi, np.pi, p_num)
             res = minimize(optimization, init_params, (sim_grad, []), method='BFGS', jac=True, callback=callback, options=solver_options)
             break
         except StopIteration:
@@ -138,13 +137,13 @@ def iter_dict(num_iter):
 
 
 layers = int(input('Number of layers: '))
-model = 1216  # for model in [1216, 1705]:
-num_iter, repetitions = 30, 20
-eval_dict = iter_dict(num_iter)
-time_dict = iter_dict(num_iter)
-fidelity_dict = iter_dict(num_iter)
-for repeat in range(1, repetitions + 1):
-    for num in range(1, num_iter + 1):
-        running(model, num, repeat, layers)
-    info(f'model{model} D9 repeat{repeat} finish\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
-    print(f'model{model} D9 repeat{repeat} finish')
+for model in [1216, 1705]:
+    num_iter, repetitions = 30, 20
+    eval_dict = iter_dict(num_iter)
+    time_dict = iter_dict(num_iter)
+    fidelity_dict = iter_dict(num_iter)
+    for repeat in range(1, repetitions + 1):
+        for num in range(1, num_iter + 1):
+            running(model, num, repeat, layers)
+        info(f'model{model} D9 repeat{repeat} finish\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
+        print(f'model{model} D9 repeat{repeat} finish')

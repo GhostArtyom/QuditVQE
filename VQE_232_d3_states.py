@@ -57,7 +57,7 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
         if loss < tol:
             raise StopIteration
 
-    path = f'./data_232/from_classical_to_violation_iter30'  # path of folder
+    path = f'./data_232/from_classical_to_violation_dense'  # path of folder
     name = f'{path}/232_d3_D9_model{model}_RDM2_iter{num}_target_state_vector.mat'
     s = File(name)
     state = s['target_state_vec'][:].view('complex')
@@ -65,7 +65,7 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
     N = s['N'][0]  # number of qudits
     s.close()
 
-    log = f'./data_232/Logs/from_classical_to_violation_iter30_L{layers}.log'
+    log = f'./data_232/Logs/from_classical_to_violation_dense_L{layers}.log'
     basicConfig(filename=log, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=INFO)
 
     d = 3  # dimension of qudit state
@@ -132,18 +132,25 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
     info(f'Fidelity List: {fidelity_dict[iter_str]}')
 
 
-def iter_dict(num_iter):
-    return {f'iter{i}': [] for i in range(1, num_iter + 1)}
+def iter_dict(iter_list: List[int]) -> dict:
+    return {f'iter{i}': [] for i in iter_list}
 
 
 layers = int(input('Number of layers: '))
+repetitions = 20
+iter_num = {
+    1216: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, \
+           33, 34, 35, 36, 37, 38, 39, 41, 43, 45, 47, 49, 51, 53,55, 57, 59, 61, 63, 67, 69, 71, 73],
+    1705: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, \
+           22, 23, 24, 25, 26, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53]}
+
 for model in [1216, 1705]:
-    num_iter, repetitions = 30, 20
-    eval_dict = iter_dict(num_iter)
-    time_dict = iter_dict(num_iter)
-    fidelity_dict = iter_dict(num_iter)
+    iter_list = iter_num[model]
+    eval_dict = iter_dict(iter_list)
+    time_dict = iter_dict(iter_list)
+    fidelity_dict = iter_dict(iter_list)
     for repeat in range(1, repetitions + 1):
-        for num in range(1, num_iter + 1):
+        for num in iter_list:
             running(model, num, repeat, layers)
         info(f'model{model} D9 repeat{repeat} finish\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
         print(f'model{model} D9 repeat{repeat} finish')

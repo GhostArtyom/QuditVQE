@@ -36,7 +36,7 @@ for num = 1:2
 end
 
 function [xdata, ydata] = plotFidelity(loadmat, layers)
-    n_qubits = 14; line_width = 1.5; marker_size = 15;
+    n_qubits = 12; line_width = 1.5; marker_size = 15;
     color_list = ["#388E3C" "#4474C4"]; color = color_list(layers);
     xdata = loadmat.energy; ydata = loadmat.fidelity;
     ydata = -log(sqrt(ydata)) / n_qubits;

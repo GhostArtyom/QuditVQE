@@ -58,8 +58,7 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
             raise StopIteration
 
     path = f'./data_232/from_classical_to_violation_dense'  # path of folder
-    name = f'{path}/232_d3_D9_model{model}_RDM2_iter{num}_target_state_vector.mat'
-    s = File(name)
+    s = File(f'{path}/232_d3_D9_model{model}_RDM2_iter{num}_target_state_vector.mat')
     state = s['target_state_vec'][:].view('complex')
     D = s['D'][0]  # bond dimension
     N = s['N'][0]  # number of qudits

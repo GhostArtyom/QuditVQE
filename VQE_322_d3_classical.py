@@ -63,16 +63,16 @@ def running(num: int, repeat: int):
     path = f'./data_322/classical'
     sub = [i for i in sorted(os.listdir(path)) if f'num{num}' in i][0]
     model = re.search('model\d+', sub).group(0)
-    name = f'{path}/322_classical_d3_num{num}_{model}_D1_target_state_vector.mat'
+    s_name = f'{path}/322_classical_d3_num{num}_{model}_D1_target_state_vector.mat'
 
     try:
-        s = File(name)
+        s = File(s_name)
         state = s['target_state_vec'][:].view('complex')
         D = s['D'][0]  # bond dimension
         N = s['N'][0]  # number of qudits
         s.close()
     except OSError:
-        s = loadmat(name)
+        s = loadmat(s_name)
         state = s['target_state_vec'].flatten()
         D = s['D'][0][0].astype(np.int64)  # bond dimension
         N = s['N'][0][0].astype(np.int64)  # number of qudits

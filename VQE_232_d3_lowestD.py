@@ -12,7 +12,7 @@ from mindquantum.simulator import Simulator, get_supported_simulator
 from utils import updatemat, circuit_depth, symmetric_encoding, qutrit_symmetric_ansatz
 
 
-def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: int = 2):
+def running(model: int, num: int, D: int, repeat: Union[int, range, List[int]], layers: int = 2):
 
     def optimization(init_params: np.ndarray, sim_grad: GradOpsWrapper, loss_list: List[float] = None):
         '''Optimization function of fidelity.
@@ -58,9 +58,8 @@ def running(model: int, num: int, repeat: Union[int, range, List[int]], layers: 
             raise StopIteration
 
     path = f'./data_232/lowestD'  # path of folder
-    s = File(f'{path}/232_lowestD_d3_model{model}_RDM2_iter{num}_target_state_vector.mat')
+    s = File(f'{path}/232_lowestD_d3_D{D}_model{model}_RDM2_iter{num}_target_state_vector.mat')
     state = s['target_state_vec'][:].view('complex')
-    global D
     D = s['D'][0]  # bond dimension
     N = s['N'][0]  # number of qudits
     s.close()
@@ -140,6 +139,7 @@ layers = int(input('Number of layers: '))
 repetitions = 20
 
 for model in [1216, 1705]:
+    D = {1216: 5, 1705: 6}[model]
     iter_num = {1216: 17, 1705: 21}[model]
     iter_list = np.arange(iter_num) + 1
     eval_dict = iter_dict(iter_list)
@@ -147,6 +147,6 @@ for model in [1216, 1705]:
     fidelity_dict = iter_dict(iter_list)
     for repeat in range(1, repetitions + 1):
         for num in iter_list:
-            running(model, num, repeat, layers)
+            running(model, num, D, repeat, layers)
         info(f'model{model} D{D} repeat{repeat} finish\n{eval_dict}\n{time_dict}\n{fidelity_dict}')
         print(f'model{model} D{D} repeat{repeat} finish')

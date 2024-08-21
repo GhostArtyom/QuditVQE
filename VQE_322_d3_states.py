@@ -116,14 +116,15 @@ def running(num: int, D: int, vec: Union[int, List[int]], repeat: Union[int, ran
         for r in repetitions:
             sim.reset()  # reset simulator to zero state
             sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
-            init_params = np.random.uniform(-np.pi, np.pi, p_num)
             solver_options = {'gtol': 1e-15, 'maxiter': 500}
 
             start = time.perf_counter()
             while True:
                 try:
                     local_minima1, local_minima2 = [], []
-                    res = minimize(optimization, init_params, (sim_grad, []), method, jac=True, callback=callback, options=solver_options)
+                    init_params = np.random.uniform(-np.pi, np.pi, p_num)
+                    res = minimize(optimization, init_params, (sim_grad, []), method, \
+                                   jac=True, callback=callback, options=solver_options)
                     break
                 except StopIteration:
                     break  # reach loss tolerance

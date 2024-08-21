@@ -111,20 +111,21 @@ def running(num: int, num_iter: int, repeat: int):
         method = 'BFGS'  # TNC CG
         info(f'Simulator: mqvector, Method: {method}')
 
+    psi = symmetric_encoding(state, N, is_csr=True)  # encode qutrit state to qubit
+    rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
+    Ham = Hamiltonian(rho)  # set target state as Hamiltonian
+
     iter_str = f'iter{num_iter}'
     eval_dict[iter_str], time_dict[iter_str], fidelity_dict[iter_str] = [], [], []
     for r in range(1, repeat + 1):
-        psi = symmetric_encoding(state, N, is_csr=True)  # encode qutrit state to qubit
-        rho = psi.dot(psi.conj().T)  # rho & psi are both csr_matrix
-        Ham = Hamiltonian(rho)  # set target state as Hamiltonian
-
-        start = time.perf_counter()
         sim.reset()  # reset simulator to zero state
         sim_grad = sim.get_expectation_with_grad(Ham, ansatz)
+        solver_options = {'gtol': 1e-15, 'maxiter': 500}
+
+        start = time.perf_counter()
         while True:
             try:
                 local_minima1, local_minima2 = [], []
-                solver_options = {'gtol': 1e-15, 'maxiter': 500}
                 init_params = np.random.uniform(-np.pi, np.pi, p_num)
                 res = minimize(optimization, init_params, (sim_grad, []), method, \
                                 jac=True, callback=callback, options=solver_options)

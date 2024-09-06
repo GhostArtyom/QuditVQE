@@ -759,8 +759,6 @@ def symmetric_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = Fals
             data = np.ones(num_i) * qudit[i] / np.sqrt(num_i)
             i_ = (ind_i, np.zeros(num_i))
             qubit += csr_matrix((data, i_), shape=(n, 1))
-        if not is_csr:
-            qubit = qubit.toarray().flatten()
     elif qudit.ndim == 2:
         qubit = csr_matrix((n, n), dtype=CDTYPE)
         for i in range(dim**n_qudits):
@@ -774,6 +772,6 @@ def symmetric_encoding(qudit: np.ndarray, n_qudits: int = 1, is_csr: bool = Fals
                 div = np.sqrt(num_i) * np.sqrt(num_j)
                 data = np.ones(num_i * num_j) * qudit[i, j] / div
                 qubit += csr_matrix((data, (i_, j_)), shape=(n, n))
-        if not is_csr:
-            qubit = qubit.toarray()
+    if not is_csr:
+        return qubit.toarray()
     return qubit

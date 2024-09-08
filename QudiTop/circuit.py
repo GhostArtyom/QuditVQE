@@ -35,11 +35,9 @@ class Circuit(nn.Module):
                 if gate.dim != self.dim:
                     raise ValueError(f"The input gate.dim({gate.dim}) doesn't match the circuit dim({self.dim}).")
                 if max(gate.obj_qudits) >= self.n_qudits:
-                    raise ValueError(
-                        f"Gate {gate.name}.obj_qudits = {gate.obj_qudits} should less than {self.n_qudits}.")
+                    raise ValueError(f"Gate {gate.name}.obj_qudits = {gate.obj_qudits} should less than {self.n_qudits}.")
                 if gate.ctrl_qudits and max(gate.ctrl_qudits) >= self.n_qudits:
-                    raise ValueError(
-                        f"Gate {gate.name}.obj_qudits = {gate.ctrl_qudits} should less than {self.n_qudits}.")
+                    raise ValueError(f"Gate {gate.name}.obj_qudits = {gate.ctrl_qudits} should less than {self.n_qudits}.")
                 self.gates.append(gate)
                 if isinstance(gate, WithParamGate):
                     self.param_name.append(gate.param_name)
@@ -123,13 +121,11 @@ class Circuit(nn.Module):
             for gate in self.gates:
                 if isinstance(gate, WithParamGate) and (trainable == gate.trainable):
                     param_gates.append(gate)
-            assert len(pr) == len(param_gates), (
-                f"Circuit have {len(param_gates)} parameters, but giving {len(pr)} parameters.")
+            assert len(pr) == len(param_gates), (f"Circuit have {len(param_gates)} parameters, but giving {len(pr)} parameters.")
             for value, gate in zip(pr, param_gates):
                 gate.assign_param(value)
         elif isinstance(pr, dict):
-            assert set(pr.keys()).issubset(set(
-                self.param_name)), f"The circuit parameters are {self.param_name}, while got {pr.keys()}."
+            assert set(pr.keys()).issubset(set(self.param_name)), f"The circuit parameters are {self.param_name}, while got {pr.keys()}."
             for gate in self.gates:
                 if isinstance(gate, WithParamGate) and (trainable == gate.trainable):
                     name = gate.param_name

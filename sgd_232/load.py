@@ -24,7 +24,6 @@ for f in files:
 #     energy_list = [float(re.search(pattern, line).group(1)) for line in data if re.search(pattern, line)]
 #     min_energy = min(energy_list) if len(energy_list) > 0 else ' No True Label'
 #     print(model, types, min_energy, len(energy_list), len(data))
-
 '''
 20240326
 model1216 all_types -9.018750920337176 1334

@@ -337,30 +337,25 @@ def _controlled_rotation_synthesis(ind: List[int], name: str, obj: int, ctrl: Li
             corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
                 ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
         elif ind == [0, 2]:
-            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(
-                obj, ctrl[1:])
+            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
         elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(
-                obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+            corr = Circuit() + X(ctrl[1]) + X(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
     elif state == 1:
         if ind == [0, 1]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
-                np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
+                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
         elif ind == [0, 2]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(obj, ctrl[1:]) + X(
-                ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
         elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(
-                -np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
+            corr = Circuit() + X(ctrl[1], ctrl[2]) + RY(np.pi / 2).on(ctrl[2]) + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(
+                ctrl[0], ctrl[1:] + [obj])
     elif state == 2:
         if ind == [0, 1]:
-            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(
-                ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
+            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj]) + X(ctrl[0], ctrl[1:])
         elif ind == [0, 2]:
             corr = Circuit() + X(obj, ctrl[1:]) + X(ctrl[0], ctrl[1:] + [obj]) + X(obj, ctrl[1:])
         elif ind == [1, 2]:
-            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(
-                ctrl[0], ctrl[1:] + [obj])
+            corr = Circuit() + X(ctrl[0], ctrl[1:] + [obj]) + RY(-np.pi / 2).on(obj, ctrl) + X(ctrl[0], ctrl[1:] + [obj])
     circ += corr
     if 'RX' in name:
         circ = circ + RX(name).on(obj, ctrl)
@@ -474,8 +469,7 @@ def qutrit_symmetric_ansatz(gate: UnivMathGate, basis: str = 'zyz', with_phase: 
         circ += _controlled_diagonal_synthesis(f'{name}CD5_', obj[0], obj[1:], 2)
         circ += _single_qutrit_unitary_synthesis(basis, f'{name}U9_', obj[:2])
     else:
-        raise ValueError(
-            'Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
+        raise ValueError('Currently only applicable when the n_qutrits is 1 or 2, which means the n_qubits must be 2 or 4.')
     if with_phase:
         for i in obj:
             circ += GlobalPhase(f'{name}phase').on(i)

@@ -123,8 +123,8 @@ def once_update_t(D, d, t, coef, learning_rate, evo_step, eta_bound, iter_max, D
 
 def run_one_model(i_model, D, d, initial_t, type, Diag_list):
     all_model = [1216, 1410, 1705, 45]
-    all_coef = np.array([[3, -2, 1, 2, -2, 5, -1, 1, 3, 1, -2, -2], [2, 1, 1, 2, 2, 1, 0, -1, 0, -1, 1, 0],
-                         [2, -1, 1, 1, -1, 2, -2, 0, 2, -1, 0, 0], [8, 2, 2, 8, -4, 8, 3, 4, 3, -5, 8, -5]])
+    all_coef = np.array([[3, -2, 1, 2, -2, 5, -1, 1, 3, 1, -2, -2], [2, 1, 1, 2, 2, 1, 0, -1, 0, -1, 1, 0], [2, -1, 1, 1, -1, 2, -2, 0, 2, -1, 0, 0],
+                         [8, 2, 2, 8, -4, 8, 3, 4, 3, -5, 8, -5]])
     all_local = [-9, -4, -5, -20]
     model = all_model[i_model]
     coef = -all_coef[i_model, :]

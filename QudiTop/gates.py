@@ -328,13 +328,7 @@ class WithParamGate(GateBase):
 class PauliNoneParamGate(NoneParamGate):
     """Pauli based none parameter gate. This gate contains two indexes."""
 
-    def __init__(self,
-                 dim,
-                 ind: Iterable,
-                 obj_qudits=None,
-                 ctrl_qudits=None,
-                 ctrl_states=None,
-                 name="PauliNoneParamGate"):
+    def __init__(self, dim, ind: Iterable, obj_qudits=None, ctrl_qudits=None, ctrl_states=None, name="PauliNoneParamGate"):
         super().__init__(dim, obj_qudits, ctrl_qudits, ctrl_states, name)
         assert (isinstance(ind, Iterable) and len(ind) == 2), "The `ind` should be a iterable object with 2 elements."
         assert ind[0] != ind[1], "`ind[0]` must not equal to `ind[1]`."
@@ -500,13 +494,7 @@ class MVCG(NoneParamGate):
 class UMG(NoneParamGate):
     """Universal math gate for qudit."""
 
-    def __init__(self,
-                 dim: int,
-                 mat: Union[Tensor, Tuple],
-                 obj_qudits=None,
-                 ctrl_qudits=None,
-                 ctrl_states=None,
-                 name="UMG"):
+    def __init__(self, dim: int, mat: Union[Tensor, Tuple], obj_qudits=None, ctrl_qudits=None, ctrl_states=None, name="UMG"):
         super().__init__(dim, obj_qudits, ctrl_qudits, ctrl_states, name)
         self._mat = mat
         self.name = name
@@ -519,6 +507,6 @@ class UMG(NoneParamGate):
 
 
 __all__ = [
-    "GateBase", "NoneParamGate", "WithParamGate", "PauliNoneParamGate", "PauliWithParamGate", "X", "Y", "Z", "H", "RX",
-    "RY", "RZ", "GP", "INC", "SWAP", "MVCG", "UMG"
+    "GateBase", "NoneParamGate", "WithParamGate", "PauliNoneParamGate", "PauliWithParamGate", "X", "Y", "Z", "H", "RX", "RY", "RZ", "GP", "INC",
+    "SWAP", "MVCG", "UMG"
 ]

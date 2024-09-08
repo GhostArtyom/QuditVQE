@@ -2,11 +2,11 @@ import os
 import numpy as np
 from math import log
 from functools import reduce
-from typing import List, Union
 from fractions import Fraction
 from scipy.linalg import sqrtm
 from scipy.sparse import csr_matrix
 from scipy.io import loadmat, savemat
+from typing import List, Tuple, Union
 from numpy.linalg import det, eigh, norm, svd
 from mindquantum.core.circuit import Circuit
 from mindquantum.core.gates import X, RX, RY, RZ, Rxx, Ryy, Rzz, U3, GlobalPhase, PhaseShift, UnivMathGate
@@ -67,7 +67,7 @@ def is_hermitian(mat: np.ndarray) -> bool:
         raise ValueError(f'Wrong matrix shape {mat.shape}')
 
 
-def approx_matrix(mat: np.ndarray, tol: float = 1e-15):
+def approx_matrix(mat: np.ndarray, tol: float = 1e-15) -> np.ndarray:
     '''Return an approximation of the matrix.'''
     if np.iscomplexobj(mat):
         mat_real = np.real(mat)
@@ -165,7 +165,7 @@ def str_ket(state: np.ndarray, dim: int = 2, tol: float = 1e-8) -> str:
     print(state)
 
 
-def decompose_zyz(mat: np.ndarray):
+def decompose_zyz(mat: np.ndarray) -> Tuple[float]:
     '''ZYZ decomposition of a one-qubit unitary matrix.'''
     phase = -np.angle(det(mat)) / 2
     matU = np.exp(1j * phase) * mat
@@ -178,7 +178,7 @@ def decompose_zyz(mat: np.ndarray):
     return phase, theta, phi, lam
 
 
-def decompose_u3(mat: np.ndarray):
+def decompose_u3(mat: np.ndarray) -> Tuple[float]:
     '''U3 decomposition of a one-qubit unitary matrix.'''
     phase, theta, phi, lam = decompose_zyz(mat)
     phase += (phi + lam) / 2

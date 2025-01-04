@@ -606,7 +606,7 @@ def symmetric_index(dim: int, n_qudits: int) -> dict:
     '''The index of the qudit state or matrix element corresponding to the qubit symmetric state or matrix during mapping.
     Args:
         dim (int): the dimension of qudit state or matrix.
-        n_qudits (int): the number fo qudit state or matrix.
+        n_qudits (int): the number of qudit state or matrix.
     Returns:
         ind (dict): which keys are the index of the qudit state or matrix,
         values are the corresponding index of qubit symmetric state or matrix.
@@ -627,7 +627,7 @@ def symmetric_index(dim: int, n_qudits: int) -> dict:
         ind, ind_ = {}, {}
         for i in range(2**(dim - 1)):
             num1 = bin(i).count('1')
-            i_ = bin(i)[2::].zfill(dim - 1)
+            i_ = bin(i)[2:].zfill(dim - 1)
             if num1 in ind_:
                 ind_[num1].append(i_)
             else:

@@ -18,7 +18,7 @@ def _symmetric_state_index(dim: int, n_qudits: int) -> dict:
 
     Args:
         dim (int): the dimension of qudit state or matrix.
-        n_qudits (int): the number fo qudit state or matrix.
+        n_qudits (int): the number of qudit state or matrix.
 
     Returns:
         dict, which keys are the index of the qudit state or matrix,
@@ -49,7 +49,7 @@ def _symmetric_state_index(dim: int, n_qudits: int) -> dict:
         ind, ind_ = {}, {}
         for i in range(2**(dim - 1)):
             num = bin(i).count("1")
-            i_ = bin(i)[2::].zfill(dim - 1)
+            i_ = bin(i)[2:].zfill(dim - 1)
             if num in ind_:
                 ind_[num].append(i_)
             else:

@@ -117,7 +117,7 @@ def ExecuteShellFunctions(args):
             #
             if b'% Line' in line:
                 line = line.replace(b'%', b'\n%')
-            if b'\end{document}' in line:
+            if b'\\end{document}' in line:
                 line = line.replace(b'\r\n', b'')
             else:
                 line = line.replace(b'\r\n', b'\n')

@@ -1,0 +1,8 @@
+GATESIZE 14
+DEPTHPAD 4
+WIREPAD 6
+
+q0 W
+q1 W
+
+q1 G:width=30 $R_z^{ij}(\theta)$ q0 P:size=8 \FontSize{6}$0$

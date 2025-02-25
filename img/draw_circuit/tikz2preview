@@ -22,13 +22,6 @@ header=r'''\documentclass{article}
 \usepackage{amssymb}
 \usepackage{geometry}
 \usepackage[fontsize=8pt]{fontsize}
-\def\sub{\subset}
-\def\I{\mathbb{I}}
-\def\R{\mathbb{R}}
-\def\C{\mathbb{C}}
-\def\Q{\mathbb{Q}}
-\def\Z{\mathbb{Z}}
-\def\sube{\subseteq}
 \newcommand\FontSize[1]{\fontsize{#1}{\baselineskip}\selectfont}
 '''
 

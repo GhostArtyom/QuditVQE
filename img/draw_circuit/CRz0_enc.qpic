@@ -1,0 +1,9 @@
+GATESIZE 10
+WIREPAD 0
+
+q0 W
+q1 W
+q2 W
+q3 W
+
+q2 q3 G:width=38 $R_{z,\mathrm{enc}}^{ij}(\theta)$ q0 P:size=3 {} q1 P:size=3 {}

@@ -34,15 +34,22 @@ for num = 1:5
     set(gca, 'YLim', [10 ^ -9, 10 ^ -1]); yticks(10 .^ (-9:-1));
     set(gca, 'fontname', 'Times New Roman', 'FontSize', font_size);
     set(gcf, 'units', 'centimeters', 'Position', [5, 5, 18, 12]);
-    legend({'$L = 1$', '$L = 2$'}, 'Interpreter', 'latex', 'Location', 'southwest');
-    print(fig, sprintf('./fig/fig_num%d_L1L2.pdf', num), '-r1000', '-dpdf');
+    legend({'$D = 5, K = 1$', '$D = 5, K = 2$'}, 'Interpreter', 'latex', 'Position', [0.41 0.7 0.2 0.1]);
+    print(fig, sprintf('./fig/fidelity_322_num%d_L1L2.pdf', num), '-r1000', '-dpdf');
 end
+
+close all
 
 function [xdata, ydata] = plotFidelity(loadmat, layers, num, D)
     n_qubits = 14; line_width = 1.5; marker_size = 15;
-    color_list = ["#388E3C" "#4474C4"]; color = color_list(layers);
+    color_list = ["#388E3C" "#4673BE"]; color = color_list(layers);
     data = loadmat.(sprintf('num%d_D%d', num, D));
     xdata = data.energy; ydata = data.fidelity;
+    ind = [5 4 4 5 4];
+    xdata = xdata(ind(num):end); ydata = ydata(ind(num):end);
+    if num == 3
+        xdata(2) = []; ydata(2) = [];
+    end
     ydata = -log(sqrt(ydata)) / n_qubits;
     fig = plot(xdata, ydata, '.-', 'LineWidth', line_width, 'MarkerSize', marker_size, 'Color', color);
     hold on

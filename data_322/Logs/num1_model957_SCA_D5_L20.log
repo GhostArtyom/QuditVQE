@@ -1,0 +1,45 @@
+2025-02-26 18:34:48,630 Number of qubits: 14
+2025-02-26 18:34:48,630 Number of gates: 2860
+2025-02-26 18:34:48,630 Number of params: 140
+2025-02-26 18:34:48,630 Depth of circuit: 280
+2025-02-26 18:34:48,630 Simulator: mqvector_gpu, Method: BFGS
+2025-02-26 18:34:51,799 num1 D5 vec1 r1 L20, Loss: -0.000000000000, Fideltiy: 0.000000000000, 1/500, 2.77
+2025-02-26 18:34:52,502 Optimization terminated successfully.
+{'vec1': [1]}
+{'vec1': [0.05]}
+{'vec1': [6.414104049444686e-14]}
+2025-02-26 18:34:52,502 num1 D5 vec[1, 10, 20, 30, 40] finished
+2025-02-26 18:34:55,827 num1 D5 vec10 r1 L20, Loss: -0.000000000000, Fideltiy: 0.000000000000, 1/500, 2.89
+2025-02-26 18:34:56,511 Optimization terminated successfully.
+{'vec1': [1], 'vec10': [1]}
+{'vec1': [0.05], 'vec10': [0.05]}
+{'vec1': [6.414104049444686e-14], 'vec10': [7.190466148709715e-33]}
+2025-02-26 18:34:56,511 num1 D5 vec[1, 10, 20, 30, 40] finished
+2025-02-26 19:24:51,414 Number of qubits: 14
+2025-02-26 19:24:51,414 Number of gates: 2860
+2025-02-26 19:24:51,414 Number of params: 140
+2025-02-26 19:24:51,414 Depth of circuit: 280
+2025-02-26 19:24:51,414 Simulator: mqvector_gpu, Method: BFGS
+2025-02-26 19:24:55,121 num1 D5 vec1 r1 L20, Loss: -0.000000000000, Fideltiy: 0.000000000000, 1/500, 3.18
+2025-02-26 19:24:55,890 Optimization terminated successfully.
+{'vec1': [1]}
+{'vec1': [0.05]}
+{'vec1': [6.414104049391871e-14]}
+2025-02-26 19:24:55,890 num1 D5 vec[1, 10, 20, 30, 40] finished
+2025-02-26 19:24:58,908 num1 D5 vec10 r1 L20, Loss: -0.000000000000, Fideltiy: 0.000000000000, 1/500, 2.65
+2025-02-26 19:24:59,781 Optimization terminated successfully.
+{'vec1': [1], 'vec10': [1]}
+{'vec1': [0.05], 'vec10': [0.04]}
+{'vec1': [6.414104049391871e-14], 'vec10': [7.180365903268958e-33]}
+2025-02-26 19:24:59,782 num1 D5 vec[1, 10, 20, 30, 40] finished
+2025-02-26 19:26:09,059 Number of qubits: 14
+2025-02-26 19:26:09,059 Number of gates: 2860
+2025-02-26 19:26:09,059 Number of params: 140
+2025-02-26 19:26:09,059 Depth of circuit: 280
+2025-02-26 19:26:09,060 Simulator: mqvector_gpu, Method: BFGS
+2025-02-26 19:26:12,278 num1 D5 vec1 r1 L20, Loss: -0.000000000000, Fideltiy: 0.000000000000, 1/500, 2.84
+2025-02-26 19:26:13,108 Optimization terminated successfully.
+{'vec1': [1]}
+{'vec1': [0.05]}
+{'vec1': [6.414104049343515e-14]}
+2025-02-26 19:26:13,108 num1 D5 vec[1, 10, 20, 30, 40] finished

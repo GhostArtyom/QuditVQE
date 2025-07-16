@@ -969,7 +969,7 @@ wheels = [
 
 [[package]]
 name = "mindquantum"
-version = "0.10.0"
+version = "0.9.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -980,25 +980,15 @@ dependencies = [
     { name = "scipy", version = "1.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/5d/366de0d5e93cd92785b02395771c5e8a269c9b9d9b17c056ddcee9f48128/mindquantum-0.10.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:7f61ac16ff3daea497004ea257c07468207a258ce1cd67a3ad2ca686cb2a5a5d", size = 5367091, upload-time = "2025-02-20T07:24:45.068Z" },
-    { url = "https://files.pythonhosted.org/packages/71/4e/85068932932acb4b5455288c05fe52c8eb7777cc23785d8c7f3cf6174eeb/mindquantum-0.10.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:8b61cb09b2134bb976be3c42445542b4439980cf983b9a117d639e9048b296fc", size = 3879611, upload-time = "2025-02-20T07:15:49.906Z" },
-    { url = "https://files.pythonhosted.org/packages/2c/e7/983b11bc72c986ba4fe41ee0e16d2c1bde6b2182f0f8aaf786247c13675d/mindquantum-0.10.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:0983e2597834495583c6d6e87cd852c3b7a33b5277d8178e45b5ac13eef25f33", size = 83929611, upload-time = "2025-03-05T01:29:52.807Z" },
-    { url = "https://files.pythonhosted.org/packages/ad/27/44dced5b5c46a6adb5509ab6b2e9bd49eb2e507fa0b35480a3e574b410b3/mindquantum-0.10.0-cp310-cp310-win_amd64.whl", hash = "sha256:1cc8aa8f7208a023c44871c074e7367a8be91d3232e55a911db36f4ea44c01aa", size = 5139884, upload-time = "2025-02-20T07:24:54.12Z" },
-    { url = "https://files.pythonhosted.org/packages/41/09/5409e2c956bfcd05ec4b32513a014b9f2d49f57d549b5509eb0495dc30c0/mindquantum-0.10.0-cp310-none-any.whl", hash = "sha256:a35402211661ed6c2bc18ae71dc5650d5a2a4e84ed615a09d8126ec152fce295", size = 4743107, upload-time = "2025-02-20T07:15:38.938Z" },
-    { url = "https://files.pythonhosted.org/packages/16/18/f2e8f429338b1e0ba0d26537675988dff99db006bc746600a93d704a0bf8/mindquantum-0.10.0-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:6bc4329e4772be52d944ccab0105ae93847a97e0c8bde1d04b67a81b116ca1b8", size = 5373664, upload-time = "2025-02-20T07:25:03.207Z" },
-    { url = "https://files.pythonhosted.org/packages/3b/3d/47c6ca50ccbbf33b41baf8315e7c189224dd23b9e9481a45bb597e3a8a5a/mindquantum-0.10.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4d61ad71c2a3e0b8e23115da5ebc45f135a161fb68863074035f071f632173f2", size = 3886141, upload-time = "2025-02-20T07:16:13.564Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/cb/67867c844b19b72a80263e676b5ed639c0fb7ac3bfc27d91f7241437d78e/mindquantum-0.10.0-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:8f3628bf9b611d228d4b62d86f2238e8ca5f9b12914ac5ef1696c1f591d24d5c", size = 83935331, upload-time = "2025-03-05T01:30:28.988Z" },
-    { url = "https://files.pythonhosted.org/packages/6e/c6/eb13e7522e25d6ae82eb687f3adb31a462144b459b4012b9e026e29f838d/mindquantum-0.10.0-cp311-none-any.whl", hash = "sha256:a1303ff2d05bbc5f8de93bd6f77d0368f23ca174ec819dc71cb146e8adfdf247", size = 4749024, upload-time = "2025-02-20T07:16:00.268Z" },
-    { url = "https://files.pythonhosted.org/packages/45/9d/f7bc0d472a9060e9100160c3cd36f5149af60697d77aff969a5e493c0391/mindquantum-0.10.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:29e51b5dbe4933d7d69efa9ed51227bfba793ba2bc2c59e59a9d126aa4f1f02e", size = 5367634, upload-time = "2025-02-20T07:25:12.865Z" },
-    { url = "https://files.pythonhosted.org/packages/09/06/a361b14847e26357f046440969a20734a251d1e89bee10ec9abcf70efee0/mindquantum-0.10.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:ae99804e67e2e7f78ae6d5f0b3decf95c514685ebf80191d113e03a4654619ea", size = 3879934, upload-time = "2025-02-20T07:16:56.516Z" },
-    { url = "https://files.pythonhosted.org/packages/7e/60/b94640631390d008d8500cb31c110f3bd7d66edf5d45b93fb464f06b128b/mindquantum-0.10.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:2a7b7ffcb9198f4fcb4a1f8e65478159d0c950455dee4600ed317c3fb97c0523", size = 83932055, upload-time = "2025-03-05T01:29:09.101Z" },
-    { url = "https://files.pythonhosted.org/packages/68/bc/8da5ccf2b2f58c805caf415393ef943e585a5b31cabc188635694265782b/mindquantum-0.10.0-cp39-cp39-win_amd64.whl", hash = "sha256:172d4fed4d0cc9abe358a3d132adc5211506b8f3a7b4db1d43c160086d679739", size = 5141671, upload-time = "2025-02-20T07:25:22.027Z" },
-    { url = "https://files.pythonhosted.org/packages/45/42/1f4189b3e380c2d69ec4f5a4e66eb9e1549ac82223d3501ee5dcb65b0005/mindquantum-0.10.0-cp39-none-any.whl", hash = "sha256:4f3ec187f7fad14dbbd9775a95b62aa59f4776fca41e6500574cedf0200a5036", size = 4746162, upload-time = "2025-02-20T07:16:44.997Z" },
+    { url = "https://files.pythonhosted.org/packages/45/c4/3a9009b9ed105056a53bce835b088c0f05bce1d672f7eedc11bde55c33ce/mindquantum-0.9.11-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:69581bde442b18fd5f955b950945a2e141157d8edab558ae5de76939f8377b69", size = 4788276, upload-time = "2024-01-30T11:42:43.311Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/2d/43ec318855d9782c2d2e1ffe8beb90483d051a0ab8423a70f3976ccda269/mindquantum-0.9.11-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:1ff433337c1857442747e5c1fcf61f0fd6e67c5604b1ca3f3d41a9eef6ca83dd", size = 3363708, upload-time = "2024-01-30T11:46:43.427Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/9a/6d869a5e632b8a80f92ff9d4bd6c3dcae9e319c9fb0384b3bf9c81500cf2/mindquantum-0.9.11-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:a4dbadf6442e53b32b39f16cbc4d1f968e031872276393c692557c0e37f1777d", size = 81366638, upload-time = "2024-01-30T11:48:13.952Z" },
+    { url = "https://files.pythonhosted.org/packages/27/e3/dd4e39316c5375939a2ffd84944afc7cde803503a4f36be16e7935a369b4/mindquantum-0.9.11-cp39-cp39-win_amd64.whl", hash = "sha256:d9d3dabce342ef69b7f348052e770adf2e3e0bf820268fe4b80efa6f6ba97fb7", size = 4598060, upload-time = "2024-01-30T11:47:09.5Z" },
 ]
 
 [[package]]
 name = "mindspore"
-version = "2.6.0"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asttokens" },
@@ -1015,21 +1005,21 @@ dependencies = [
     { name = "scipy", version = "1.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/f2/03a0ea8c1cd1ac19dbdaa048c79fa09a89fad8317280b4c31f4d6cdd845c/mindspore-2.6.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:c63c06a14aaea2b7ade9b3cfafe3afd6f3d92fd4ccd0c1006928fe3c7e5efc87", size = 172828471, upload-time = "2025-06-10T02:05:51.99Z" },
-    { url = "https://files.pythonhosted.org/packages/47/45/946b3faa164756c24bc0e8d603c8e64f9559df41b422386b87ec51eb3acc/mindspore-2.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:cf7aa990e98e3b5c6ae1ed06744aa902f6809b6c04e81749902f5c7d21f36bf6", size = 155099927, upload-time = "2025-06-10T02:04:45.436Z" },
-    { url = "https://files.pythonhosted.org/packages/e7/9b/559286126fe06db94c47e5ef9f790232cccfb9ac7de9429e3e47bada84c3/mindspore-2.6.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:9d6fb7f538d2c464a9037640c45c6cd3939948db759bfbb534f4b7dbc3f6d200", size = 813353099, upload-time = "2025-06-10T02:21:58.783Z" },
-    { url = "https://files.pythonhosted.org/packages/16/23/cf470c5553d585d4fb295e7dec2e331317b80d69195600e2085514fc9588/mindspore-2.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:89d2cab829c9214b257e7df15eda8fed7e1281aa522535f3c6ff427e295c2d43", size = 106123083, upload-time = "2025-06-10T02:06:38.113Z" },
-    { url = "https://files.pythonhosted.org/packages/c1/4c/37f3f1f4702b8eebf5c8b51a1f72edfd953bfbdf736ee682f7a50b2e5903/mindspore-2.6.0-cp310-none-any.whl", hash = "sha256:1e1f844f65a3699146ba6a210d9df2a36906f43c3668d089d600f5041cb05d78", size = 386792564, upload-time = "2025-06-10T02:12:36.746Z" },
-    { url = "https://files.pythonhosted.org/packages/4e/83/e806475fbce57261186ae5e98f11fa8c9c665bcc406c95ffa409a2156678/mindspore-2.6.0-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:9ff0a7286d7b648947aae7de982cba4b6971f5706610bf8bb1d345f17a611f83", size = 173354673, upload-time = "2025-06-10T02:07:47.452Z" },
-    { url = "https://files.pythonhosted.org/packages/75/2b/fe57e05073fe36d4ec892ac2d299f2784a5f0516218fc9ad50c38915e173/mindspore-2.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:64e15aa67bc7eb1156cc193c193b33ed2948b3ca6afed03cae5231484aa338f3", size = 155459311, upload-time = "2025-06-10T02:03:46.548Z" },
-    { url = "https://files.pythonhosted.org/packages/2f/55/0d40c3d75cc270d7c30308923a810ef51a886b7740e5de1dfc8c612e2ac8/mindspore-2.6.0-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:55910e88e99bb842853bb026f0629f9176a8f911f0abc3200aea1e78ebd62c51", size = 816045084, upload-time = "2025-06-10T02:26:34.748Z" },
-    { url = "https://files.pythonhosted.org/packages/84/04/aa58130a7ae27dfba3831ee2cb7edffaf3251c47b3dc0f7c35130d3e559e/mindspore-2.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:0098505481ef46e2f517596b05a232c0104902cfc06f5e9997460bf477ea746f", size = 106380324, upload-time = "2025-06-10T02:08:35.255Z" },
-    { url = "https://files.pythonhosted.org/packages/84/3b/3fcee1a3d8ccb3316dc7983d9c7466513c2e833cb2bb119c4f44cf021629/mindspore-2.6.0-cp311-none-any.whl", hash = "sha256:14cb6b2b94598d38fa1be50dfed05597d23e479dbff9e52f906b9583259a61a9", size = 388513906, upload-time = "2025-06-10T02:14:54.79Z" },
-    { url = "https://files.pythonhosted.org/packages/b6/9c/cf33d114aab6819bad73f6d32397aace20da8c285e7324437cf5565ec83c/mindspore-2.6.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:7121933bb8b29ea01c834366d2baee067f74cf5325cae1db3b1c43379e826020", size = 172827138, upload-time = "2025-06-10T02:09:40.981Z" },
-    { url = "https://files.pythonhosted.org/packages/6b/31/f5ee83c0f5d9b52c096729c8659262f252736baed1fb59987ee7d5dc0cb9/mindspore-2.6.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:98a5f15558eecce21c1a657cf1d212dae7eaf511bff721c7ad1d048244c75474", size = 155033710, upload-time = "2025-06-10T02:02:41.019Z" },
-    { url = "https://files.pythonhosted.org/packages/8f/57/7748c02d496de4d7d0eaaf426ecf300eee34c3307c834049bd82adf23520/mindspore-2.6.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:fc99ac495ae308f27e44900e48abda91bf53695eedca160836ac452442b8f295", size = 813487890, upload-time = "2025-06-10T02:31:13.632Z" },
-    { url = "https://files.pythonhosted.org/packages/bb/09/7bcf6218b64fce21be376d8de2c10e91227e8b0ebd32254059485a9b89db/mindspore-2.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:be64e97517c7544c299823632ac2d4c4a4e54a57313db9eae1e6a1683078ed01", size = 106171892, upload-time = "2025-06-10T02:10:25.031Z" },
-    { url = "https://files.pythonhosted.org/packages/f4/ce/382654c6126065062371b210a9fb4f0b5377d89d93468f7db86dfb25f2ba/mindspore-2.6.0-cp39-none-any.whl", hash = "sha256:f496de26a28ea6cd6e63dc86aeb2cf455fba3304658779d03cb7689e5f6a1aac", size = 386743433, upload-time = "2025-06-10T02:17:18.624Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/35/fbb5d5cae93baf05e46843b0087e82eac1a7131b5427895efe2cb002d590/mindspore-2.5.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:b3a68f36429460e83b1a753fc859aeae9bbc2e2dc0b530265d8bdd7589472b5f", size = 248354113, upload-time = "2025-02-20T07:08:52.771Z" },
+    { url = "https://files.pythonhosted.org/packages/84/b4/a7cd84d7c53f0a72e951dc695b93bcc4c6d7bfcb16ad8b2d5acc058f01ba/mindspore-2.5.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:58e8851b81b94a9d03ad46a777e3252b484e54d53c513b34809c426ce6c4a3e0", size = 230932635, upload-time = "2025-02-20T07:02:54.366Z" },
+    { url = "https://files.pythonhosted.org/packages/10/79/20d5a5d26881ae3bb3dfb580d94ee09adb62324f99fd81471fb2be729db5/mindspore-2.5.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:4171c24accd21aed5fce21bee3df2e6b570e07a9db9e3518dacb99eccf5a86b8", size = 958371571, upload-time = "2025-02-20T06:46:24.106Z" },
+    { url = "https://files.pythonhosted.org/packages/07/31/ed91911904c87d570e8ebc680ed9f069f4e52dcae266bd692cc755b54868/mindspore-2.5.0-cp310-cp310-win_amd64.whl", hash = "sha256:756ab1eda87bbeae2018f0e01536b625e27123a61912b3839988e41ccb5c2dbd", size = 102871013, upload-time = "2025-02-20T07:09:44.196Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/71/f48a3a4f40950fd91cb012a19820b426bb76f7ce7578461f26914decc4f7/mindspore-2.5.0-cp310-none-any.whl", hash = "sha256:1116fd666a059f0480deccd6af04f5e9fe9c019fa88df24a51b0e0fe3c2e55da", size = 344995569, upload-time = "2025-02-20T06:35:39.116Z" },
+    { url = "https://files.pythonhosted.org/packages/45/60/4e24db4be8180c8562f8d7419d52b1716086435e24de7b6a2b5101f0020a/mindspore-2.5.0-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:7d48dba95fe67255eeb4f4c137af4bf7610d66d3834f56051131c838cea98ccd", size = 248924185, upload-time = "2025-02-20T07:11:27.983Z" },
+    { url = "https://files.pythonhosted.org/packages/28/3f/88eccec368fa0e1713c80ebd82d2f2eef2b464e6a63b7ca0d6d2426f52ed/mindspore-2.5.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:20a5be17c6b718a95508bc5408e4d520a2bb54650286ffb29aacd22428277a60", size = 231195428, upload-time = "2025-02-20T07:04:48.883Z" },
+    { url = "https://files.pythonhosted.org/packages/0a/5d/047ff675dd72806e413f58b11357f0ef9318f4b3ba9fdf9afcaadcc47d2f/mindspore-2.5.0-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:bb8950840f92899891925b32bbcf4f2b38b011178eafe969ea2bf5894ea8af1c", size = 961996733, upload-time = "2025-02-20T06:53:25.284Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/64/17d8d9321d7418e8d685c30487bf3a57906d7f2dfd01cd17f6faf0fc25d3/mindspore-2.5.0-cp311-cp311-win_amd64.whl", hash = "sha256:256632eb40c0b6e61f8f7b1ed213dbbf0ea280a922ce5b47b4dd8fa91f7e929a", size = 103180918, upload-time = "2025-02-20T07:12:35.967Z" },
+    { url = "https://files.pythonhosted.org/packages/88/c7/8fa0ec4a9646512d24b5c459338a9671e367da644ed15d1b561afc1faf88/mindspore-2.5.0-cp311-none-any.whl", hash = "sha256:ae26062f3918996138f7d51f658c552853f52c16a5ad1ad7006054a988234379", size = 347328437, upload-time = "2025-02-20T06:37:58.631Z" },
+    { url = "https://files.pythonhosted.org/packages/00/eb/ed4c7db28bd0499732a18a594867b4ec30ad80e0963e09d52cbbdd1c594d/mindspore-2.5.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:c452c870aff1b2365c7ec8eeb2c947f46c96c4f06e0e6247d8afdf3458f5c873", size = 248302209, upload-time = "2025-02-20T07:14:28.566Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/25/e5b62b23d52841d547fd724ce90b677d8e1d68096d4f09c20cad42d52036/mindspore-2.5.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:87d460c8e640a72783c5a8b768783660a48e8616de6674bcab43b517e00de01e", size = 231001439, upload-time = "2025-02-20T07:06:23.885Z" },
+    { url = "https://files.pythonhosted.org/packages/23/22/dff0f1bef6c0846a97271ae5d39ca187914f39562f9e3f6787041dea1a97/mindspore-2.5.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:3a616acfabd92744d8de370896e744e2584e977de55b56296ea455db138eda4f", size = 958370549, upload-time = "2025-02-20T07:00:25.689Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/74/9de99cc1b66dc074d9852950b91d8ba37c3393be0309378534772247be12/mindspore-2.5.0-cp39-cp39-win_amd64.whl", hash = "sha256:eb7df41e178e7f05d6170efc5c3e17966969cfa08ac81f02aa0f60f42d9bee16", size = 102757416, upload-time = "2025-02-20T07:15:21.264Z" },
+    { url = "https://files.pythonhosted.org/packages/28/ef/5e67b9b0d6b4f1058c27b5e9700abf3501738b2e347e324781c6273bc99c/mindspore-2.5.0-cp39-none-any.whl", hash = "sha256:d484b1386289b4f4c05711da8edf2c438b0000f774e6bb3d1930f78d36a3a96e", size = 344983029, upload-time = "2025-02-20T06:40:12.088Z" },
 ]
 
 [[package]]
@@ -1455,8 +1445,8 @@ dependencies = [
 requires-dist = [
     { name = "cairosvg", specifier = ">=2.8.2" },
     { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "mindquantum", specifier = ">=0.10.0" },
-    { name = "mindspore", specifier = ">=2.6.0" },
+    { name = "mindquantum", specifier = "==0.9.11" },
+    { name = "mindspore", specifier = "==2.5.0" },
     { name = "numpy", specifier = "==1.26.4" },
     { name = "scipy", specifier = ">=1.13.1" },
 ]

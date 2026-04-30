@@ -9,7 +9,7 @@ dependencies = [
     "h5py>=3.14.0",
     "ipykernel>=6.29.5",
     "mindquantum==0.9.11",
-    "mindspore==2.5.0",
+    "mindspore==2.6.0",
     "numpy==1.26.4",
     "scipy>=1.13.1",
     "sympy==1.13.3",
